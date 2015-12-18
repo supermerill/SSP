@@ -103,21 +103,21 @@ public class AnneauCarte implements MapFactory {
 				// on prend un point sur la terre au pif
 				int abscice = rand.nextInt(nbColonne);
 				int ordonnee = rand.nextInt(nbLigne);
-				while(provinces.get(abscice).get(ordonnee).surface < 10){
+				while(provinces.get(abscice).get(ordonnee).surfaceSol < 10){
 					abscice = rand.nextInt(nbColonne);
 					ordonnee = rand.nextInt(nbLigne);
 				}
 				Province centre = provinces.get(abscice).get(ordonnee);
-				if (centre.surface > 10) {
+				if (centre.surfaceSol > 10) {
 					// on fait une grosse montagne dessus
 					centre.relief = (float)Math.min(1,(1/((3*i/((float)nbRelief))+1))+0.2);
 					// on continue pendant tailleMontagne
 					int nbMont = 1;
-					centre = centre.proche[rand.nextInt(6)];
-					while(centre != null && centre.surface>0 && nbMont<tailleMontagne){
+					centre = centre.proche[rand.nextInt(centre.proche.length)];
+					while(centre != null && centre.surfaceSol>0 && nbMont<tailleMontagne){
 						centre.relief = (float)Math.min(1,(1/((3*i/(float)nbRelief)+1))+0.2);
 								//(float)((i>ordreGrandeurInit)?0.6:1);
-						centre = centre.proche[rand.nextInt(6)];
+						centre = centre.proche[rand.nextInt(centre.proche.length)];
 						nbMont++;
 					}
 					nbMont = 0;
@@ -135,7 +135,7 @@ public class AnneauCarte implements MapFactory {
 				// on prend un point sur la terre au pif
 				int abscice = rand.nextInt(nbColonne);
 				int ordonnee = rand.nextInt(nbLigne);
-				while(provinces.get(abscice).get(ordonnee).surface < 10){
+				while(provinces.get(abscice).get(ordonnee).surfaceSol < 10){
 					abscice = rand.nextInt(nbColonne);
 					ordonnee = rand.nextInt(nbLigne);
 				}
@@ -155,10 +155,10 @@ public class AnneauCarte implements MapFactory {
 //					}
 //				}
 				int nbMont = 1;
-				centre = centre.proche[rand.nextInt(6)];
-				while(centre != null && centre.surface>0 && nbMont<tailleMontagne){
+				centre = centre.proche[rand.nextInt(centre.proche.length)];
+				while(centre != null && centre.surfaceSol>0 && nbMont<tailleMontagne){
 					dessine(centre, tailleMontagne/3, dessineur);
-					centre = centre.proche[rand.nextInt(6)];
+					centre = centre.proche[rand.nextInt(centre.proche.length)];
 					nbMont++;
 				}
 				nbMont = 0;
@@ -176,7 +176,7 @@ public class AnneauCarte implements MapFactory {
 
 		for (List<Province> prvs : provinces) {
 			for (Province prv : prvs) {
-				prv.surface = 0;
+				prv.surfaceSol = 0;
 			}
 		}
 
@@ -252,23 +252,23 @@ public class AnneauCarte implements MapFactory {
 	}
 
 	public boolean checkIsTerre(Province centre) {
-		if (centre.surface > 0)
+		if (centre.surfaceSol > 0)
 			return true;
 		boolean ret = false;
 		for (Province prv : centre.proche) {
 			if (prv != null)
-				ret |= prv.surface > 0;
+				ret |= prv.surfaceSol > 0;
 		}
 		return ret;
 	}
 
 	public boolean checkIsEau(Province centre) {
-		if (centre.surface == 0)
+		if (centre.surfaceSol == 0)
 			return true;
 		boolean ret = false;
 		for (Province prv : centre.proche) {
 			if (prv != null)
-				ret |= prv.surface == 0;
+				ret |= prv.surfaceSol == 0;
 		}
 		return ret;
 	}
@@ -277,7 +277,7 @@ public class AnneauCarte implements MapFactory {
 		int nbEau = 0;
 		for (List<Province> prvs : provinces) {
 			for (Province prv : prvs) {
-				nbEau += prv.surface == 0 ? 1 : 0;
+				nbEau += prv.surfaceSol == 0 ? 1 : 0;
 			}
 		}
 		return nbEau / (double) (provinces.size() * provinces.get(0).size());
@@ -288,7 +288,7 @@ public class AnneauCarte implements MapFactory {
 			
 			@Override
 			public void dessine(Province prv) {
-				prv.surface = kmCaree;
+				prv.surfaceSol = kmCaree;
 			}
 		});
 //		centre.surface = kmCaree;

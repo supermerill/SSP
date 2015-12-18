@@ -1,10 +1,17 @@
 package remi.ssp;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Province {
 
+	//for plug-ins
+	public Map<String,Serializable> pluginData = new HashMap<>(0);
+	
+	//can be 5 if making a globe... be careful!
 	public Province[] proche = new Province[6];
 
 	///meteo
@@ -16,17 +23,28 @@ public class Province {
 	float pluieAnnuelle; // en mm
 	
 	//relief /geographie
-	public int surface=10000; //km² 'sec'
+	public int surface=10000; //km² total
+	public int surfaceSol=10000; //km² 'sec'
 	public float relief=0; //0 plat, 1 montagne extreme
 	public float humidite = 0.5f; //0 sec, 1 marécage sans terre emergée.
-	float plages=0; //si cote, % d'espace cotier avec plage (0->1)
+	public float plages=0; //si cote, % d'espace cotier avec plage (0->1)
 	
-	//ressources
-	ProvinceRessource[] probaRessources = new ProvinceRessource[Ressource.values().length];
+	//ressource spéciale
+	ProvinceRessource probaRessource = null;
 	
-	//agriculture
-	float pourcentChamps; //0=> aucune, 1= >tout
-	float mecanisationChamps; //0=> aucune, X=> score moyen de X
+	//agriculture pourcent are pourcent de sol
+	public float pourcentHostile=0; //0=> aucune, 1= >tout
+	public float pourcentFriche=0.5f; //0=> aucune, 1= >tout
+	public float pourcentForet=0.5f; //0=> aucune, 1= >tout
+	
+	public float pourcentChamps=0; //0=> aucune, 1= >tout
+	public float mecanisationChamps=0; //0=> aucune, X=> score moyen de X
+	public float champsRendement=1;
+	public float rationReserve=0; // nb de ration stocké dans cette province.
+
+	public float pourcentPrairie=0; //0=> aucune, 1= >tout
+	public float elevageRendement=1;
+	public int cheptel=0; // nb bete (chevaux-equivalent ~500 portions nouriture)
 	
 	//infrastructure
 	 /*
@@ -47,21 +65,22 @@ public class Province {
 	float rail;
 	
 	//population
-	int[] nombreHabitantsParAge;
-	float educationMoy; //0 ignare, 1 érudit
-	float sante;//0 épidémie foudroyante, 1 santé parfaite.
-	int nbPaysan; ///primaire (sauf mines)
-	int nbOuvrier; //et artisan, secondaire (+mines)
-	int nbtertiaire;
-	int nbElite; //les riches, nobles, clergé, intellectuels
-	float criminalite; //0=> auncun, 1=> anarchie
-	Map<Communaute, Float> percentCommunaute;
+	public int nbHabitants = 0; // cache pour sum(nombreHabitantsParAge)
+	public int[] nombreHabitantsParAge = new int[100]; // de 0 à 100ans
+	public float educationMoy=0; //0 ignare, 1 érudit
+	public float sante=0.5f;//0 épidémie foudroyante, 1 santé parfaite.
+	public float pourcentPaysan=0; ///primaire (sauf mines)
+	public float pourcentOuvrier=0; //et artisan, secondaire (+mines)
+	public float pourcentTertiaire=0;
+	public float pourcentElite=0; //les riches, nobles, clergé, intellectuels
+	public float criminalite=0; //0=> auncun, 1=> anarchie
+	public Map<Communaute, Float> pourcentCommunaute = new HashMap<>(1);
 	
 	//militaire
-	List<Division> divisions;
+	List<Division> divisions = new ArrayList<>(1);
 	//bataille(s) ?
 	
 	
 	//autres
-	float rayonnementCulturel; //0=nul, X=nombre de personnes connaissant cette province.
+	float rayonnementCulturel = 0; //0=nul, X=nombre de personnes connaissant cette province.
 }

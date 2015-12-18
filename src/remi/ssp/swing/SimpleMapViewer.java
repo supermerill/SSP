@@ -46,7 +46,7 @@ public class SimpleMapViewer extends JComponent{
 		for(int i=0;i<map.provinces.size();i++){
 			for(int j=0;j<map.provinces.get(i).size();j++){
 				Province prv = map.provinces.get(i).get(j);
-				if(prv.surface > 10){
+				if(prv.surfaceSol > 10){
 
 					Color altitudeColor = Color.BLACK; //new Color(0, 1-prv.relief,0);
 					Color grass = Color.GREEN;
