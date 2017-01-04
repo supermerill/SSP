@@ -1,6 +1,6 @@
 package remi.ssp;
 
-public enum Ressource {
+public enum Resources {
 
 	metal, //cuivre/fer
 	rares, //platine, tantale, tungstene, terre rares ...

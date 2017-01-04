@@ -89,6 +89,21 @@ public class AnneauCarte implements MapFactory {
 		createSol();
 		createRelief();
 		createDesert();
+		populate();
+	}
+
+	private void populate() {
+		Random rand = new Random();
+		for(int i=0;i<provinces.size();i++){
+			for(int j=0;j<provinces.get(i).size();j++){
+				Province prv = provinces.get(i).get(j);
+				if(prv.surfaceSol>0){
+					prv.nombreHabitantsParAge[20] = Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10))));
+//					System.out.println("create pop of " + prv.nombreHabitantsParAge[20]);
+				}
+			}
+		}
+		
 	}
 
 	private void createRelief() {
@@ -140,10 +155,15 @@ public class AnneauCarte implements MapFactory {
 					ordonnee = rand.nextInt(nbLigne);
 				}
 				Province centre = provinces.get(abscice).get(ordonnee);
-				final float aridite = (float)(i/(2.0*ordreGrandeurInit));
+				final float humidite = (float)(i/(2.0*ordreGrandeurInit));
 				Dessiner dessineur = new Dessiner() {
 					@Override public void dessine(Province prv) {
-						prv.humidite = aridite;
+						prv.humidite = humidite;
+						System.out.println("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
+						prv.pourcentForet = (0.5f-Math.abs(humidite-0.5f))/2;
+						System.out.println("pourcentForet: "+prv.pourcentForet);
+						prv.pourcentFriche = prv.pourcentForet;
+						prv.pourcentSterile = Math.abs(humidite-0.5f);
 					}};
 				dessine(centre, tailleMontagne/3, dessineur);
 //				centre.humidite = (float)( 0+(i/(2.0*ordreGrandeurInit)));

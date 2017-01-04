@@ -1,7 +1,7 @@
 package remi.ssp;
 
 
-public class ProvinceRessource {
+public class ProvinceResources {
 
 	static final int TRES_FACILE = 0;
 	static final int FACILE = 1;
@@ -11,7 +11,7 @@ public class ProvinceRessource {
 	static final int[] DIFFICULTE = new int[]{TRES_FACILE, FACILE, MOYEN, DUR, TRES_DUR};
 	
 	
-	Ressource r;
+	Resources r;
 	float[] probabiliteNouveauFilon = new float[DIFFICULTE.length];
 	float[] quantiteRestante = new float[DIFFICULTE.length];
 	

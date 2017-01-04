@@ -2,41 +2,55 @@ package remi.ssp.algorithmes;
 
 import java.util.Random;
 
+import remi.ssp.Pop;
 import remi.ssp.Province;
 
-public abstract class Nouriture {
-
-	public void getNouritureSemaine(Province prv) {
+//TODO: replace this by 4 industry : fishing, harvesting, hunting, elevage (taunting?)
+public abstract class Nourriture {
+ 
+	public void getNourritureSemaine(Province prv) {
+		if(prv.getNbHabitants()==0) return;
 
 		// premier: culture
-		int rationNecessaire = prv.nbHabitants * 7;
+		int rationNecessaire = prv.getNbHabitants() * 7;
 		int rationRecolte = culture.culture(prv) + peche.peche(prv)
 				+ elevage.elevage(prv, 0);
 		if (rationNecessaire - rationRecolte > prv.rationReserve) {
+			System.out.println("pas asser de recolte: "+rationRecolte+", par chasser pour "+chasse.chasse(prv)+", humidite:"+prv.humidite+", faune="+prv.pourcentFaune);
 			rationRecolte += chasse.chasse(prv) + elevage.elevage(prv, 0.5f);
 		}
 		if (rationNecessaire - rationRecolte > prv.rationReserve) {
 			rationRecolte += elevage.elevage(prv, 1f);
 		}
-		prv.rationReserve += rationNecessaire - rationRecolte;
+		prv.rationReserve += rationRecolte - rationNecessaire;
 		if (prv.rationReserve < 0) {
 			// famine!
-			for (int i = 0; i < -prv.rationReserve / 2; i++) {
+			System.out.print("famine! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbHabitants()+" => ");
+//			for (int i = 0; i < -prv.rationReserve / 2; i++) {
+			while(prv.rationReserve<0 && prv.getNbHabitants() >0){
 				// la moitié des habitant non nouris meurent, les plus
 				// vieux(TODO) et jeunes d'abord
+				//TODO: les esclave en premier
 				Random rand = new Random();
 				int age = Math.abs(rand.nextInt(20) + rand.nextInt(20) - 20);
-				prv.nombreHabitantsParAge[age] = Math.max(0,
-						prv.nombreHabitantsParAge[age] - 1);
+				for( Pop pop : prv.pops)
+					if(pop.nombreHabitantsParAge[age]>0){
+						pop.nombreHabitantsParAge[age]--;
+						prv.rationReserve += 7;
+					}
 				// TODO: ne pas impacter les elites => remonter leur %age
+				
 			}
 			prv.rationReserve = 0;
+			System.out.println(prv.getNbHabitants());
+		}else{
+			System.out.println("OK! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbHabitants());
 		}
 
 	}
 
-	// get nb ration(per week) (1 ration = nouriture pour 1 homme pour 1
-	// journée)
+	// get nb ration(per week) (1 ration = nourriture pour 1 homme pour 1
+	// journee)
 	public interface Chasse {
 		public abstract int chasse(Province prv);
 	}
@@ -60,7 +74,10 @@ public abstract class Nouriture {
 	public Chasse chasse = new Chasse() {
 		@Override
 		public int chasse(Province prv) {
-			return (int) (prv.pourcentForet * prv.surfaceSol);
+			int nbPrit = (int) ((prv.pourcentFaune * prv.pourcentForet * prv.surfaceSol) * Math.min(1,prv.getNbHabitants()/25f));
+			//TODO: reduire faune locale
+			prv.pourcentFaune -= prv.pourcentFaune*0.2*Math.min(1,prv.getNbHabitants()/25f);
+			return nbPrit;
 		}
 	};
 	// peche : un peu mieux que la subsistance
@@ -71,10 +88,11 @@ public abstract class Nouriture {
 			// check how many sea tiles
 			int seaTiles = 0;
 			for (int i = 0; i < prv.proche.length; i++) {
-				if (prv.proche[i] != null && prv.proche[i].surfaceSol < 10)
-					seaTiles++;
+//				if (prv.proche[i] != null && prv.proche[i].surfaceSol < 10)
+//					seaTiles++;
+				if (prv.proche[i] != null && prv.proche[i].isSea) seaTiles ++;
 			}
-			return (int)( seaTiles*prv.nbHabitants*prv.pourcentPaysan*10);
+			return (int)( seaTiles*prv.getNbHabitants()*prv.pourcentPaysan*10);
 		}
 	};
 	 // agriculture
