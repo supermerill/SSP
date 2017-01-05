@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.army.BattalionUnit;
 import remi.ssp.army.DivisionUnit;
 
@@ -39,13 +41,13 @@ public abstract class Battle {
 			bat.getTemplate().getBehavior().doTurn(bat, defender, attacker, roundDurationSeconds);
 		}
 		//2 attacks TODO: target other nearby bat (friendly fire) for a part of the time
-		Map<BattalionUnit, Integer> attBats2wounded = new HashMap<>();
+		Object2IntMap<BattalionUnit> attBats2wounded = new Object2IntOpenHashMap<>();
 		for(BattalionUnit bat : attacker.getBattalions()){
 			if(bat.getCurrentBattleDecision().wantToShot && !bat.getCurrentBattleDecision().wantToMove){
 				attBats2wounded.put(bat.getCurrentBattleDecision().wantedTarget, bat.attack(bat.getCurrentBattleDecision().wantedTarget, roundDurationSeconds));
 			}
 		}
-		Map<BattalionUnit, Integer> defBats2wounded = new HashMap<>();
+		Object2IntMap<BattalionUnit> defBats2wounded = new Object2IntOpenHashMap<>();
 		for(BattalionUnit bat : defender.getBattalions()){
 			if(bat.getCurrentBattleDecision().wantToShot && !bat.getCurrentBattleDecision().wantToMove){
 				defBats2wounded.put(bat.getCurrentBattleDecision().wantedTarget, bat.attack(bat.getCurrentBattleDecision().wantedTarget, roundDurationSeconds));

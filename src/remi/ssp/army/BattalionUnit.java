@@ -5,6 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.Plot;
 import remi.ssp.algorithmes.GlobalRandom;
 
@@ -22,7 +26,7 @@ public class BattalionUnit {
 	//ie, at how much my battalions are effective
 	int woundedMens;
 	//ie the power of mens for each of my battalions
-	Map<EquipmentDevelopped, Integer> equipmentForArmy = new HashMap<>();
+	Object2IntMap<EquipmentDevelopped> equipmentForArmy = new Object2IntOpenHashMap<>();
 	
 	int battlePosition;
 	int nbMsRunInCurrentBattle;
@@ -34,8 +38,8 @@ public class BattalionUnit {
 	public void setAvailableMens(int availableMens) { this.availableMens = availableMens; }
 	public int getWoundedMens() { return woundedMens; }
 	public void setWoundedMens(int woundedMens) { this.woundedMens = woundedMens; }
-	public Map<EquipmentDevelopped, Integer> getEquipmentForArmy() { return equipmentForArmy; }
-	public void setEquipmentForArmy(Map<EquipmentDevelopped, Integer> equipmentForArmy) { this.equipmentForArmy = equipmentForArmy; }
+	public Object2IntMap<EquipmentDevelopped> getEquipmentForArmy() { return equipmentForArmy; }
+	public void setEquipmentForArmy(Object2IntMap<EquipmentDevelopped> equipmentForArmy) { this.equipmentForArmy = equipmentForArmy; }
 	public int getPosition() { return battlePosition; }
 	public void setPosition(int position) { this.battlePosition = position; }
 	public int getNbMsRunInCurrentBattle() { return nbMsRunInCurrentBattle; }
@@ -55,11 +59,11 @@ public class BattalionUnit {
 	// return wounded. killed = wounded/4
 	public int attack(BattalionUnit enemy, int nbSeconds){
 		//compute ennemyDefense enemy 
-		ArrayList<Integer> enemyArmor = new ArrayList<>(Collections.nCopies(DamageType.values.size(), 0));
+		IntList enemyArmor = new IntArrayList(Collections.nCopies(DamageType.values.size(), 0));
 		for(EquipmentDevelopped equip : enemy.template.equipment){
-			int realQuantity = enemy.equipmentForArmy.get(equip);
+			int realQuantity = enemy.equipmentForArmy.getInt(equip);
 			if(equip.type == EquipmentType.Protection){
-				enemyArmor.set(equip.DamageType, Math.max(enemyArmor.get(equip.DamageType), 
+				enemyArmor.set(equip.DamageType, Math.max(enemyArmor.getInt(equip.DamageType), 
 							(int) (equip.armor * ((float)realQuantity)/enemy.template.nbFightingMens)));
 			}
 		}
@@ -78,7 +82,7 @@ public class BattalionUnit {
 				}
 
 				//get number of hit
-				float numberOfHit = this.equipmentForArmy.get(equip);
+				float numberOfHit = this.equipmentForArmy.getInt(equip);
 				if(equip.rangeInMeter > 2){
 					numberOfHit *= equip.precisionForMDist / ((float)distance);
 				}else{
@@ -100,7 +104,7 @@ public class BattalionUnit {
 				}
 
 				int nbWounded = 0;
-				final int def = enemyArmor.get(equip.DamageType);
+				final int def = enemyArmor.getInt(equip.DamageType);
 				final float powerDivDef = (power/(def+def));
 				nbWounded = (int)(1-(1/(1+powerDivDef*powerDivDef)) * numberOfHit);
 				if(power <= def){

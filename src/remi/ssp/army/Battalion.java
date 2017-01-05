@@ -32,10 +32,10 @@ public class Battalion {
 //		}
 //	}
 	
-//	void setStats(ArmyStat stats, Map<EquipmentDevelopped, Integer> dispo){
+//	void setStats(ArmyStat stats, Object2IntMap<EquipmentDevelopped> dispo){
 //		stats.reset();
 //		for(EquipmentDevelopped equip : equipment2Quantity){
-//			int realQuantity = dispo.get(equip);
+//			int realQuantity = dispo.getInt(equip);
 //			if(equip.type == EquipmentType.MainWeapon){
 //				stats.setMax(equip.combatStat, ((float)realQuantity)/nbFightingMens);
 //			}

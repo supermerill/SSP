@@ -3,6 +3,8 @@ package remi.ssp.economy;
 import java.util.HashMap;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.Province;
 
 public class ProvinceIndustry {
@@ -18,7 +20,7 @@ public class ProvinceIndustry {
 
 	
 	// used to run
-	Map<Good, Integer> stock=new HashMap<Good, Integer>(); //raw goods + tools
+	Object2IntMap<Good> stock = new Object2IntOpenHashMap<Good>(); //raw goods + tools
 	int money;//bfr
 	int rawGoodsCost; // rawgoods + depreciation of owned stock
 	int previousProduction;
@@ -41,7 +43,7 @@ public class ProvinceIndustry {
 	public void setMoney(int money) { this.money = money; }
 	public int getRawGoodsCost() { return rawGoodsCost; }
 	public void setRawGoodsCost(int rawGoodsCost) { this.rawGoodsCost = rawGoodsCost; }
-	public Map<Good, Integer> getStock() { return stock; }
+	public Object2IntMap<Good> getStock() { return stock; }
 	public int getPreviousProduction() { return previousProduction; }
 	public void setPreviousProduction(int previousProduction) { this.previousProduction = previousProduction; }
 	public int getPreviousSalary() { return previousSalary; }

@@ -9,8 +9,10 @@ import java.util.Map;
 
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.economy.Good;
+import remi.ssp.economy.ProvinceCommerce;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
+import remi.ssp.economy.TradeRoute;
 
 public class Province implements Serializable{
 	private static final long serialVersionUID = ((long)"Province".hashCode()) + 1L;
@@ -107,6 +109,7 @@ public class Province implements Serializable{
 	Map<Good, ProvinceGoods> stock = new HashMap<>(); //market : industry & pop & merchant buy goods from this. industry & merchant sell goods into this
 	int money; //BFR from the marketplace
 	int moneyChangePerDay;
+	List<TradeRoute> tradeRoutes = new ArrayList<>();
 	
 	//autres
 	public float rayonnementCulturel = 0; //0=nul, X=nombre de personnes connaissant cette province.
@@ -140,5 +143,15 @@ public class Province implements Serializable{
 	public void setMoney(int money) { this.money = money; }
 	public int getMoneyChangePerDay() { return moneyChangePerDay; }
 	public void setMoneyChangePerDay(int moneyChangePerDay) { this.moneyChangePerDay = moneyChangePerDay; }
+	public List<TradeRoute> getTradeRoute() { return tradeRoutes; }
+
+	public float getRoutes() { return routes; }
+	public void setRoutes(float routes) { this.routes = routes; }
+	public float getRail() { return rail; }
+	public void setRail(float rail) { this.rail = rail; }
+	public float getRelief() { return relief; }
+	public boolean isCoastal(){ return plages>0; }
+	
+	
 	
 }

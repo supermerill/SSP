@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import remi.ssp.economy.Needs.NeedWish;
 
 /**
@@ -38,8 +39,8 @@ public abstract class Needs implements Comparable<Needs>{
 	public float getMinimumStockPerPop() { return minimumStockPerPop; }
 	
 
-	public abstract NeedWish moneyNeeded(int nb, Collection<ProvinceGoods> prices, Map<Good, Integer> currentStock, int totalMoneyThisTurn, int nbDays);
-	public abstract int spendMoney(int nb, Collection<ProvinceGoods> prices, Map<Good, Integer> currentStock, NeedWish maxMoneyToSpend, int nbDays);
+	public abstract NeedWish moneyNeeded(int nb, Collection<ProvinceGoods> prices, Object2IntMap<Good> currentStock, int totalMoneyThisTurn, int nbDays);
+	public abstract int spendMoney(int nb, Collection<ProvinceGoods> prices, Object2IntMap<Good> currentStock, NeedWish maxMoneyToSpend, int nbDays);
 	
 	
 	@Override

@@ -31,7 +31,7 @@ public abstract class Industry {
 	//	public abstract void checkImport(Province prv); // si moins cher à coté, importer pour augmenter le stock
 
 	//done by needs
-	//	public abstract void consume(Province prv, Map<Pop, Integer> alreadyUsed); // le habitants peuvent dépenser de l'argnet pour acheter ces biens (selon le fric qu'il leur reste
+	//	public abstract void consume(Province prv, Object2IntMap<Pop> alreadyUsed); // le habitants peuvent dépenser de l'argnet pour acheter ces biens (selon le fric qu'il leur reste
 
 	
 }

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.army.EquipmentDevelopped;
 import remi.ssp.economy.Needs;
@@ -18,13 +20,12 @@ public class Civilisation {
 	 // for army
 	List<DivisionUnit> divisions = new ArrayList<>();
 	int mensInReserve = 0;
-	Map<EquipmentDevelopped, Integer> equipmentReserve= new HashMap<>();
 
 
 	public List<Province> getProvinces() { return provinces; }
 	public List<DivisionUnit> getDivisions() { return divisions; }
 	public int getMensInReserve() { return mensInReserve; }
-	public Map<EquipmentDevelopped, Integer> getEquipmentReserve() { return equipmentReserve; }
+	public Map<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
 	
 	
 	

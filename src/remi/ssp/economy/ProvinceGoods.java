@@ -7,11 +7,11 @@ public class ProvinceGoods {
 //	protected Province prv;
 //	protected Good good;
 	
-	public int stock;
-	public int price;
-	public int nbConsumePerDay; // BFR, we need to keep this as stock, so choose the price accordingly
+	public int stock=0;
+	public int price=0;
+	public int nbConsumePerDay=0; // BFR, we need to keep this as stock, so choose the price accordingly
 	
-	
+	//TODO "demande" pour permettre aux pop et à l'etat de demander aux marchants d'apporter des trucs
 	
 	
 	public ProvinceGoods() {
