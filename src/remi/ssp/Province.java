@@ -38,7 +38,7 @@ public class Province implements Serializable{
 	public int surfaceSol=10000; //km² 'sec'
 	public float relief=0; //0 plat, 1 montagne extreme
 	public float humidite = 0.5f; //0 sec, 1 marécage sans terre emergée.
-	public float plages=0; //si cote, % d'espace cotier avec plage (0->1)
+	public float plages=0; //si cote, % d'espace cotier avec plage (0->1), sinon -1?
 	
 	//ressource spéciale
 	ProvinceResources probaRessource = null;
@@ -141,6 +141,7 @@ public class Province implements Serializable{
 	public Civilisation getOwner() { return owner; }
 	public int getMoney() { return money; }
 	public void setMoney(int money) { this.money = money; }
+	public void addMoney(int money) { this.money += money; }
 	public int getMoneyChangePerDay() { return moneyChangePerDay; }
 	public void setMoneyChangePerDay(int moneyChangePerDay) { this.moneyChangePerDay = moneyChangePerDay; }
 	public List<TradeRoute> getTradeRoute() { return tradeRoutes; }

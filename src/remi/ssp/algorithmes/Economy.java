@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.Pop;
 import remi.ssp.Province;
+import remi.ssp.algorithmes.Economy.GoodsProduced;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Needs;
 import remi.ssp.economy.ProvinceCommerce;
@@ -45,17 +47,7 @@ public class Economy {
 		
 	}
 
-	public int getPriceSellToMarket(Province prv, Good item, int quantity, int durationInDay){
-		float coeff = prv.getMoney() / (durationInDay*prv.getMoneyChangePerDay());
-		coeff = ( 0.2f / (1+ coeff*coeff) );
-		return (int)( prv.getStock().get(item).price * (1-coeff) );
-	}
-	
-	public int getPriceBuyFromMarket(Province prv, Good item, int quantity, int durationInDay){
-		float coeff = prv.getMoney() / (durationInDay*prv.getMoneyChangePerDay());
-		coeff = ( 0.2f / (1+ coeff*coeff) );
-		return (int)( prv.getStock().get(item).price * (1+coeff) );
-	}
+
 	
 
 	public void sellToMarket(Province prv, Good item, int quantity, int price, int durationInDay){
@@ -80,7 +72,7 @@ public class Economy {
 		doLandImportExport(prv, durationInDay);
 		consume(prv, durationInDay);
 		setPrices(prv, durationInDay);
-		moveWorkers(prv, durationInDay);
+		//moveWorkers(prv, durationInDay);
 		//popSellThingsIfNeedMoney(prv, durationInDay);
 
 		//stock gaspi
@@ -134,8 +126,8 @@ public class Economy {
 				for(Entry<Good, ProvinceGoods> otherGoods : otherOne.getStock().entrySet()){
 					Good good = otherGoods.getKey();
 					//look at how much it cost here (double if not present ever)
-					int hisBuyCost = getPriceBuyFromMarket(otherOne, good, 1,durationInDay);
-					int hisSellCost = getPriceSellToMarket(otherOne, good, 1,durationInDay);
+					int hisBuyCost = otherGoods.getValue().getPriceBuyFromMarket(otherOne, durationInDay);
+					int hisSellCost = otherGoods.getValue().getPriceSellToMarket(otherOne,durationInDay);
 					int myBuyCost = hisSellCost;
 					int mySellCost = hisBuyCost;
 					ProvinceGoods myGoods = prv.getStock().get(good);
@@ -151,8 +143,8 @@ public class Economy {
 							mySellCost = Integer.MAX_VALUE;
 						}
 					}else{
-						myBuyCost = getPriceBuyFromMarket(prv, good, 1,durationInDay);
-						mySellCost = getPriceSellToMarket(prv, good, 1,durationInDay);
+						myBuyCost = prv.getStock().get(good).getPriceBuyFromMarket(prv, durationInDay);
+						mySellCost = prv.getStock().get(good).getPriceSellToMarket(prv, durationInDay);
 					}
 					//if profitable, add ; profitablity = gain in money per merchant
 					//note: we choose the kilogram (liter) as the base unit for transortation
@@ -288,7 +280,7 @@ public class Economy {
 			//for all our carts, destroy x% of them
 			
 			//then use merchant needs with merchant money to buy merchant tools
-			//TODO
+			//TODO (and do it on consume phase plz)
 			// get the number of merchant without carts
 			//get the best carts for them
 			
@@ -306,6 +298,7 @@ public class Economy {
 			
 		}
 	}
+	
 	protected static class TradeTry{
 		double beneficePerKilo;
 		int buyerPrice;
@@ -331,7 +324,7 @@ public class Economy {
 		for( ProvinceIndustry indus : prv.getIndustries()){
 			//compute marge
 //			ProvinceGoods goodPrice= prv.getStock().get(indus.getIndustry().getGood());
-			int goodPrice = getPriceSellToMarket(prv, indus.getIndustry().getGood(), 1, durationInDay);
+			int goodPrice = prv.getStock().get(indus.getIndustry().getGood()).getPriceSellToMarket(prv, durationInDay);
 			int marge = goodPrice - indus.getRawGoodsCost();
 			if(marge <= 0){
 				//chomage technique
@@ -448,7 +441,7 @@ public class Economy {
 		//industry
 		for(ProvinceIndustry indus : prv.getIndustries()){
 			Needs need = indus.getIndustry().getMyNeeds();
-			NeedWish wish = need.moneyNeeded(indus.getPreviousProduction(), prv.getStock().values(), indus.getStock(), indus.getMoney(), durationInDay);
+			NeedWish wish = need.moneyNeeded(prv, indus.getPreviousProduction(), indus.getStock(), indus.getMoney(), durationInDay);
 			int moneyLeft = indus.getMoney();
 			if(wish.vitalNeed > moneyLeft){
 				wish.vitalNeed = moneyLeft;
@@ -464,7 +457,7 @@ public class Economy {
 			if(wish.luxuryNeed > moneyLeft){
 				wish.luxuryNeed = moneyLeft;
 			}
-			int moneySpent = need.spendMoney(indus.getPreviousProduction(), prv.getStock().values(), indus.getStock(), wish, durationInDay);
+			int moneySpent = need.spendMoney(prv, indus.getPreviousProduction(), indus.getStock(), wish, durationInDay);
 			indus.addMoney(-moneySpent);
 			if(indus.getMoney() < 0) System.err.println("Error, in industral money buy");
 		}
@@ -474,7 +467,7 @@ public class Economy {
 		Map<Needs, NeedWish> moneyNeeded = new HashMap<>();
 		NeedWish wantedMoney = new NeedWish(0, 0, 0);
 		for(Needs need : pop.getPopNeeds()){
-			NeedWish moneyNeeds = need.moneyNeeded(nb, pop.getProvince().getStock().values(), pop.getStock(), money, durationInDay);
+			NeedWish moneyNeeds = need.moneyNeeded(pop.getProvince(), nb, pop.getStock(), money, durationInDay);
 			wantedMoney.add(moneyNeeds);
 			moneyNeeded.put(need, moneyNeeds);
 		}
@@ -534,9 +527,11 @@ public class Economy {
 			}
 		}
 		
+		
+		
 		for(Needs need : pop.getPopNeeds()){
 			NeedWish wish = moneyNeeded.get(need);
-			int moneySpent = need.spendMoney(nb, pop.getProvince().getStock().values(), pop.getStock(), wish, durationInDay);
+			int moneySpent = need.spendMoney(pop.getProvince(), nb, pop.getStock(), wish, durationInDay);
 			pop.addMoney(- moneySpent);
 		}
 		if(pop.getMoney() < 0) System.err.println("Error, in pop money buy");
@@ -547,6 +542,15 @@ public class Economy {
 //	}
 
 	private void setPrices(Province prv, int durationInDay) {
+
+//		Object2IntMap<Good> mimumStock = new Object2IntOpenHashMap<>();
+//		Object2IntMap<Good> optimalStock = new Object2IntOpenHashMap<>();
+//		for(Pop pop : prv.getPops()){
+//			for(Needs need : pop.getPopNeeds()){
+//				need.getMinimumStockPerPop()
+//			}
+//		}
+		
 		for(Entry<Good, GoodsProduced> entry : oldStock.entrySet()){ 
 			GoodsProduced gp = entry.getValue();
 			long newPrice = gp.exportPrice*(long)gp.nbExport;
@@ -554,20 +558,20 @@ public class Economy {
 			newPrice += gp.prodPrice*(long)gp.nbProd;
 			newPrice += gp.oldPrice*(long)gp.oldStock;
 			newPrice /= gp.nbExport+gp.nbImport+gp.nbProd+gp.oldStock;
-			prv.getStock().get(entry.getKey()).price = (int)newPrice;
 
 			//test for shortage/overproduction
-			int newStock = prv.getStock().get(entry.getKey()).stock;
-			//TODO: move quicker as it move away of the threshold
-			if(newStock <= prv.getNbHabitants() * entry.getKey().getNeeds().getMinimumStockPerPop()){
-				//test for shortage : increase price
-				newPrice *= 1.01;
-				newPrice += 1; // to increase even very small values.
-			}else if(newStock >= prv.getNbHabitants() * entry.getKey().getNeeds().getOptimalStockPerPop()){ 
-				//test for over abundance : decrease price
-				newPrice *= 0.99;
-				newPrice -= 1; // to decrease even very small values.
-			}
+			ProvinceGoods prvGood = prv.getStock().get(entry.getKey());
+			int newStock = prvGood.stock;
+			//max 50% (asymptote)
+			// 2 * need for a step is the objective.
+			// 5 * need => -22%
+			// 3 * need => -10%
+			// 1.5 * need => +7%
+			// 1 * need => +16%
+			double ratio = newStock / (double)(prvGood.nbConsumePerDay * durationInDay * 2.0);
+			newPrice = (int)( newPrice * (0.5+(1/(1+ratio))) );
+			
+			prv.getStock().get(entry.getKey()).price = (int)newPrice;
 		}
 	}
 

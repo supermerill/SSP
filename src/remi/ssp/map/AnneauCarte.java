@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 import remi.ssp.Carte;
+import remi.ssp.Pop;
 import remi.ssp.Province;
 
 public class AnneauCarte implements MapFactory {
@@ -98,7 +99,9 @@ public class AnneauCarte implements MapFactory {
 			for(int j=0;j<provinces.get(i).size();j++){
 				Province prv = provinces.get(i).get(j);
 				if(prv.surfaceSol>0){
-					prv.nombreHabitantsParAge[20] = Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10))));
+					Pop pop = new Pop(prv);
+					pop.addHabitants(20, Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
+					prv.getPops().add(pop);
 //					System.out.println("create pop of " + prv.nombreHabitantsParAge[20]);
 				}
 			}

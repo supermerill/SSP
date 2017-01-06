@@ -26,42 +26,39 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
  */
 public class Good {
 	
-	public static HashMap<String, Good> goodList = new HashMap<>();
-	static{
-		create("Crop",0.98f, 1);
-		create("Fish",0.5f, 4);
-		create("rareFish",0.5f, 10);
-		create("Meat",0.5f, 3);
-		create("rareMeat",0.5f, 6);
-		create("rawWood",0.99f, 1);
-		create("plank",0.99f, 10);
-		create("woodenHouse", 0.99f, 1).setCanBeMoved(false);
-		create("bigWoodenHouse", 0.99f, 10).setCanBeMoved(false);
-		create("basicStoneHouse", 0.998f, 5).setCanBeMoved(false);
-		create("bigStoneHouse", 0.998f, 100).setCanBeMoved(false);
-		create("basicGoods",0.95f, 1);
-		create("normalGoods",0.95f, 3);
-		create("luxuryGoods",0.95f, 10);
-	}
-	
-	private static Good create(String name, int weight, float storageLossPerMonth, int desirability){
-		Good good = new Good();
-		good.name = name;
-		good.transportability = weight;
-		good.storageLossPerMonth = storageLossPerMonth;
-		good.desirability = desirability;
-		goodList.put(name, good);
-		return good;
-	}
-	private static Good create(String name, float storageLossPerMonth, int desirability){
-		return create(name, 1000, storageLossPerMonth, desirability);
+	public static class GoodFactory{
+		public static HashMap<String, Good> goodList = new HashMap<>();
+		public static Good get(String name) { return goodList.get(name); }
+		private static Good create(String name, int weight, float storageLossPerMonth, int desirability){
+			Good good = new Good();
+			good.name = name;
+			good.transportability = weight;
+			good.storageLossPerMonth = storageLossPerMonth;
+			good.desirability = desirability;
+			goodList.put(name, good);
+			return good;
+		}
+
+		private Good currentGood = null;
+		private static GoodFactory me = new GoodFactory();;
+		private GoodFactory(){}
+		
+		public static GoodFactory create(String name, float storageLossPerMonth, int desirability){
+			me.currentGood = create(name, 1000, storageLossPerMonth, desirability);
+			return me;
+		}
+
+		public GoodFactory setName(String name) { currentGood.name = name; return me; }
+		public GoodFactory setTransportability(int transportability) { currentGood.transportability = transportability; return me; }
+		public GoodFactory setCanBeMoved(boolean canBeMoved) { currentGood.canBeMoved = canBeMoved; return me; }
+		public GoodFactory setNaval(boolean isNaval) { currentGood.isNaval = isNaval; return me; }
+		public GoodFactory setStorageLossPerMonth(float storageLossPerMonth) { currentGood.storageLossPerMonth = storageLossPerMonth; return me; }
+		public GoodFactory setCommerceCapacityPerMen(int commerceCapacityPerMen) { currentGood.commerceCapacityPerMen = commerceCapacityPerMen; return me; }
+		public Good get() { return currentGood; }
 	}
 	
 	String name;
 	
-	
-	ArrayList<Good> needsToProduce;
-	IntArrayList needsQuantity;
 	
 //	// 0=vital (nouriture), 1=nécécité, 2=commodité, 4=confort, 5=luxe
 //	byte consumePriority = 5;
@@ -78,6 +75,7 @@ public class Good {
 	
 	int desirability=0; //  +1 = 20% better, +5 = two time better!
 	
+	
 	//stats
 	int commerceCapacityPerMen = 0; //increase the commerce capacity of a men by a certain amount
 	
@@ -88,23 +86,21 @@ public class Good {
 	 */
 	public int storageLoss(int previousStock, int durationInDay) {
 		//TODO: change his with tech
-		//reduce the qaunty by X% per month
+		//reduce the quantity by X% per month
 		return (int)(previousStock * Math.pow(storageLossPerMonth, durationInDay/30.0));
 	}
 
-//	public Needs getNeeds() { return buyingBehavior; }
 	public boolean isNaval() { return false; }
 	public int getWeight() { return transportability; }
-
+	public String getName() { return name; }
+	public int getTransportability() { return transportability; }
+	public boolean isCanBeMoved() { return canBeMoved; }
+	public float getStorageLossPerMonth() { return storageLossPerMonth; }
+	public int getDesirability() { return desirability; }
+	public int getCommerceCapacityPerMen() { return commerceCapacityPerMen; }
 	
-	public Good setName(String name) { this.name = name; return this; }
-	public Good setNeedsToProduce(ArrayList<Good> needsToProduce) { this.needsToProduce = needsToProduce; return this; }
-	public Good setNeedsQuantity(IntArrayList needsQuantity) { this.needsQuantity = needsQuantity; return this; }
-	public Good setTransportability(int transportability) { this.transportability = transportability; return this; }
-	public Good setCanBeMoved(boolean canBeMoved) { this.canBeMoved = canBeMoved; return this; }
-	public Good setNaval(boolean isNaval) { this.isNaval = isNaval; return this; }
-	public Good setStorageLossPerMonth(float storageLossPerMonth) { this.storageLossPerMonth = storageLossPerMonth; return this; }
-	public Good setCommerceCapacityPerMen(int commerceCapacityPerMen) { this.commerceCapacityPerMen = commerceCapacityPerMen; return this; }
+	
+	
 	
 	
 	

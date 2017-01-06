@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import remi.ssp.Province;
 import remi.ssp.economy.Needs.NeedWish;
 
 /**
@@ -39,8 +40,8 @@ public abstract class Needs implements Comparable<Needs>{
 	public float getMinimumStockPerPop() { return minimumStockPerPop; }
 	
 
-	public abstract NeedWish moneyNeeded(int nb, Collection<ProvinceGoods> prices, Object2IntMap<Good> currentStock, int totalMoneyThisTurn, int nbDays);
-	public abstract int spendMoney(int nb, Collection<ProvinceGoods> prices, Object2IntMap<Good> currentStock, NeedWish maxMoneyToSpend, int nbDays);
+	public abstract NeedWish moneyNeeded(Province prv, int nb, Object2IntMap<Good> currentStock, int totalMoneyThisTurn, int nbDays);
+	public abstract int spendMoney(Province prv, int nb, Object2IntMap<Good> currentStock, NeedWish maxMoneyToSpend, int nbDays);
 	
 	
 	@Override
@@ -52,7 +53,7 @@ public abstract class Needs implements Comparable<Needs>{
 	
 	public static class NeedWish{
 		public int vitalNeed; // MUST be completed. No need for more.
-		public int normalNeed; // sould be completed. Okay to have some more
+		public int normalNeed; // should be completed. Okay to have some more
 		public int luxuryNeed; // may be completed. Put as many more as you want into this.
 		public NeedWish(int vital, int normal, int luxury){
 			vitalNeed = vital;

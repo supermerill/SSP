@@ -18,6 +18,9 @@ import remi.ssp.economy.ProvinceIndustry;
 public class Pop {
 	Culture culture;
 	Province prv; //weak?
+
+	public Pop(){}
+	public Pop(/*Culture culture,*/ Province prv){ this.prv = prv; }
 	
 	int nbMensTotal=0;
 	int[] nombreHabitantsParAge = new int[100]; // de 0 à 100ans
@@ -55,7 +58,9 @@ public class Pop {
 	
 	public Culture getCulture() { return culture; }
 	public Province getProvince() { return prv; }
-	public int[] getNombreHabitantsParAge() { return nombreHabitantsParAge; }
+	public int getNombreHabitantsParAge(int age) { if(age>=nombreHabitantsParAge.length) return 0; return nombreHabitantsParAge[age]; }
+	public void addHabitants(int age, int nb){ nombreHabitantsParAge[age] += nb; nbMensTotal += nb; }
+	public void removeHabitants(int age, int nb){ nombreHabitantsParAge[age] -= nb; nbMensTotal -= nb; }
 	public int getNbMensInArmy() { return nbMensInArmy; }
 	public int getNbMensChomage() { return nbMensChomage; }
 	public int getNbMensCommerce() { return nbMensCommerce; }

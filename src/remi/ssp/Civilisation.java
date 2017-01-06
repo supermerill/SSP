@@ -25,7 +25,7 @@ public class Civilisation {
 	public List<Province> getProvinces() { return provinces; }
 	public List<DivisionUnit> getDivisions() { return divisions; }
 	public int getMensInReserve() { return mensInReserve; }
-	public Map<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
+//	public Map<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
 	
 	
 	
