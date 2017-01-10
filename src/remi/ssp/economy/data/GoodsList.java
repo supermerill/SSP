@@ -19,13 +19,22 @@ public class GoodsList extends Plugin {
 		FoodNeed.kJoules.put(create("rareMeat",0.5f, 6).get(), 2000);
 		create("rawWood",0.99f, 1);
 		create("plank",0.99f, 10);
-		create("woodenHouse", 0.99f, 1).setCanBeMoved(false);
-		create("bigWoodenHouse", 0.99f, 10).setCanBeMoved(false);
-		create("basicStoneHouse", 0.998f, 5).setCanBeMoved(false);
-		create("bigStoneHouse", 0.998f, 100).setCanBeMoved(false);
-		create("basicGoods",0.95f, 1);
-		create("normalGoods",0.95f, 3);
-		create("luxuryGoods",0.95f, 10);
+		HouseNeed.houses.add(create("woodenHouse", 0.99f, 1).setCanBeMoved(false).get());
+		HouseNeed.houses.add(create("bigWoodenHouse", 0.99f, 10).setCanBeMoved(false).get());
+		HouseNeed.houses.add(create("basicStoneHouse", 0.998f, 6).setCanBeMoved(false).get());
+		HouseNeed.houses.add(create("bigStoneHouse", 0.998f, 100).setCanBeMoved(false).get());
+		create("woodenBasicGoods",0.95f, 1);
+		create("woodenNormalGoods",0.95f, 3);
+		create("woodenLuxuryGoods",0.95f, 10);
+
+		create("coal",0.99f, 0);
+		create("badSteel",0.99f, 0);
+		create("goodSteel",0.99f, 0);
+		create("premiumSteel",0.99f, 0);
+		create("steelBasicGoods",0.99f, 0);
+		create("steelNormalGoods",0.99f, 0);
+		create("steelLuxuryGoods",0.99f, 0);
+		
 		
 	}
 	

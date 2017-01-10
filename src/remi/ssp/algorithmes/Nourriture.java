@@ -9,10 +9,10 @@ import remi.ssp.Province;
 public abstract class Nourriture {
  
 	public void getNourritureSemaine(Province prv) {
-		if(prv.getNbHabitants()==0) return;
+		if(prv.getNbMens()==0) return;
 
 		// premier: culture
-		int rationNecessaire = prv.getNbHabitants() * 7;
+		int rationNecessaire = prv.getNbMens() * 7;
 		int rationRecolte = culture.culture(prv) + peche.peche(prv)
 				+ elevage.elevage(prv, 0);
 		if (rationNecessaire - rationRecolte > prv.rationReserve) {
@@ -25,9 +25,9 @@ public abstract class Nourriture {
 		prv.rationReserve += rationRecolte - rationNecessaire;
 		if (prv.rationReserve < 0) {
 			// famine!
-			System.out.print("famine! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbHabitants()+" => ");
+			System.out.print("famine! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbMens()+" => ");
 //			for (int i = 0; i < -prv.rationReserve / 2; i++) {
-			while(prv.rationReserve<0 && prv.getNbHabitants() >0){
+			while(prv.rationReserve<0 && prv.getNbMens() >0){
 				// la moitié des habitant non nouris meurent, les plus
 				// vieux(TODO) et jeunes d'abord
 				//TODO: les esclave en premier
@@ -42,9 +42,9 @@ public abstract class Nourriture {
 				
 			}
 			prv.rationReserve = 0;
-			System.out.println(prv.getNbHabitants());
+			System.out.println(prv.getNbMens());
 		}else{
-			System.out.println("OK! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbHabitants());
+			System.out.println("OK! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbMens());
 		}
 
 	}
@@ -74,9 +74,9 @@ public abstract class Nourriture {
 	public Chasse chasse = new Chasse() {
 		@Override
 		public int chasse(Province prv) {
-			int nbPrit = (int) ((prv.pourcentFaune * prv.pourcentForet * prv.surfaceSol) * Math.min(1,prv.getNbHabitants()/25f));
+			int nbPrit = (int) ((prv.pourcentFaune * prv.pourcentForet * prv.surfaceSol) * Math.min(1,prv.getNbMens()/25f));
 			//TODO: reduire faune locale
-			prv.pourcentFaune -= prv.pourcentFaune*0.2*Math.min(1,prv.getNbHabitants()/25f);
+			prv.pourcentFaune -= prv.pourcentFaune*0.2*Math.min(1,prv.getNbMens()/25f);
 			return nbPrit;
 		}
 	};
@@ -92,7 +92,7 @@ public abstract class Nourriture {
 //					seaTiles++;
 				if (prv.proche[i] != null && prv.proche[i].isSea) seaTiles ++;
 			}
-			return (int)( seaTiles*prv.getNbHabitants()*prv.pourcentPaysan*10);
+			return (int)( seaTiles*prv.getNbMens()*prv.pourcentPaysan*10);
 		}
 	};
 	 // agriculture

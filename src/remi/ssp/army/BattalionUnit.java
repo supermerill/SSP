@@ -103,6 +103,12 @@ public class BattalionUnit {
 					power *= (1- (((float)distance)/equip.rangeInMeter)); //power loss from distance (range weapon)
 				}
 
+				// double asymptote
+				//if att = 4def, nbWound = nbHit * 0.8
+				//if att = 2def, nbWound = nbHit * 0.5
+				//if att = def+1, nbWound = nbHit * 0.2
+				//if att = def, nbWound = nbHit * 0.1
+				//if 2att = def, nbWound = nbHit * 0.03
 				int nbWounded = 0;
 				final int def = enemyArmor.getInt(equip.DamageType);
 				final float powerDivDef = (power/(def+def));

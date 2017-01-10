@@ -1,10 +1,8 @@
 package remi.ssp.economy.data;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -13,13 +11,13 @@ import remi.ssp.Pop;
 import remi.ssp.Province;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
-import remi.ssp.economy.Needs;
+import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.utils.ComparatorValueDesc;
 
 //TODO: use the current stock.
-// actually, we eat all right away, without stocking anything.
-public class FoodNeed extends Needs{
+// actually, we eat all right away, without stockpiling anything.
+public class FoodNeed extends PopNeed{
 	
 	/*
 	 * 1 gramme de glucide donne 4 kCalories
@@ -34,12 +32,12 @@ public class FoodNeed extends Needs{
 	 */
 	public static Object2IntMap<Good> kJoules = new Object2IntOpenHashMap<>();
 
-	public static FoodNeed me = new FoodNeed();
+	//public static FoodNeed me = new FoodNeed();
 
-	private FoodNeed(){}
+	private FoodNeed(Pop pop){super(pop);}
 	
 	@Override
-	public NeedWish moneyNeeded(Province prv, int nbToConsume, Object2IntMap<Good> currentStock,
+	public NeedWish moneyNeeded(Province prv, int nbMensInPop, Object2IntMap<Good> currentStock,
 			int totalMoneyThisTurn, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		
@@ -48,7 +46,7 @@ public class FoodNeed extends Needs{
 		//check the min price
 		
 		//kjoule need to consume
-		long kJNeeded = nbToConsume * 24000l * nbDays;
+		long kJNeeded = nbMensInPop * 24000l * nbDays;
 		
 		//kjoules in stock, in case of?
 		//TODO
@@ -87,7 +85,7 @@ public class FoodNeed extends Needs{
 		}
 		if(kgFoodNeeded > 0){
 			//famine
-			wish.normalNeed = wish.vitalNeed;
+			wish.normalNeed = 0;
 			wish.luxuryNeed = wish.vitalNeed;
 			return wish;
 		}
@@ -126,13 +124,13 @@ public class FoodNeed extends Needs{
 	}
 
 	@Override
-	public int spendMoney(Province prv, int nbToConsume, Object2IntMap<Good> currentStock,
+	public int spendMoney(Province prv, int nbMensInPop, Object2IntMap<Good> currentStock,
 			NeedWish maxMoneyToSpend, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		
 		// get basic then switch them to more grateful dishs?
 		//kjoule need to consume
-				long kJNeeded = nbToConsume * 24000l * nbDays;
+				long kJNeeded = nbMensInPop * 24000l * nbDays;
 				
 				//kjoules in stock, in case of?
 				//TODO
@@ -241,19 +239,22 @@ public class FoodNeed extends Needs{
 						// famine! (ols code, placeholder that can work, somehow (but it's not efficient)
 						int nbPopNoFood = (int)(nbSurplus * 1.5f); //1.5kg par personne
 						int nbPopToDie = (int)(1+nbPopNoFood * 0.8);
-						System.out.print("famine! ("+nbPopNoFood+"+"+(nbKiloVital + nbKiloNormal + nbKiloLuxe)+"<="+kgFoodNeeded+" => "+prv.rationReserve+")"+prv.getNbHabitants()+" => ");
+						System.out.print("famine! ("+nbPopNoFood+"+"+(nbKiloVital + nbKiloNormal + nbKiloLuxe)+"<="+kgFoodNeeded+" => "+prv.rationReserve+")"+nbMensInPop+" => ");
 //						for (int i = 0; i < -prv.rationReserve / 2; i++) {
-						while(nbPopToDie > 0 && prv.getNbHabitants() > 0){
+						while(nbPopToDie > 0 && nbMensInPop > 0){
 							// la moitié des habitant non nouris meurent, les plus
-							// vieux(TODO) et jeunes d'abord
 							//TODO: les esclave en premier
-							Random rand = new Random();
-							int age = Math.abs(rand.nextInt(20) + rand.nextInt(20) - 20);
-							for( Pop pop : prv.pops)
-								if(pop.getNombreHabitantsParAge(age)>0){
-									pop.removeHabitants(age, 1);
+							// jeunes d'abord (loi normale entre 0 et 14
+							//old or young?
+							if(GlobalRandom.aleat.getInt(2, nbPopToDie) == 0){
+								//young
+								int age = (GlobalRandom.aleat.getInt(7, nbPopToDie) + GlobalRandom.aleat.getInt(7, nbPopToDie));
+								if(myPop.getNombreHabitantsParAge(age)>0){
+									myPop.removeHabitants(age, 1);
 									nbPopToDie--;
+									nbMensInPop--;
 								}
+							}
 							// TODO: ne pas impacter les elites => remonter leur %age
 						}
 						
@@ -348,7 +349,7 @@ public class FoodNeed extends Needs{
 					//Use this money to buy 10 chunk of random food.
 					int moneyToSpend = newMoney / 10;
 					for(int i=0;i<10;i++){
-						Good food = allFood.get(GlobalRandom.aleat.getInt(allFood.size(), nbToConsume));
+						Good food = allFood.get(GlobalRandom.aleat.getInt(allFood.size(), nbMensInPop));
 						int maxStock = currentStock.getInt(food) - nbGoods.getInt(food);
 						int price = goodPrice.getInt(food);
 						int nbPicked = Math.min(moneyToSpend / price, maxStock);

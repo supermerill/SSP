@@ -114,7 +114,7 @@ public class Province implements Serializable{
 	//autres
 	public float rayonnementCulturel = 0; //0=nul, X=nombre de personnes connaissant cette province.
 	
-	public int getNbHabitants(){
+	public int getNbMens(){
 		int nbHabitants = 0;
 //		if(nbHabitants<0){
 		for(Pop pop : pops)

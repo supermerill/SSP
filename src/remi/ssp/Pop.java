@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Needs;
+import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceCommerce;
 import remi.ssp.economy.ProvinceIndustry;
 
@@ -36,9 +37,9 @@ public class Pop {
 
 	int cash = 0; // during a tunr, people receive cash. Then, they use it to buy goods.
 	Object2IntMap<Good> stock = new Object2IntOpenHashMap<>();
-	List<Needs> myNeeds = new ArrayList<>();
+	List<PopNeed> myNeeds = new ArrayList<>();
 //	SortedSet<Needs> popNeeds = new TreeSet<>();
-	public Collection<Needs> getPopNeeds() { return myNeeds; }
+	public Collection<PopNeed> getPopNeeds() { return myNeeds; }
 	
 	public float educationMoy=0; //0 ignare, 1 érudit
 	public float sante=0.5f;//0 épidémie foudroyante, 1 santé parfaite.

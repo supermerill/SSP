@@ -55,20 +55,19 @@ public class HuntingIndustry extends Industry {
 	for(Pop pop : pops){
 		nbMens += pop.getNbMensEmployed().getInt(indus);
 	}
-	if(nbRabbit > 30 * nbMens){ //30 Rabbit per people: can sustain an other men
-		nbRabbitToSell = nbRabbit - 30 * nbMens;
-		nbRabbit -= nbRabbitToSell;
-	}
-	if(nbRabbit > nbFields){ //30 Rabbit per people: can sustain an other men
-		nbRabbitToSell = nbRabbit - nbFields;
-		nbRabbit -= nbRabbitToSell;
-	}
+
+	// reduce efficacity of hunting per rabbit density.
+	//at full livestock, it can hunt 6 rabbit per day (food for 4 mens)
+	nbRabbitToSell = (int)(nbRabbit - durationInDay * 6 * nbMens * (nbRabbit / (float)nbForest));
+	nbRabbit -= nbRabbitToSell;
+	
+	//note: over-hunt can happen easily (no hunter limit), it's intended.
 		
 	//set new livestock
 	indus.getStock().put(Good.GoodFactory.get("meat"), nbRabbit);
 	
 	
-	//TODO: sell more Rabbit if the price is high and famine is occurring.
+	//TODO: sell more Rabbit if the price is high and famine is occurring ?
 	
 	return nbRabbitToSell;
 }
