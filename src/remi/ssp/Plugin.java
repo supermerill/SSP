@@ -16,7 +16,9 @@ public abstract class Plugin implements Serializable{
 	public void init(){}
 
 	//load data & algo into containers
-	public void loadData(){}
+	public void loadGoods(){} //1
+	public void loadEquipment(){} //2
+	public void loadIndustry(){} //3
 	
 	
 	

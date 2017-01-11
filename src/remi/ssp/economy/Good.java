@@ -29,11 +29,11 @@ public class Good {
 	public static class GoodFactory{
 		public static HashMap<String, Good> goodList = new HashMap<>();
 		public static Good get(String name) { return goodList.get(name); }
-		private static Good create(String name, int weight, float storageLossPerMonth, int desirability){
+		private static Good create(String name, int weight, float storageLossPerYear, int desirability){
 			Good good = new Good();
 			good.name = name;
 			good.transportability = weight;
-			good.storageLossPerMonth = storageLossPerMonth;
+			good.storageLossPerYear = storageLossPerYear;
 			good.desirability = desirability;
 			goodList.put(name, good);
 			return good;
@@ -43,8 +43,8 @@ public class Good {
 		private static GoodFactory me = new GoodFactory();;
 		private GoodFactory(){}
 		
-		public static GoodFactory create(String name, float storageLossPerMonth, int desirability){
-			me.currentGood = create(name, 1000, storageLossPerMonth, desirability);
+		public static GoodFactory create(String name, float storageLossPerYear, int desirability){
+			me.currentGood = create(name, 1000, storageLossPerYear, desirability);
 			return me;
 		}
 
@@ -52,9 +52,13 @@ public class Good {
 		public GoodFactory setTransportability(int transportability) { currentGood.transportability = transportability; return me; }
 		public GoodFactory setCanBeMoved(boolean canBeMoved) { currentGood.canBeMoved = canBeMoved; return me; }
 		public GoodFactory setNaval(boolean isNaval) { currentGood.isNaval = isNaval; return me; }
-		public GoodFactory setStorageLossPerMonth(float storageLossPerMonth) { currentGood.storageLossPerMonth = storageLossPerMonth; return me; }
+		public GoodFactory setStorageLossPerYear(float storageLossPerYear) { currentGood.storageLossPerYear = storageLossPerYear; return me; }
 		public GoodFactory setCommerceCapacityPerMen(int commerceCapacityPerMen) { currentGood.commerceCapacityPerMen = commerceCapacityPerMen; return me; }
+		public GoodFactory setIndustryToolEfficiency(int industryToolEfficiency) {	currentGood.industryToolEfficiency = industryToolEfficiency; return me; }
 		public Good get() { return currentGood; }
+	}
+	public static final Good get(String name){
+		return GoodFactory.get(name);
 	}
 	
 	String name;
@@ -71,13 +75,14 @@ public class Good {
 	boolean canBeMoved = true;
 	boolean isNaval = false;
 	
-	float storageLossPerMonth = 0.95f;
+	float storageLossPerYear = 0.95f;
 	
 	int desirability=0; //  +1 = 20% better, +5 = two time better!
 	
 	
 	//stats
 	int commerceCapacityPerMen = 0; //increase the commerce capacity of a men by a certain amount
+	int industryToolEfficiency = 0;
 	
 	
 	/**
@@ -87,7 +92,7 @@ public class Good {
 	public int storageLoss(int previousStock, int durationInDay) {
 		//TODO: change his with tech
 		//reduce the quantity by X% per month
-		return (int)(previousStock * Math.pow(storageLossPerMonth, durationInDay/30.0));
+		return (int)(previousStock * Math.pow(storageLossPerYear, durationInDay/360.0));
 	}
 
 	public boolean isNaval() { return false; }
@@ -95,9 +100,10 @@ public class Good {
 	public String getName() { return name; }
 	public int getTransportability() { return transportability; }
 	public boolean isCanBeMoved() { return canBeMoved; }
-	public float getStorageLossPerMonth() { return storageLossPerMonth; }
+	public float getStorageLossPerYear() { return storageLossPerYear; }
 	public int getDesirability() { return desirability; }
 	public int getCommerceCapacityPerMen() { return commerceCapacityPerMen; }
+	public int getIndustryToolEfficiency() { return industryToolEfficiency;	}
 	
 	
 	

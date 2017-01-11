@@ -338,6 +338,8 @@ public class Economy {
 				//sell to market
 				
 				//give money to workers
+				//TODO : change share (salary vs marge (profit+investment)) from civilization vars 
+				//	=> if low marge, low insvestment => decline. If high marge => increase of inequality (or not), unhappiness of poor people
 				//compute how many we need to keep going (increase prod) 
 				int moneyToKeep = indus.getRawGoodsCost() * quantity;
 				float ratio = (indus.getMoney()/moneyToKeep);

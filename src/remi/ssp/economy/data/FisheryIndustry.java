@@ -4,12 +4,24 @@ import java.util.Collection;
 
 import remi.ssp.Pop;
 import remi.ssp.Province;
+import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceIndustry;
 
+//create food from fish
 //TODO: create FisheryNeed to grab some boats and nets
 public class FisheryIndustry extends Industry {
 
+	static protected FisheryIndustry ptr;
+	public static void load(){ ptr = new FisheryIndustry(); }
+	public static FisheryIndustry get(){ return ptr; }
+
+	private FisheryIndustry(){
+		myNeeds = null;
+		createThis = Good.get("fish");
+	}
+	
+	
 	@Override
 	public int produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
 		Province prv = indus.getProvince();

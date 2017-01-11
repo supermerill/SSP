@@ -9,9 +9,19 @@ import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceIndustry;
 
+//create food from animals (and grow the cheptel)
 //needs:  TODO: buy sheep from market if possible
 public class ElevageIndustry extends Industry {
 
+	static protected ElevageIndustry ptr;
+	public static void load(){ ptr = new ElevageIndustry(); }
+	public static ElevageIndustry get(){ return ptr; }
+	
+	private ElevageIndustry(){
+		myNeeds = null;
+		createThis = Good.get("meat");
+	}
+	
 	@Override
 	public int produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
 		Province prv = indus.getProvince();
@@ -21,7 +31,7 @@ public class ElevageIndustry extends Industry {
 		//TODO: evolution de la surface agricole prv.surfaceSol*prv.pourcentChamps*prv.champsRendement
 		//TODO evolution de la surface cultivable par personne
 		int production = 0;
-		int nbFields = (int) ( (prv.pourcentPrairie * prv.surface / 100 )); // 1 hectare per sheep
+		int nbFields = (int) ( (prv.pourcentPrairie * prv.surface * 100 )); // 1 hectare per sheep
 		int nbSheep = (indus.getStock().getInt(Good.GoodFactory.get("meat"))/100); //100kg per sheep
 		
 		//temp booststrap TODO replace by needs

@@ -13,8 +13,8 @@ import remi.ssp.Province;
 // the Industry class contains the logic and provinceIndustry the data (with province and pop).
 public abstract class Industry {
 	
-	Good createThis;
-	Needs myNeeds; // ask for raw goods and tools.
+	protected Good createThis = null; // we produce only one good for now, because it's easier to compute the profitability this way
+	protected Needs myNeeds = null; // ask for raw goods and tools.
 	
 	
 	//produce goods and pay people for this

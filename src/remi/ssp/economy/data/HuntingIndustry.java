@@ -9,7 +9,12 @@ import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceIndustry;
 
+//create food from livestock (and grow the livestock)
 public class HuntingIndustry extends Industry {
+
+	static protected HuntingIndustry ptr;
+	public static void load(){ ptr = new HuntingIndustry(); }
+	public static HuntingIndustry get(){ return ptr; }
 
 	@Override
 	public int produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
@@ -18,7 +23,7 @@ public class HuntingIndustry extends Industry {
 	
 	//TODO: use tools
 	int production = 0;
-	int nbForest = (int) ( (prv.pourcentForet * prv.surface / 100 )); // 1 hectare per Rabbit
+	int nbForest = (int) ( (prv.pourcentForet * prv.surface * 100 )); // 1 hectare per Rabbit
 	int nbRabbit = (indus.getStock().getInt(Good.GoodFactory.get("meat"))); //100kg per Rabbit
 	
 	//temp booststrap (there are always at least two rabbit)

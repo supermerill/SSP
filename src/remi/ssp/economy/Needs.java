@@ -39,8 +39,26 @@ public abstract class Needs implements Comparable<Needs>{
 	public float getOptimalStockPerPop() { return optimalStockPerPop; }
 	public float getMinimumStockPerPop() { return minimumStockPerPop; }
 	
-
+	/**
+	 * You should watch the BasicIndutryNeed or FoodNeed instead.
+	 * @param prv
+	 * @param nb
+	 * @param currentStock
+	 * @param totalMoneyThisTurn
+	 * @param nbDays
+	 * @return
+	 */
 	public abstract NeedWish moneyNeeded(Province prv, int nb, Object2IntMap<Good> currentStock, int totalMoneyThisTurn, int nbDays);
+
+	/**
+	 * You should watch the BasicIndutryNeed or FoodNeed instead.
+	 * @param prv
+	 * @param nb
+	 * @param currentStock
+	 * @param maxMoneyToSpend
+	 * @param nbDays
+	 * @return
+	 */
 	public abstract int spendMoney(Province prv, int nb, Object2IntMap<Good> currentStock, NeedWish maxMoneyToSpend, int nbDays);
 	
 	

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.economy.Good;
+import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceCommerce;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
@@ -105,7 +106,7 @@ public class Province implements Serializable{
 	
 	
 	//economic
-	List<ProvinceIndustry> industries = new ArrayList<>();
+	Map<Industry, ProvinceIndustry> industries = new HashMap<>();
 	Map<Good, ProvinceGoods> stock = new HashMap<>(); //market : industry & pop & merchant buy goods from this. industry & merchant sell goods into this
 	int money; //BFR from the marketplace
 	int moneyChangePerDay;
@@ -135,7 +136,8 @@ public class Province implements Serializable{
 	}
 	
 
-	public Collection<ProvinceIndustry> getIndustries() { return industries; }
+	public Collection<ProvinceIndustry> getIndustries() { return industries.values(); }
+	public ProvinceIndustry getIndustry(Industry indus) { return industries.get(indus); }
 	public Map<Good, ProvinceGoods> getStock() { return stock; }
 	public Collection<Pop> getPops() { return this.pops; }
 	public Civilisation getOwner() { return owner; }
