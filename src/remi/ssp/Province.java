@@ -1,5 +1,8 @@
 package remi.ssp;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -113,6 +116,8 @@ public class Province implements Serializable{
 	
 	//autres
 	public float rayonnementCulturel = 0; //0=nul, X=nombre de personnes connaissant cette province.
+	//to compute the cultural exchange
+	Object2IntMap<Province> lastTradeRouteExchange = new Object2IntOpenHashMap<>();
 	
 	public int getNbHabitants(){
 		int nbHabitants = 0;
@@ -151,6 +156,11 @@ public class Province implements Serializable{
 	public void setRail(float rail) { this.rail = rail; }
 	public float getRelief() { return relief; }
 	public boolean isCoastal(){ return plages>0; }
+
+	public Object2IntMap<Province> getLastTradeRouteExchange() {
+		return lastTradeRouteExchange;
+	}
+	
 	
 	
 	

@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import remi.ssp.Civilisation;
 import remi.ssp.Pop;
 import remi.ssp.Province;
 import remi.ssp.economy.Good;
@@ -23,6 +24,7 @@ import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.TradeRoute;
 import remi.ssp.utils.ComparatorValueDesc;
+import remi.ssp.utils.U;
 
 public class Economy {
 	//cache values
@@ -62,6 +64,8 @@ public class Economy {
 		bfrThisTurn += price * quantity;
 	}
 	
+	
+	//REMINDER: don't forget to clear the TradeRouteExchange structure from all civ & prv before calling this
 	public void doTurn(Province prv, int durationInDay){
 		oldStock.clear();
 		bfrThisTurn = 0;
@@ -235,6 +239,14 @@ public class Economy {
 						tradeOffer.from.setMoney(tradeOffer.from.getMoney() - nbGoodsToChange * tradeOffer.buyerPrice ); //he buy, he give us (merchant) money
 						data.addMoney(nbGoodsToChange * (tradeOffer.buyerPrice - tradeOffer.sellerPrice));
 //						data.addToPreviousSalary(nbGoodsToChange * (tradeOffer.buyerPrice - tradeOffer.sellerPrice));
+						U.add(tradeOffer.from.getLastTradeRouteExchange(),tradeOffer.to, trMerchantUsed);
+						U.add(tradeOffer.to.getLastTradeRouteExchange(),tradeOffer.from, trMerchantUsed);
+						if(tradeOffer.from.getOwner() != tradeOffer.to.getOwner()){
+							Civilisation civFrom = tradeOffer.from.getOwner();
+							Civilisation civTo = tradeOffer.to.getOwner();
+							U.add(civTo.getTradeRouteExchange(), civFrom, trMerchantUsed);
+							U.add(civFrom.getTradeRouteExchange(), civTo, trMerchantUsed);
+						}
 						
 						if(availableMerchantSlot<0) break;
 					}
@@ -269,6 +281,14 @@ public class Economy {
 						tradeOffer.from.setMoney(tradeOffer.from.getMoney() - nbGoodsToChange * tradeOffer.buyerPrice ); //he buy, he give us (merchant) money
 						data.addMoney(nbGoodsToChange * (tradeOffer.buyerPrice - tradeOffer.sellerPrice));
 //						data.addToPreviousSalary(nbGoodsToChange * (tradeOffer.buyerPrice - tradeOffer.sellerPrice));
+						U.add(tradeOffer.from.getLastTradeRouteExchange(),tradeOffer.to, trMerchantUsed);
+						U.add(tradeOffer.to.getLastTradeRouteExchange(),tradeOffer.from, trMerchantUsed);
+						if(tradeOffer.from.getOwner() != tradeOffer.to.getOwner()){
+							Civilisation civFrom = tradeOffer.from.getOwner();
+							Civilisation civTo = tradeOffer.to.getOwner();
+							U.add(civTo.getTradeRouteExchange(), civFrom, trMerchantUsed);
+							U.add(civFrom.getTradeRouteExchange(), civTo, trMerchantUsed);
+						}
 						
 						if(availableMerchantSlot<0) break;
 					}

@@ -21,11 +21,19 @@ public class Civilisation {
 	List<DivisionUnit> divisions = new ArrayList<>();
 	int mensInReserve = 0;
 
+	// to compute tech movements.
+	Object2IntMap<Civilisation> lastTradeRouteExchange = new Object2IntOpenHashMap<>();
+	
+	
+	Object2IntMap<EquipmentDevelopped> equipmentReserve = new Object2IntOpenHashMap<>();
+	
+
 
 	public List<Province> getProvinces() { return provinces; }
 	public List<DivisionUnit> getDivisions() { return divisions; }
 	public int getMensInReserve() { return mensInReserve; }
-	public Map<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
+	public Object2IntMap<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
+	public Object2IntMap<Civilisation> getTradeRouteExchange() { return lastTradeRouteExchange; }
 	
 	
 	
