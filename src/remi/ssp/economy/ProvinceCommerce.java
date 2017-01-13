@@ -1,11 +1,10 @@
 package remi.ssp.economy;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import remi.ssp.Province;
+import remi.ssp.politic.Province;
 import remi.ssp.utils.ComparatorValueDesc;
 
 public class ProvinceCommerce {

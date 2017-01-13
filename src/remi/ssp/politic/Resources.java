@@ -1,4 +1,4 @@
-package remi.ssp;
+package remi.ssp.politic;
 
 public enum Resources {
 

@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-import remi.ssp.Carte;
-import remi.ssp.Pop;
-import remi.ssp.Province;
+import remi.ssp.politic.Carte;
+import remi.ssp.politic.Pop;
+import remi.ssp.politic.Province;
 
 public class AnneauCarte implements MapFactory {
 

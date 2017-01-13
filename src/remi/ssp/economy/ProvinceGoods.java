@@ -1,6 +1,6 @@
 package remi.ssp.economy;
 
-import remi.ssp.Province;
+import remi.ssp.politic.Province;
 
 public class ProvinceGoods {
 //	

@@ -1,10 +1,11 @@
 package remi.ssp.algorithmes;
 
-import remi.ssp.Province;
+import remi.ssp.politic.Province;
 
-public class Stability {
+public abstract class Stability {
+	static public Stability ptr;
 
-	public void computeStabilityProvince(Province prv){
+	public abstract void computeStabilityProvince(Province prv);
 		//get the culture rejection sentiment
 			//how many other people share our culture?
 			// if 100% of empire, 0% culture rejection
@@ -19,14 +20,11 @@ public class Stability {
 		
 		//TODO check for recent military defeat/victory nearby
 		//TODO colonial rejection (extension)
-		
-	}
 	
-	public void computeCorruption(Province prv){
+	public abstract void computeCorruption(Province prv);
 		//compute the time to go from capital to the province
 		// add 10% per day (multiplicative)
 		// may be reduced by policies (extension)
-	}
 	
 	
 	

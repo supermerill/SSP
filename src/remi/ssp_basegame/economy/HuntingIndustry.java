@@ -1,13 +1,13 @@
-package remi.ssp.economy.data;
+package remi.ssp_basegame.economy;
 
 import java.util.Collection;
 
-import remi.ssp.Pop;
-import remi.ssp.Province;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceIndustry;
+import remi.ssp.politic.Pop;
+import remi.ssp.politic.Province;
 
 //create food from livestock (and grow the livestock)
 public class HuntingIndustry extends Industry {

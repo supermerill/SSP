@@ -1,4 +1,4 @@
-package remi.ssp;
+package remi.ssp.politic;
 
 import java.util.ArrayList;
 import java.util.Collection;

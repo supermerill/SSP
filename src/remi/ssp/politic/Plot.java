@@ -1,4 +1,4 @@
-package remi.ssp;
+package remi.ssp.politic;
 
 public class Plot {
 	short x,y;

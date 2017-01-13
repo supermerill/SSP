@@ -1,6 +1,6 @@
 package remi.ssp.economy;
 
-import remi.ssp.Pop;
+import remi.ssp.politic.Pop;
 
 public abstract class PopNeed extends Needs {
 

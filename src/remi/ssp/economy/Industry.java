@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import remi.ssp.Pop;
-import remi.ssp.Province;
+import remi.ssp.politic.Pop;
+import remi.ssp.politic.Province;
 
 // unlocked by technologies
 // then added to your pool of industry.

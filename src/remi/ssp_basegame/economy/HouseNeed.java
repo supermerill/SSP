@@ -1,4 +1,4 @@
-package remi.ssp.economy.data;
+package remi.ssp_basegame.economy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,12 +8,12 @@ import java.util.Map.Entry;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import remi.ssp.Pop;
-import remi.ssp.Province;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceGoods;
+import remi.ssp.politic.Pop;
+import remi.ssp.politic.Province;
 import remi.ssp.utils.ComparatorValueDesc;
 
 

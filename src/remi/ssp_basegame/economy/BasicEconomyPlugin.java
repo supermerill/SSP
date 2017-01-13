@@ -1,8 +1,12 @@
-package remi.ssp.economy.data;
+package remi.ssp_basegame.economy;
 
-import remi.ssp.Plugin;
 import static remi.ssp.economy.Good.GoodFactory.create;
 
+import com.google.auto.service.AutoService;
+
+import remi.ssp.Plugin;
+
+@AutoService(Plugin.class)
 public class BasicEconomyPlugin extends Plugin {
 	private static final long serialVersionUID = 1L;
 	

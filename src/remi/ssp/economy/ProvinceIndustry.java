@@ -5,7 +5,7 @@ import java.util.Map;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import remi.ssp.Province;
+import remi.ssp.politic.Province;
 
 public class ProvinceIndustry {
 	

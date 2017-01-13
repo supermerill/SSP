@@ -2,18 +2,22 @@ package remi.ssp.swing;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.File;
+import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import remi.ssp.Carte;
-import remi.ssp.Province;
-import remi.ssp.algorithmes.Nourriture;
+import remi.ssp.PluginLoader;
+import remi.ssp.algorithmes.Economy;
 import remi.ssp.map.AnneauCarte;
+import remi.ssp.politic.Carte;
+import remi.ssp.politic.Province;
 
 @SuppressWarnings("serial")
 public class SimpleMapViewer extends JComponent{
 
+	private static PluginLoader manager;
 	private Carte map;
 	
 	public SimpleMapViewer() {
@@ -25,6 +29,13 @@ public class SimpleMapViewer extends JComponent{
 		
 		view.map = new AnneauCarte().createMap(30, 30);
 
+		//load algos & data
+		manager = new PluginLoader();
+		System.out.println(new File(".").getAbsolutePath());
+		manager.loadJars("src");
+		List<String> pluginNames = manager.getPluginNames();
+		manager.loadStaticData(pluginNames);
+		
 		fenetre.add(view);
 		fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		fenetre.setSize(800,1000);
@@ -34,12 +45,13 @@ public class SimpleMapViewer extends JComponent{
 	}
 	
 	public void updateSimu(){
-		Nourriture algoN = new Nourriture(){};
+//		Nourriture algoN = new Nourriture(){};
 		while(true){
 			for(int i=0;i<map.provinces.size();i++){
 				for(int j=0;j<map.provinces.get(i).size();j++){
 					Province prv = map.provinces.get(i).get(j);
-						algoN.getNourritureSemaine(prv);
+					Economy.ptr.doTurn(prv, 30);
+//						algoN.getNourritureSemaine(prv);
 				}
 			}
 			this.repaint();

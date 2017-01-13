@@ -9,8 +9,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import remi.ssp.Plot;
 import remi.ssp.algorithmes.GlobalRandom;
+import remi.ssp.politic.Plot;
 
 //a battalion in a divisionUnit
 public class BattalionUnit {

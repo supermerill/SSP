@@ -1,4 +1,4 @@
-package remi.ssp;
+package remi.ssp.politic;
 
 public class Culture {
 	//TODO tenet, etc
