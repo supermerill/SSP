@@ -8,16 +8,24 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import remi.ssp.economy.Good;
+import remi.ssp.economy.Industry;
 import remi.ssp.economy.Needs;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceCommerce;
 import remi.ssp.economy.ProvinceIndustry;
 
 public class Pop {
-	Culture culture;
+	Culture culture; //TODO: save/load with index
 	Province prv; //weak?
 
 	public Pop(){}
@@ -82,6 +90,85 @@ public class Pop {
 	
 	//public float criminalite=0; //0=> auncun, 1=> anarchie
 
-	
+	public void load(JsonObject jsonObj, Province prv){
+		nbMensTotal = jsonObj.getInt("nb");
+		nbMensInArmy = jsonObj.getInt("nbArmy");
+		nbMensChomage = jsonObj.getInt("nbUE");
+		nbMensCommerce = jsonObj.getInt("nbBI");
+		JsonArray array = jsonObj.getJsonArray("popD");
+		for(int i=0;i<array.size() && i< nombreHabitantsParAge.length;i++){
+			nombreHabitantsParAge[i] = array.getInt(i);
+		}
+		array = jsonObj.getJsonArray("nbE");
+		nbMensEmployed.clear();
+		for(int i=0;i<array.size();i++){
+			JsonObject object = array.getJsonObject(i);
+			nbMensEmployed.put(prv.industries.get(Industry.get(object.getString("name"))), object.getInt("nb"));
+		}
+		
+		commerceLand = new ProvinceCommerce();
+		commerceLand.load(jsonObj.getJsonObject("trl"), prv);
+		commerceSea = new ProvinceCommerce();
+		commerceSea.load(jsonObj.getJsonObject("trs"), prv);
+		cash = jsonObj.getInt("cash");
+		
+		array = jsonObj.getJsonArray("stock");
+		stock.clear();
+		for(int i=0;i<array.size();i++){
+			JsonObject object = array.getJsonObject(i);
+			stock.put(Good.get(object.getString("name")), object.getInt("nb"));
+		}
+		array = jsonObj.getJsonArray("needs");
+		myNeeds.clear();
+		for(int i=0;i<array.size();i++){
+			myNeeds.add(PopNeed.get(array.getString(i)));
+		}
+		educationMoy = (float) jsonObj.getJsonNumber("edu").doubleValue();
+		sante = (float) jsonObj.getJsonNumber("pv").doubleValue();
+	}
+	public void save(JsonObjectBuilder jsonOut){
+		jsonOut.add("nb", nbMensTotal);
+		jsonOut.add("nbArmy", nbMensInArmy);
+		jsonOut.add("nbUE", nbMensChomage);
+		jsonOut.add("nbBI", nbMensCommerce);
+		
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		for(int i=0; i< nombreHabitantsParAge.length;i++){
+			array.add(nombreHabitantsParAge[i]);
+		}
+		jsonOut.add("popD", array);
+		array = Json.createArrayBuilder();
+		for(Entry<ProvinceIndustry> good : nbMensEmployed.object2IntEntrySet()){
+			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+			objectBuilder.add("name", good.getKey().getIndustry().getName());
+			objectBuilder.add("nb", good.getIntValue());
+			array.add(objectBuilder);
+		}
+		jsonOut.add("nbE", array);
+		
+		JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		commerceLand.save(jsonObj);
+		jsonOut.add("trl", jsonObj);
+		jsonObj = Json.createObjectBuilder();
+		commerceSea.save(jsonObj);
+		jsonOut.add("trs", jsonObj);
+		jsonOut.add("cash", cash);
+
+		array = Json.createArrayBuilder();
+		for(Entry<Good> good : stock.object2IntEntrySet()){
+			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+			objectBuilder.add("name", good.getKey().getName());
+			objectBuilder.add("nb", good.getIntValue());
+			array.add(objectBuilder);
+		}
+		jsonOut.add("stock", array);
+		
+		jsonOut.add("needs", array);
+		for(int i=0;i<myNeeds.size();i++){
+			array.add(myNeeds.get(i).getName());
+		}
+		jsonOut.add("edu", educationMoy);
+		jsonOut.add("pv", sante);
+	}
 	
 }

@@ -6,16 +6,22 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
-import remi.ssp.economy.ProvinceCommerce;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.TradeRoute;
 
-public class Province implements Serializable{
+public class Province{
 	private static final long serialVersionUID = ((long)"Province".hashCode()) + 1L;
 	
 	//for plug-ins
@@ -41,9 +47,9 @@ public class Province implements Serializable{
 	public float humidite = 0.5f; //0 sec, 1 marécage sans terre emergée.
 	public float plages=0; //si cote, % d'espace cotier avec plage (0->1), sinon -1?
 	
-	//ressource spéciale
-	ProvinceResources probaRessource = null;
-	int positionresource = 0; //in the 5-6 hex around
+	//ressource spéciale => on Plot
+//	ProvinceResources probaRessource = null;
+//	int positionresource = 0; //in the 5-6 hex around
 	
 	//ecologie
 	public float pourcentPollution = 0f;
@@ -154,7 +160,184 @@ public class Province implements Serializable{
 	public void setRail(float rail) { this.rail = rail; }
 	public float getRelief() { return relief; }
 	public boolean isCoastal(){ return plages>0; }
+
+
+	public void loadLinks(JsonObject jsonProvince, Carte carte){
+
+		JsonArray arrayPlot = jsonProvince.getJsonArray("plots");
+		if(myPLots.length != arrayPlot.size()/2) myPLots = new Plot[arrayPlot.size()/2];
+		for(int i=0;i<arrayPlot.size();i+=2){
+			myPLots[i/2] = carte.plots.get(arrayPlot.getInt(i)).get(arrayPlot.getInt(i+1));
+		}
+		
+		arrayPlot = jsonProvince.getJsonArray("prvs");
+		if(proche.length != arrayPlot.size()/2) proche = new Province[arrayPlot.size()/2];
+		for(int i=0;i<arrayPlot.size();i+=2){
+			proche[i/2] = carte.provinces.get(arrayPlot.getInt(i)).get(arrayPlot.getInt(i+1));
+		}
+	}
+
+	public void saveLinks(JsonObjectBuilder jsonOut){
+
+
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		for(Plot plot : myPLots){
+			array.add(plot.x);
+			array.add(plot.y);
+		}
+		jsonOut.add("plots", array);
+		
+		array = Json.createArrayBuilder();
+		for(Province prv : proche){
+			array.add(prv.x);
+			array.add(prv.y);
+		}
+		jsonOut.add("prvs", array);
+	}
 	
+	public void load(JsonObject jsonProvince){
+
+		x = jsonProvince.getInt("x");
+		y = jsonProvince.getInt("y");
+		pluie = (float)jsonProvince.getJsonNumber("pluie").doubleValue();
+		barometre = (float)jsonProvince.getJsonNumber("barometre").doubleValue();
+		nuages = (float)jsonProvince.getJsonNumber("nuages").doubleValue();
+		ensoleillementAnnuel = (float)jsonProvince.getJsonNumber("ensoleillementAnnuel").doubleValue();
+		temperatureAnnuelle = (float)jsonProvince.getJsonNumber("temperatureAnnuelle").doubleValue();
+		pluieAnnuelle = (float)jsonProvince.getJsonNumber("pluieAnnuelle").doubleValue();
+		surface = jsonProvince.getInt("surface");
+		surfaceSol = jsonProvince.getInt("surfaceSol");
+		relief = (float)jsonProvince.getJsonNumber("relief").doubleValue();
+		humidite = (float)jsonProvince.getJsonNumber("humidite").doubleValue();
+		plages = (float)jsonProvince.getJsonNumber("plages").doubleValue();
+		pourcentPollution = (float)jsonProvince.getJsonNumber("pourcentPollution").doubleValue();
+		pourcentFaune = (float)jsonProvince.getJsonNumber("pourcentFaune").doubleValue();
+		pourcentSterile = (float)jsonProvince.getJsonNumber("pourcentSterile").doubleValue();
+		pourcentFriche = (float)jsonProvince.getJsonNumber("pourcentFriche").doubleValue();
+		pourcentForet = (float)jsonProvince.getJsonNumber("pourcentForet").doubleValue();	
+		pourcentChamps = (float)jsonProvince.getJsonNumber("pourcentChamps").doubleValue();
+		mecanisationChamps = (float)jsonProvince.getJsonNumber("mecanisationChamps").doubleValue();
+		champsRendement = (float)jsonProvince.getJsonNumber("champsRendement").doubleValue();
+		rationReserve = (float)jsonProvince.getJsonNumber("rationReserve").doubleValue();
+		pourcentPrairie = (float)jsonProvince.getJsonNumber("pourcentPrairie").doubleValue();
+		elevageRendement = (float)jsonProvince.getJsonNumber("elevageRendement").doubleValue();
+		cheptel = jsonProvince.getInt("cheptel");
+		pourcentUrbanisation = (float)jsonProvince.getJsonNumber("pourcentUrbanisation").doubleValue();
+		routes = (float)jsonProvince.getJsonNumber("routes").doubleValue();
+		rail = (float)jsonProvince.getJsonNumber("rail").doubleValue();
+		criminalite = (float)jsonProvince.getJsonNumber("criminalite").doubleValue();
+		money = jsonProvince.getInt("money");
+		moneyChangePerDay = jsonProvince.getInt("money");
+		rayonnementCulturel = (float)jsonProvince.getJsonNumber("rayonnementCulturel").doubleValue();
+		nbElites = jsonProvince.getInt("nbElites");
+		
+		JsonArray array;
+		JsonObject object;
+		
+
+		//divisions are loaded separatly
+		divisions.clear();
+		
+		array = jsonProvince.getJsonArray("indus");
+		industries.clear();
+		for(int i=0;i<array.size();i++){
+			ProvinceIndustry indus = new ProvinceIndustry();
+			indus.load(array.getJsonObject(i));
+			indus.setProvince(this);
+			industries.put(indus.getIndustry(), indus);
+		}
+
+		array = jsonProvince.getJsonArray("stock");
+		stock.clear();
+		for(int i=0;i<array.size();i++){
+			ProvinceGoods good = new ProvinceGoods();
+			object = array.getJsonObject(i);
+			good.load(object);
+			stock.put(Good.get(object.getString("name")), good);
+		}
+		
+		//need to be done after loading industries
+		array = jsonProvince.getJsonArray("pops");
+		pops.clear();
+		for(int i=0;i<array.size();i++){
+			Pop pop = new Pop();
+			pop.load(array.getJsonObject(i), this);
+			pop.prv = this;
+			pops.add(pop);
+		}
+		
+	}
+	
+	public void save(JsonObjectBuilder jsonOut){
+
+		jsonOut.add("bla", x);
+		jsonOut.add("x", x);
+		jsonOut.add("y", y);
+		jsonOut.add("pluie", pluie);
+		jsonOut.add("barometre", barometre);
+		jsonOut.add("nuages", nuages);
+		jsonOut.add("ensoleillementAnnuel", ensoleillementAnnuel);
+		jsonOut.add("temperatureAnnuelle", temperatureAnnuelle);
+		jsonOut.add("pluieAnnuelle", pluieAnnuelle);
+		jsonOut.add("surface", surface);
+		jsonOut.add("surfaceSol", surfaceSol);
+		jsonOut.add("relief", relief);
+		jsonOut.add("humidite", humidite);
+		jsonOut.add("plages", plages);
+		jsonOut.add("pourcentPollution", pourcentPollution);
+		jsonOut.add("pourcentFaune", pourcentFaune);
+		jsonOut.add("pourcentSterile", pourcentSterile);
+		jsonOut.add("pourcentFriche", pourcentFriche);
+		jsonOut.add("pourcentForet", pourcentForet);
+		jsonOut.add("pourcentChamps", pourcentChamps);
+		jsonOut.add("mecanisationChamps", mecanisationChamps);
+		jsonOut.add("champsRendement", champsRendement);
+		jsonOut.add("rationReserve", rationReserve);
+		jsonOut.add("pourcentPrairie", pourcentPrairie);
+		jsonOut.add("elevageRendement", elevageRendement);
+		jsonOut.add("cheptel", cheptel);
+		jsonOut.add("pourcentUrbanisation", pourcentUrbanisation);
+		jsonOut.add("routes", routes);
+		jsonOut.add("rail", rail);
+		jsonOut.add("criminalite", criminalite);
+		jsonOut.add("money", money);
+		jsonOut.add("money", moneyChangePerDay);
+		jsonOut.add("rayonnementCulturel", rayonnementCulturel);
+		jsonOut.add("nbElites", nbElites);
+		
+		JsonArrayBuilder array;
+		JsonObjectBuilder objectBuilder;
+		
+		array = Json.createArrayBuilder();
+		for(Pop pop : pops){
+			objectBuilder = Json.createObjectBuilder();
+			pop.save(objectBuilder);
+			array.add(objectBuilder);
+		}
+		jsonOut.add("pops", array);
+		
+
+		//divisions are saved separatly
+
+
+		array = Json.createArrayBuilder();
+		for(ProvinceIndustry indus : industries.values()){
+			objectBuilder = Json.createObjectBuilder();
+			indus.save(objectBuilder);
+			array.add(objectBuilder);
+		}
+		jsonOut.add("indus", array);
+
+		array = Json.createArrayBuilder();
+		for(Entry<Good, ProvinceGoods> good : stock.entrySet()){
+			objectBuilder = Json.createObjectBuilder();
+			good.getValue().save(objectBuilder);
+			objectBuilder.add("name", good.getKey().getName());
+			array.add(objectBuilder);
+		}
+		jsonOut.add("stock", array);
+		
+	}
 	
 	
 }

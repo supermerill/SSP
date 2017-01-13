@@ -187,7 +187,7 @@ public class BaseEconomy extends Economy {
 				// do trade : buy & sell (benef or deficit are for the pop money)
 				// use tools
 			
-			//careles merchants
+			//careless merchants
 			final int nbMerchantDontCare = (int) (pop.getNbMens() * 0.7f);
 			int merchantToFill = pop.getNbMens();
 			for(TradeRoute tr : listOfTrades){

@@ -1,10 +1,12 @@
 package remi.ssp.economy;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import remi.ssp.economy.Good.GoodFactory;
 import remi.ssp.economy.Needs.NeedWish;
 import remi.ssp.politic.Province;
 
@@ -24,6 +26,16 @@ import remi.ssp.politic.Province;
  *
  */
 public abstract class Needs implements Comparable<Needs>{
+
+	
+	public static class NeedStorage{
+		public static HashMap<String, Needs> goodList = new HashMap<>();
+		public static Needs get(String name) { return goodList.get(name); }
+		public static void put(String name, Needs obj) { goodList.put(name, obj); }
+	}
+	public static Needs get(String name){
+		return NeedStorage.get(name);
+	}
 
 	String name;
 	

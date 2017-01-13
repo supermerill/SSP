@@ -3,7 +3,14 @@ package remi.ssp.economy;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.politic.Province;
 
@@ -49,5 +56,48 @@ public class ProvinceIndustry {
 	public int getPreviousSalary() { return previousSalary; }
 	public void setPreviousSalary(int previousSalary) { this.previousSalary = previousSalary; }
 	
+/*
+ * 
+	Industry industry;
 	
+//	int needs;
+//	int offer;
+//	int price;
+	
+	//int efficiency; //TODO : number of people that work optimally (hard to boostrap industry)
+
+	
+	// used to run
+	Object2IntMap<Good> stock = new Object2IntOpenHashMap<Good>(); //raw goods + tools
+	int money;//bfr
+	int rawGoodsCost; // rawgoods + depreciation of owned stock
+	int previousProduction;
+	int previousSalary;
+ */
+	public void load(JsonObject jsonObj){
+		money = jsonObj.getInt("money");
+		rawGoodsCost = jsonObj.getInt("cost");
+		previousProduction = jsonObj.getInt("prod");
+		previousSalary = jsonObj.getInt("salary");
+		JsonArray array = jsonObj.getJsonArray("stock");
+		stock.clear();
+		for(int i=0;i<array.size();i++){
+			JsonObject object = array.getJsonObject(i);
+			stock.put(Good.get(object.getString("name")), object.getInt("nb"));
+		}
+	}
+	public void save(JsonObjectBuilder jsonOut){
+		jsonOut.add("money", money);
+		jsonOut.add("cost", rawGoodsCost);
+		jsonOut.add("prod", previousProduction);
+		jsonOut.add("salary", previousSalary);
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		for(Entry<Good> good : stock.object2IntEntrySet()){
+			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+			objectBuilder.add("name", good.getKey().getName());
+			objectBuilder.add("nb", good.getIntValue());
+			array.add(objectBuilder);
+		}
+		jsonOut.add("stock", array);
+	}
 }

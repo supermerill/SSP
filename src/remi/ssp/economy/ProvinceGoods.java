@@ -1,5 +1,8 @@
 package remi.ssp.economy;
 
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import remi.ssp.politic.Province;
 
 public class ProvinceGoods {
@@ -42,6 +45,17 @@ public class ProvinceGoods {
 		float coeff = prv.getMoney() / (durationInDay*prv.getMoneyChangePerDay());
 		coeff = ( 0.2f / (1+ coeff*coeff) );
 		return (int)( price * (1+coeff) );
+	}
+	
+	public void load(JsonObject jsonObj){
+		stock = jsonObj.getInt("stock");
+		price = jsonObj.getInt("price");
+		nbConsumePerDay = jsonObj.getInt("nb");
+	}
+	public void save(JsonObjectBuilder jsonOut){
+		jsonOut.add("stock", stock);
+		jsonOut.add("price", price);
+		jsonOut.add("nb", nbConsumePerDay);
 	}
 	
 }

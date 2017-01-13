@@ -2,8 +2,15 @@ package remi.ssp.economy;
 
 import java.util.ArrayList;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import remi.ssp.politic.Province;
 import remi.ssp.utils.ComparatorValueDesc;
 
@@ -55,5 +62,31 @@ public class ProvinceCommerce {
 		}
 		
 		return (int)(capacity * efficiency);
+	}
+
+	public void load(JsonObject jsonObj, Province prv){
+		this.province = prv;
+		efficiency = (float)jsonObj.getJsonNumber("eff").doubleValue();
+		money = jsonObj.getInt("money");
+		previousSalary = jsonObj.getInt("salary");
+		JsonArray array = jsonObj.getJsonArray("stock");
+		stock.clear();
+		for(int i=0;i<array.size();i++){
+			JsonObject object = array.getJsonObject(i);
+			stock.put(Good.get(object.getString("name")), object.getInt("nb"));
+		}
+	}
+	public void save(JsonObjectBuilder jsonOut){
+		jsonOut.add("eff", efficiency);
+		jsonOut.add("money", money);
+		jsonOut.add("salary", previousSalary);
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		for(Entry<Good> good : stock.object2IntEntrySet()){
+			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+			objectBuilder.add("name", good.getKey().getName());
+			objectBuilder.add("nb", good.getIntValue());
+			array.add(objectBuilder);
+		}
+		jsonOut.add("stock", array);
 	}
 }

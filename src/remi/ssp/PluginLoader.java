@@ -1,6 +1,8 @@
 package remi.ssp;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -10,6 +12,14 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonReader;
+
+import remi.ssp.politic.Carte;
+import remi.ssp.politic.Civilisation;
+import remi.ssp.politic.Province;
 
 public class PluginLoader{
 
@@ -72,7 +82,7 @@ public class PluginLoader{
 	
 	public void loadStaticData(List<String> orderedNames){
 		
-
+		
 		forEachPlugin(orderedNames, plugin->System.out.println("Activate plugin "+plugin.getClass().getName()));
 		
 		//1 goods
@@ -100,15 +110,29 @@ public class PluginLoader{
 		}
 	}
 	
-	public void loadSavedData(){
+	public void loadSavedData(URL url){
+		try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
 		
-		// civilization -> province -> pop -> popneed, stock
-		//				-> equipment developed
-		// 				-> division -> battalion
-		//				-> division unit -> battalion unit
-		// province trade routes & province-province links
-		//
-		
+			//Carte -> province -> pop -> popneed, stock, prvindus
+			Carte carte = new Carte();
+			carte.load(rdr.readObject());
+			
+			// civilization 
+			JsonArray arrayCiv = rdr.readArray();
+			for(int i=0;i<arrayCiv.size();i++){
+				Civilisation civ = new Civilisation();
+				civ.load(arrayCiv.getJsonObject(i));
+			}
+			
+			//				-> equipment developed
+			// 				-> division -> battalion
+			//				-> division unit -> battalion unit
+			// province trade routes & province-province links
+			//
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

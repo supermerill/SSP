@@ -4,6 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Users/Admin/Documents/personel/workspace/SSP/fastutil-7.0.13.jar"/>
 	<classpathentry kind="lib" path="auto-service-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="javax.json-1.0.4.jar" sourcepath="javax.json-1.0.4-sources.jar"/>
 	<classpathentry kind="src" path=".apt_generated">
 		<attributes>
 			<attribute name="optional" value="true"/>

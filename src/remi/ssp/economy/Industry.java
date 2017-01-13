@@ -1,11 +1,9 @@
 package remi.ssp.economy;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.HashMap;
 
 import remi.ssp.politic.Pop;
-import remi.ssp.politic.Province;
 
 // unlocked by technologies
 // then added to your pool of industry.
@@ -13,9 +11,14 @@ import remi.ssp.politic.Province;
 // the Industry class contains the logic and provinceIndustry the data (with province and pop).
 public abstract class Industry {
 	
+	protected static HashMap<String, Industry> industryList = new HashMap<>();
+	public static Industry get(String name) { return industryList.get(name); }
+	public static void put(String name, Industry indus) { industryList.put(name, indus); }
+	
 	protected Good createThis = null; // we produce only one good for now, because it's easier to compute the profitability this way
 	protected Needs myNeeds = null; // ask for raw goods and tools.
 	
+	public String getName(){return getClass().getName();}
 	
 	//produce goods and pay people for this
 	public abstract int produce(ProvinceIndustry indus, Collection<Pop> pop, int durationInDay);
