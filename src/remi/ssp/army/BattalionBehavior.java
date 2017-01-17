@@ -5,9 +5,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
+
 
 public abstract class BattalionBehavior implements Serializable{
+	
+	//TODO: fill this on a plugin 
+	protected static HashMap<String, BattalionBehavior> batBehaviorList = new HashMap<>();
+	public static BattalionBehavior get(String name) { return batBehaviorList.get(name); }
+	public static void put(String name, BattalionBehavior indus) { batBehaviorList.put(name, indus); }
+	
+	
 	private static final long serialVersionUID = ((long)"BattalionBehaviorMelee".hashCode())<<30 + 1;
 //	MELEE, //go to the enemy
 //	RANGE, //advance to dist/2 then fire

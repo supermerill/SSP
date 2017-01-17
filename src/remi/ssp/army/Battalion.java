@@ -4,11 +4,30 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
+import remi.ssp.politic.Civilisation;
 
 public class Battalion {
 
+	private final int id;
+	public Battalion(int id){this.id = id;}
+	public Battalion(Civilisation others){
+		int i=0;
+		for(Battalion other : others.getBattalionTemplate()){
+			if(i <= other.id){
+				i = other.id+1;
+			}
+		}
+		this.id = i;
+	}
+	public final int getId(){return id;}
+	
 
 	BattalionBehavior behavior;
 	int nbFightingMens;
@@ -93,6 +112,33 @@ public class Battalion {
 			max = Math.max(max, equip.rangeInMeter);
 		}
 		return max;
+	}
+	
+	public void load(JsonObject objBat, Civilisation civ) {
+		behavior = BattalionBehavior.get(objBat.getString("behavior"));
+		nbFightingMens = objBat.getInt("nbFmens");
+		nbHandlingMens = objBat.getInt("nbHmens");
+		JsonArray arrayEquip = objBat.getJsonArray("equips");
+		for(int i=0;i<arrayEquip.size();i++){
+			int id = arrayEquip.getInt(i);
+			free: for(EquipmentDevelopped equip : civ.getEquipmentReserve().keySet()){
+				if(equip.getId() == id){
+					equipment.add(equip);
+					break free;
+				}
+			}
+		}
+	}
+	public void save(JsonObjectBuilder jsonOut) {
+		jsonOut.add("behavior", behavior.getClass().getName());
+		jsonOut.add("nbFmens", nbFightingMens);
+		jsonOut.add("nbHmens", nbHandlingMens);
+
+		JsonArrayBuilder arrayEquip = Json.createArrayBuilder();
+		for(EquipmentDevelopped equip : equipment){
+			arrayEquip.add(equip.getId());
+		}
+		jsonOut.add("equips", arrayEquip);
 	}
 	
 }

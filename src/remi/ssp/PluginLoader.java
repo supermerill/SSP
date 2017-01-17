@@ -3,6 +3,7 @@ package remi.ssp;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -15,7 +16,11 @@ import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
+import javax.json.JsonWriter;
 
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Civilisation;
@@ -109,28 +114,64 @@ public class PluginLoader{
 			}
 		}
 	}
-	
+
 	public void loadSavedData(URL url){
 		try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
 		
+			JsonObject root = rdr.readObject();
+			
 			//Carte -> province -> pop -> popneed, stock, prvindus
-			Carte carte = new Carte();
-			carte.load(rdr.readObject());
+			// province-province links & plotplot links
+			CurrentGame.map = new Carte();
+			CurrentGame.map.load(root.getJsonObject("map"));
 			
 			// civilization 
-			JsonArray arrayCiv = rdr.readArray();
+			//				-> equipment developed
+			// 				-> division -> battalion
+			//				-> division unit -> battalion unit
+			CurrentGame.civs = new ArrayList<>();
+			JsonArray arrayCiv = root.getJsonArray("civs");
 			for(int i=0;i<arrayCiv.size();i++){
 				Civilisation civ = new Civilisation();
-				civ.load(arrayCiv.getJsonObject(i));
+				civ.load(arrayCiv.getJsonObject(i), CurrentGame.map);
+				CurrentGame.civs.add(civ);
 			}
+
+			// province trade routes ?
+			
+			//
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void savedData(URL url){
+		try (OutputStream out = url.openConnection().getOutputStream(); JsonWriter wtr = Json.createWriter(out)) {
+		
+			JsonObjectBuilder root = Json.createObjectBuilder();
+			
+			//Carte -> province -> pop -> popneed, stock, prvindus
+			JsonObjectBuilder object = Json.createObjectBuilder();
+			CurrentGame.map.save(object);
+			root.add("map", object);
+			
+			// civilization 
+			JsonArrayBuilder arrayCivs = Json.createArrayBuilder();
+			for(int i=0;i<CurrentGame.civs.size();i++){
+				JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+				CurrentGame.civs.get(i).save(objectBuilder);
+				arrayCivs.add(objectBuilder);
+			}
+			root.add("civs", arrayCivs);
 			
 			//				-> equipment developed
 			// 				-> division -> battalion
 			//				-> division unit -> battalion unit
 			// province trade routes & province-province links
 			//
+			wtr.writeObject(root.build());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

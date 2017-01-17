@@ -39,9 +39,9 @@ public class Good {
 			return good;
 		}
 
-		private Good currentGood = null;
+		protected Good currentGood = null;
 		private static GoodFactory me = new GoodFactory();;
-		private GoodFactory(){}
+		protected GoodFactory(){}
 		
 		public static GoodFactory create(String name, float storageLossPerYear, int desirability){
 			me.currentGood = create(name, 1000, storageLossPerYear, desirability);
@@ -57,11 +57,11 @@ public class Good {
 		public GoodFactory setIndustryToolEfficiency(int industryToolEfficiency) {	currentGood.industryToolEfficiency = industryToolEfficiency; return me; }
 		public Good get() { return currentGood; }
 	}
-	public static final Good get(String name){
+	public static Good get(String name){
 		return GoodFactory.get(name);
 	}
 	
-	String name;
+	protected String name;
 	
 	
 //	// 0=vital (nouriture), 1=nécécité, 2=commodité, 4=confort, 5=luxe
@@ -70,19 +70,19 @@ public class Good {
 //	byte wantedStock = 0;
 //	Needs buyingBehavior;
 	
-	int transportability; // 0 = dematerialized, 1 = 1 gram, 1000= a notebook (1kg, 1liter), 1 000 000 = 1 tonne, a car. -1 = not transportable (house)
+	protected int transportability; // 0 = dematerialized, 1 = 1 gram, 1000= a notebook (1kg, 1liter), 1 000 000 = 1 tonne, a car. -1 = not transportable (house)
 	
-	boolean canBeMoved = true;
-	boolean isNaval = false;
+	protected boolean canBeMoved = true;
+	protected boolean isNaval = false;
 	
-	float storageLossPerYear = 0.95f;
+	protected float storageLossPerYear = 0.95f;
 	
-	int desirability=0; //  +1 = 20% better, +5 = two time better!
+	protected int desirability=0; //  +1 = 20% better, +5 = two time better!
 	
 	
 	//stats
-	int commerceCapacityPerMen = 0; //increase the commerce capacity of a men by a certain amount
-	int industryToolEfficiency = 0;
+	protected int commerceCapacityPerMen = 0; //increase the commerce capacity of a men by a certain amount
+	protected int industryToolEfficiency = 0;
 	
 	
 	/**

@@ -5,19 +5,26 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.algorithmes.GlobalRandom;
-import remi.ssp.politic.Plot;
+import remi.ssp.politic.Civilisation;
 
 //a battalion in a divisionUnit
 public class BattalionUnit {
 	
 	//int x,y;
-	Plot plot;
-	Plot goingTo;
+//	Plot plot; //do this in divisionunit
+//	Plot goingTo;
 	
 	Battalion template;
 
@@ -30,6 +37,7 @@ public class BattalionUnit {
 	
 	int battlePosition;
 	int nbMsRunInCurrentBattle;
+	//cache
 	BattalionBattleDecision currentBattleDecision;
 
 	
@@ -46,12 +54,12 @@ public class BattalionUnit {
 	public void setNbMsRunInCurrentBattle(int nbMsRunInCurrentBattle) { this.nbMsRunInCurrentBattle = nbMsRunInCurrentBattle; }
 	public Battalion getTemplate() { return template; }
 	public BattalionBattleDecision getCurrentBattleDecision() { return currentBattleDecision; }
-	public int getX() { return plot.getX(); }
-	public int getY() { return plot.getY(); }
-	public Plot getPlot() { return plot; }
-	public void setPlot(Plot plot) { this.plot = plot; }
-	public Plot getGoingTo() { return goingTo; }
-	public void setGoingTo(Plot goingTo) { this.goingTo = goingTo; }
+//	public int getX() { return plot.getX(); }
+//	public int getY() { return plot.getY(); }
+//	public Plot getPlot() { return plot; }
+//	public void setPlot(Plot plot) { this.plot = plot; }
+//	public Plot getGoingTo() { return goingTo; }
+//	public void setGoingTo(Plot goingTo) { this.goingTo = goingTo; }
 	public int getBattlePosition() { return battlePosition; }
 	public void setBattlePosition(int battlePosition) { this.battlePosition = battlePosition; }
 	
@@ -123,6 +131,59 @@ public class BattalionUnit {
 		}
 		
 		return bestWounded;
+	}
+	
+	/*
+	 * 
+	
+	Battalion template;
+
+	//ie, at how much my battalions are manned
+	int availableMens;
+	//ie, at how much my battalions are effective
+	int woundedMens;
+	//ie the power of mens for each of my battalions
+	Object2IntMap<EquipmentDevelopped> equipmentForArmy = new Object2IntOpenHashMap<>();
+	
+	int battlePosition;
+	int nbMsRunInCurrentBattle;
+	BattalionBattleDecision currentBattleDecision;
+	 */
+	public void load(JsonObject jsonObject, Civilisation civ) {
+		availableMens = jsonObject.getInt("amens");
+		woundedMens = jsonObject.getInt("wmens");
+		battlePosition = jsonObject.getInt("pos");
+		nbMsRunInCurrentBattle = jsonObject.getInt("time");
+		int id2find = jsonObject.getInt("batId");
+		for(Battalion bat : civ.getBattalionTemplate()){
+			if(id2find == bat.getId()){
+				template = bat;
+				break;
+			}
+		}
+		JsonArray array = jsonObject.getJsonArray("equips");
+		for(int i=0;i+1<array.size(); i+=2){
+			id2find = array.getInt(i);
+			free: for(EquipmentDevelopped equi : civ.getEquipmentReserve().keySet()){
+				if(id2find == equi.getId()){
+					equipmentForArmy.put(equi, array.getInt(i+1));
+					break free;
+				}
+			}
+		}
+	}
+	public void save(JsonObjectBuilder objSave) {
+		objSave.add("amens", availableMens);
+		objSave.add("wmens", woundedMens);
+		objSave.add("pos", battlePosition);
+		objSave.add("time", nbMsRunInCurrentBattle);
+		objSave.add("batId", template.getId());
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		for(Entry<EquipmentDevelopped> equi : equipmentForArmy.object2IntEntrySet()){
+			array.add(equi.getKey().getId());
+			array.add(equi.getIntValue());
+		}
+		objSave.add("equips", array);
 	}
 	
 }
