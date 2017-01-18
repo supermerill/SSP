@@ -1,20 +1,24 @@
 package remi.ssp_basegame;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.algorithmes.Economy;
 import remi.ssp.economy.Good;
+import remi.ssp.economy.Job;
 import remi.ssp.economy.Needs;
 import remi.ssp.economy.Needs.NeedWish;
+import remi.ssp.politic.Carte;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 import remi.ssp.economy.ProvinceCommerce;
@@ -25,7 +29,7 @@ import remi.ssp.economy.TradeRoute;
 public class BaseEconomy extends Economy {
 	
 	//cache values
-	Map<Good, GoodsProduced> oldStock = new HashMap<>();
+	Map<Province, Map<Good, GoodsProduced>> oldStock = new HashMap<>();
 	int bfrThisTurn = 0;
 	
 	//for(Province prv: allPrvs){
@@ -51,8 +55,74 @@ public class BaseEconomy extends Economy {
 		bfrThisTurn += price * quantity;
 	}
 	
-	public void doTurn(Province prv, int durationInDay){
-		oldStock.clear();
+	/**
+	 * TODO: rework: instead of a province-loop, it should be a:
+	 *  - produce goods in all province in the world (no order)
+	 *  - move goods via merchants for all provinces (ordered by the richest/pop to the poorest)
+	 *  - consume goods in each province (no order)
+	 *  - set prices in each province (no order)
+	 */
+	public void doTurn(Carte map, int durationInDay){
+		final Object2IntMap<Province> prv2Wealth = new Object2IntOpenHashMap<Province>();
+		final List<Province> allPrvs = new ArrayList<>();
+		for( List<Province> prvs: map.provinces){
+			//init map to compute prices
+			for( Province prv: prvs){
+				if(!oldStock.containsKey(prv))oldStock.put(prv, new HashMap<>());
+				oldStock.get(prv).clear();
+				bfrThisTurn = 0;
+				//save previous stock to redo price
+				for(Entry<Good, ProvinceGoods> goodStock : prv.getStock().entrySet()){
+					GoodsProduced gp = new GoodsProduced();
+					gp.oldStock = goodStock.getValue().stock;
+					gp.oldPrice = goodStock.getValue().price;
+	//				gp.good = goodStock.getKey();
+	//				gp.prv = prv;
+					oldStock.get(prv).put(goodStock.getKey(), gp);
+				}
+				
+				//init map to compute wealth order
+				allPrvs.add(prv);
+				int richesse = 0;
+				for(Pop pop: prv.getPops()){
+					//TODO: this is not the wealth but the current bank account... change it (when you have time)
+					richesse = pop.getMoney();
+				}
+				prv2Wealth.put(prv, richesse/prv.getNbMens());
+				
+				//procude goods
+				produce(prv, durationInDay);
+			}
+		}
+		
+		//sort list to have the first one with the biggest value.
+		allPrvs.sort( (prv1,prv2) -> -Integer.compare(prv2Wealth.getInt(prv1),prv2Wealth.getInt(prv2)) );
+		for(Province prv: allPrvs){
+			doNavalImportExport(prv, durationInDay);
+			doLandImportExport(prv, durationInDay);
+		}
+		for(Province prv: allPrvs){
+			consume(prv, durationInDay);
+			//popSellThingsIfNeedMoney(prv, durationInDay);
+			setPrices(prv, durationInDay);
+			moveWorkers(prv, durationInDay); //ie: changejob
+			
+			
+			//stock gaspi
+			for(Entry<Good, ProvinceGoods> goodStock : prv.getStock().entrySet()){
+				goodStock.getValue().stock = (goodStock.getKey().storageLoss(goodStock.getValue().stock, durationInDay));
+			}
+			//useful accumulators for computing prices
+			prv.setMoneyChangePerDay(1 + bfrThisTurn/durationInDay);
+		}
+		//TODO
+//		for(Province prv: allPrvs){
+//			emigration(prv, durationInDay);
+//		}
+	}
+	@Deprecated
+	private void doTurn(Province prv, int durationInDay){
+		oldStock.get(prv).clear();
 		bfrThisTurn = 0;
 		//save previous stock to redo price
 		for(Entry<Good, ProvinceGoods> goodStock : prv.getStock().entrySet()){
@@ -61,7 +131,7 @@ public class BaseEconomy extends Economy {
 			gp.oldPrice = goodStock.getValue().price;
 //			gp.good = goodStock.getKey();
 //			gp.prv = prv;
-			oldStock.put(goodStock.getKey(), gp);
+			oldStock.get(prv).put(goodStock.getKey(), gp);
 		}
 		
 		produce(prv, durationInDay);
@@ -69,7 +139,7 @@ public class BaseEconomy extends Economy {
 		doLandImportExport(prv, durationInDay);
 		consume(prv, durationInDay);
 		setPrices(prv, durationInDay);
-		//moveWorkers(prv, durationInDay);
+		moveWorkers(prv, durationInDay);
 		//popSellThingsIfNeedMoney(prv, durationInDay);
 
 		//stock gaspi
@@ -100,8 +170,8 @@ public class BaseEconomy extends Economy {
 			
 			//check our transport capacity (from number of merchant, efficiency, and merchant tools
 			final ProvinceCommerce data = pop.getLandCommerce();
-			final int transportCapa = data.computeCapacity(pop.getNbMensCommerce());
-			final float capaPerMen = transportCapa / (float)pop.getNbMensCommerce();
+			final int transportCapa = data.computeCapacity(pop.getNbMensEmployed().getInt(pop.getLandCommerce()));
+			final float capaPerMen = transportCapa / (float)pop.getNbMensEmployed().getInt(pop.getLandCommerce());
 			
 			//init : give all pop money to merchant (loan)
 			data.setPreviousSalary(0);
@@ -550,7 +620,7 @@ public class BaseEconomy extends Economy {
 //			}
 //		}
 		
-		for(Entry<Good, GoodsProduced> entry : oldStock.entrySet()){ 
+		for(Entry<Good, GoodsProduced> entry : oldStock.get(prv).entrySet()){ 
 			GoodsProduced gp = entry.getValue();
 			long newPrice = gp.exportPrice*(long)gp.nbExport;
 			newPrice += gp.importPrice*(long)gp.nbImport;
@@ -574,45 +644,62 @@ public class BaseEconomy extends Economy {
 		}
 	}
 
-	private void moveWorkersTODO(Province prv, int durationInDay) {
+	private void moveWorkers(Province prv, int durationInDay) {
+		
+		//note: as we used the "job" abstraction, it count commerce and industry on an equal foot. TODO: Do we do the same for the army?
 		for(Pop pop : prv.getPops()){
+			//sort job by best salary
+			List<Job> bestJob = new ArrayList<>( pop.getNbMensEmployed().keySet());
+			bestJob.sort((i1,i2) -> - Integer.compare( i1.getPreviousSalary(), i2.getPreviousSalary()));
+			
 			//compute mean revenu
 			long mean = 0;
-			for(Entry<ProvinceIndustry, Integer> indus : pop.getNbMensEmployed().entrySet()){
-				mean += indus.getValue() * indus.getKey().getPreviousSalary(); //TODO multiply by an "efficiency" from education or other things.
+			float nbEmployed = 0;
+			for(it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Job> indus : pop.getNbMensEmployed().object2IntEntrySet()){
+				mean += indus.getIntValue() * indus.getKey().getPreviousSalary(); //TODO multiply by an "efficiency" from education or other things.
+				nbEmployed += indus.getIntValue();
 			}
 			mean /= pop.getNbMens();
+			
+			//1 : put some men from inefficient industry into chomage.
+			//asymptote 1/(98x+1), => f(1) = 0.01 (1% turnover per month), so f(0.5) => ~0.02 
+			//		and f(0.1) => 0.085 (if the salaries earn only 10% of the mean salary, 8.5% of them will leave each month)
+			// 	lim(f, oo)=0				f(100%)=1%	f(50%)=2%	f(25%)=4%	f(10%)=9% 	f(0)=100% .. too steep
+			// new func: (2^(-5.64x))/2 =>	f(1)=1%,	f(0.5)=7%,	f(25%)=19% 	f(10%)=34% 	f(0)=50% .. not steep enough
+			// new func: 1/(98x²+1) => 		f(1)=1%		f(0.5)=3.8%	f(25%)=12.3	f(10%)=33.5	f(0)=50% .. not a good form (bell shape)
+			// new func: 1/(70*(x+0.17)²)	f(1)=1%		f(0.5)=3.1%	f(25%)=8%	f(10%)=19.6	f(0)=49% .. seems fine
+			
+			// for each indus, remove employes with this asymptote.
+			// if an industry has less than 10 mens (and in bad shape), remove all.
+			for(it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Job> indus : pop.getNbMensEmployed().object2IntEntrySet()){
+				float result = indus.getKey().getPreviousSalary()/(float)mean + 0.17f;
+				result *= result;
+				result *= 70;
+				result = 1/result;
+				//don't fire more people than are employed inside the company
+				int nbFired = Math.min(indus.getIntValue(),(int) result);
 
+				pop.addNbMensChomage(nbFired);
+				indus.setValue(indus.getIntValue()-nbFired);
+			}
 			
-			//for each indus, grab some emplyes from unemployed state
-			for(Entry<ProvinceIndustry, Integer> indusCible : pop.getNbMensEmployed().entrySet()){
-				//TODO: check efficiency (high efficiency => more worker to grab
-				//TODO: check bfr => low bfr, not enough cash to pay them
-				//TODO: check stock => not enough stock & low bfr => can't employ them efficiently
+			//then, for each job (more prosperous can grab more mens, as they have a share on the bigger pool).
+			for( Job indus : bestJob){
+				int nbMensEmployed = pop.getNbMensEmployed().getInt(indus);
+				//compute the % of mens employed inside vs all employed.
+				float ratioEmployed = nbMensEmployed / (float)nbEmployed;
+				//TODO (later) compute the factor from edu and adu needed then passed in a f(eduratio, %popemployed) => ratioEduHire (you can't hire dumb people if all smart one are taken)
+				//	you should checj each indus to see how many smarts people are taken, and how many you can grab now.
+				float ratioEduHire = 0.8f;
+				//grab ratioEduHire * employedratio * min(nbemployes/2, nbchomage/2)
+				int nbHire = 1+ (int)(ratioEmployed * ratioEduHire * Math.min(nbMensEmployed/2, pop.getNbMensChomage()/2));
+				nbHire = Math.min(nbHire, pop.getNbMensChomage()); //safeguard for the +1
 				
-//				int nbMove = (int)( 1 + indus.getValue() * 0.01f * (mean/(float)revenu) * (indusCible.getValue()/(float)pop.getNbMens()));
-//				// move 1 + 0.01 * mean/revenu * nbMenIndusCible/nbMens
-//				indus.setValue(indus.getValue() - nbMove);
-//				indusCible.setValue(indusCible.getValue() + nbMove);
-//				if(indus.getValue() < 0){
-//					indusCible.setValue(indusCible.getValue() + indus.getValue());
-//					indus.setValue(0);
-//					break;
-//				}
+				pop.addNbMensChomage(-nbHire);
+				pop.getNbMensEmployed().put(indus, nbMensEmployed+nbHire);
 			}
 			
-			//remove/add some from/to commerce
-			
-			//for each indus, put some into unemployed state
-			for(Entry<ProvinceIndustry, Integer> indus : pop.getNbMensEmployed().entrySet()){
-				//if revenu < mean
-				int revenu = indus.getValue() * indus.getKey().getPreviousSalary(); //TODO multiply by an "efficiency" from education or other things.
-				if(revenu < mean){
-					//Put some employes into enumployed state
-					//TODO
-					
-				}
-			}
+			//TODO: army can also grab unemployed
 			
 		}
 		

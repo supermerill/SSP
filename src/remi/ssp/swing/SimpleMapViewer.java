@@ -8,6 +8,7 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+import remi.ssp.CurrentGame;
 import remi.ssp.PluginLoader;
 import remi.ssp.algorithmes.Economy;
 import remi.ssp.map.AnneauCarte;
@@ -27,14 +28,23 @@ public class SimpleMapViewer extends JComponent{
 		JFrame fenetre = new JFrame();
 		SimpleMapViewer view = new SimpleMapViewer();
 		
-		view.map = new AnneauCarte().createMap(30, 30);
 
-		//load algos & data
+		//load algos & static data
 		manager = new PluginLoader();
 		System.out.println(new File(".").getAbsolutePath());
 		manager.loadJars("src");
 		List<String> pluginNames = manager.getPluginNames();
 		manager.loadStaticData(pluginNames);
+
+		//create map
+		view.map = new AnneauCarte().createMap(30, 30);
+		CurrentGame.map = view.map;
+		
+		//create civs
+		
+		//create pops
+		
+		//assign starting tech (basic industry & needs) 
 		
 		fenetre.add(view);
 		fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,13 +57,14 @@ public class SimpleMapViewer extends JComponent{
 	public void updateSimu(){
 //		Nourriture algoN = new Nourriture(){};
 		while(true){
-			for(int i=0;i<map.provinces.size();i++){
-				for(int j=0;j<map.provinces.get(i).size();j++){
-					Province prv = map.provinces.get(i).get(j);
-					Economy.ptr.doTurn(prv, 30);
-//						algoN.getNourritureSemaine(prv);
-				}
-			}
+			Economy.ptr.doTurn(map, 30);
+//			for(int i=0;i<map.provinces.size();i++){
+//				for(int j=0;j<map.provinces.get(i).size();j++){
+//					Province prv = map.provinces.get(i).get(j);
+//					
+////						algoN.getNourritureSemaine(prv);
+//				}
+//			}
 			this.repaint();
 			try {
 				Thread.sleep(1000);

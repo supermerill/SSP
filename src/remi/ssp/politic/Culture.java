@@ -1,6 +1,12 @@
 package remi.ssp.politic;
 
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 public class Culture {
+	
+	
+	
 	//TODO tenet, etc
 	
 	String name;
@@ -32,5 +38,56 @@ public class Culture {
 	
 	//religion (TODO: extension) (ie, organized beliefs)
 	String religionName = "Flying Spaghetti Monster";
+	
+	
+	public String getName(){return name;}
 
+	public void load(JsonObject jsonObject) {
+		name = jsonObject.getString("name");
+		religionName = jsonObject.getString("religionName");
+
+		esclavage2freedom = jsonObject.getInt("esclavage2freedom");
+		spiritual2athee = jsonObject.getInt("spiritual2athee");
+		collectivist2individualist = jsonObject.getInt("collectivist2individualist");
+		warrior2peaceful = jsonObject.getInt("warrior2peaceful");
+		rascite2tolerant = jsonObject.getInt("rascite2tolerant");
+		violence2talking = jsonObject.getInt("violence2talking");
+		polytheiste2monotheiste = jsonObject.getInt("polytheiste2monotheiste");
+		puritain2hippie = jsonObject.getInt("puritain2hippie");
+		vengance2mercy = jsonObject.getInt("vengance2mercy");
+		unrespectful2honor = jsonObject.getInt("unrespectful2honor");
+		nature = jsonObject.getInt("nature");
+		stars = jsonObject.getInt("stars");
+		moon = jsonObject.getInt("moon");
+		sea = jsonObject.getInt("sea");
+		divination = jsonObject.getInt("divination");
+		sorcery = jsonObject.getInt("sorcery");
+		
+	}
+
+	public void save(JsonObjectBuilder objectBuilder) {
+		objectBuilder.add("name", name);
+		objectBuilder.add("religionName", religionName);
+		
+		objectBuilder.add("esclavage2freedom", esclavage2freedom);
+		objectBuilder.add("spiritual2athee", spiritual2athee);
+		objectBuilder.add("collectivist2individualist", collectivist2individualist);
+		objectBuilder.add("warrior2peaceful", warrior2peaceful);
+		objectBuilder.add("rascite2tolerant", rascite2tolerant);
+		objectBuilder.add("violence2talking", violence2talking);
+		objectBuilder.add("polytheiste2monotheiste", polytheiste2monotheiste);
+		objectBuilder.add("puritain2hippie", puritain2hippie);
+		objectBuilder.add("vengance2mercy", vengance2mercy);
+		objectBuilder.add("unrespectful2honor", unrespectful2honor);
+		objectBuilder.add("nature", nature);
+		objectBuilder.add("stars", stars);
+		objectBuilder.add("moon", moon);
+		objectBuilder.add("sea", sea);
+		objectBuilder.add("divination", divination);
+		objectBuilder.add("sorcery", sorcery);
+		
+	}
+
+	
+	
 }

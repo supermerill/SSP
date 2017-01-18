@@ -16,6 +16,7 @@ import javax.json.JsonObjectBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+import remi.ssp.CurrentGame;
 import remi.ssp.army.Battalion;
 import remi.ssp.army.DivisionTemplate;
 import remi.ssp.army.DivisionUnit;
@@ -34,6 +35,8 @@ public class Civilisation {
 	int mensInReserve = 0;
 	Object2IntMap<EquipmentDevelopped> equipmentReserve = new Object2IntOpenHashMap<>();
 
+	
+	Culture mainCulture;
 
 	public List<Province> getProvinces() { return provinces; }
 	public List<DivisionUnit> getDivisions() { return divisions; }
@@ -46,6 +49,8 @@ public class Civilisation {
 	public void load(JsonObject jsonObj, Carte carte){
 		
 		mensInReserve = jsonObj.getInt("mensRsv");
+		
+		mainCulture = CurrentGame.cultures.get(jsonObj.get("cultName"));
 
 		JsonArray array = jsonObj.getJsonArray("prvs");
 		provinces.clear();
@@ -82,6 +87,8 @@ public class Civilisation {
 	
 	public void save(JsonObjectBuilder jsonOut){
 		jsonOut.add("mensRsv", mensInReserve);
+
+		jsonOut.add("cultName", mainCulture.getName());
 		
 		JsonArrayBuilder array = Json.createArrayBuilder();
 		for(Province prv : provinces){

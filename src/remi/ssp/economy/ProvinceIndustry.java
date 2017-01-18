@@ -14,10 +14,11 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.politic.Province;
 
-public class ProvinceIndustry {
+public class ProvinceIndustry implements Job{
 	
 	Province province;
 	Industry industry;
+	public String getName(){return industry.getName();}
 	
 //	int needs;
 //	int offer;
@@ -56,24 +57,7 @@ public class ProvinceIndustry {
 	public int getPreviousSalary() { return previousSalary; }
 	public void setPreviousSalary(int previousSalary) { this.previousSalary = previousSalary; }
 	
-/*
- * 
-	Industry industry;
 	
-//	int needs;
-//	int offer;
-//	int price;
-	
-	//int efficiency; //TODO : number of people that work optimally (hard to boostrap industry)
-
-	
-	// used to run
-	Object2IntMap<Good> stock = new Object2IntOpenHashMap<Good>(); //raw goods + tools
-	int money;//bfr
-	int rawGoodsCost; // rawgoods + depreciation of owned stock
-	int previousProduction;
-	int previousSalary;
- */
 	public void load(JsonObject jsonObj){
 		money = jsonObj.getInt("money");
 		rawGoodsCost = jsonObj.getInt("cost");

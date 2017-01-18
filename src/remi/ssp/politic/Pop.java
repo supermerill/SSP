@@ -17,8 +17,10 @@ import javax.json.JsonObjectBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+import remi.ssp.CurrentGame;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
+import remi.ssp.economy.Job;
 import remi.ssp.economy.Needs;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceCommerce;
@@ -33,14 +35,14 @@ public class Pop {
 	
 	int nbMensTotal=0;
 	int[] nombreHabitantsParAge = new int[100]; // de 0 à 100ans
-	int nbMensInArmy=0;
+	int nbMensInArmy=0; //cf job?
 	int nbMensChomage=0;
-	int nbMensCommerce=0; // more = more imports & exports. A part is used as a baseline for shop = efficacity of stock retention (TODO)
-	Object2IntMap<ProvinceIndustry> nbMensEmployed = new Object2IntOpenHashMap<>();
+//	int nbMensCommerce=0;//cf job // more = more imports & exports. A part is used as a baseline for shop = efficacity of stock retention (TODO)
+	Object2IntMap<Job> nbMensEmployed = new Object2IntOpenHashMap<>();
 
 	// commerce
-	ProvinceCommerce commerceLand = new ProvinceCommerce(); //fake industry to contains commerce data
-	ProvinceCommerce commerceSea = new ProvinceCommerce(); //fake industry to contains commerce data
+	ProvinceCommerce commerceLand = new ProvinceCommerce("commLand"); //fake industry to contains commerce data
+	ProvinceCommerce commerceSea = new ProvinceCommerce("commSea"); //fake industry to contains commerce data
 //	int revenueCommerce = 0; //industry one is stored in factories, military in civilisation.
 
 	int cash = 0; // during a tunr, people receive cash. Then, they use it to buy goods.
@@ -72,8 +74,10 @@ public class Pop {
 	public void removeHabitants(int age, int nb){ nombreHabitantsParAge[age] -= nb; nbMensTotal -= nb; }
 	public int getNbMensInArmy() { return nbMensInArmy; }
 	public int getNbMensChomage() { return nbMensChomage; }
-	public int getNbMensCommerce() { return nbMensCommerce; }
-	public Object2IntMap<ProvinceIndustry> getNbMensEmployed() { return nbMensEmployed; }
+	public void setNbMensChomage(int nb) { nbMensChomage = nb; }
+	public void addNbMensChomage(int nb) { nbMensChomage += nb; }
+//	public int getNbMensCommerce() { return nbMensCommerce; }
+	public Object2IntMap<Job> getNbMensEmployed() { return nbMensEmployed; }
 	public float getEducationMoy() { return educationMoy; }
 	public float getSante() { return sante; }
 //	public SocialStatus getStatus() { return status; }
@@ -91,10 +95,11 @@ public class Pop {
 	//public float criminalite=0; //0=> auncun, 1=> anarchie
 
 	public void load(JsonObject jsonObj, Province prv){
+		this.prv = prv;
 		nbMensTotal = jsonObj.getInt("nb");
 		nbMensInArmy = jsonObj.getInt("nbArmy");
 		nbMensChomage = jsonObj.getInt("nbUE");
-		nbMensCommerce = jsonObj.getInt("nbBI");
+//		nbMensCommerce = jsonObj.getInt("nbBI");
 		JsonArray array = jsonObj.getJsonArray("popD");
 		for(int i=0;i<array.size() && i< nombreHabitantsParAge.length;i++){
 			nombreHabitantsParAge[i] = array.getInt(i);
@@ -103,13 +108,19 @@ public class Pop {
 		nbMensEmployed.clear();
 		for(int i=0;i<array.size();i++){
 			JsonObject object = array.getJsonObject(i);
-			nbMensEmployed.put(prv.industries.get(Industry.get(object.getString("name"))), object.getInt("nb"));
+			String jobName = object.getString("name");
+			Industry jobIndustry = Industry.get(jobName);
+			if(jobIndustry != null){
+				nbMensEmployed.put(prv.industries.get(jobIndustry), object.getInt("nb"));
+			}else if(jobName.equals("commLand")){
+				commerceLand = new ProvinceCommerce("commLand"); //TODO: use moddable factories in all load() method in the project
+				commerceLand.load(jsonObj.getJsonObject("trl"), prv);
+			}else if(jobName.equals("commSea")){
+				commerceSea = new ProvinceCommerce("commSea");
+				commerceSea.load(jsonObj.getJsonObject("trs"), prv);
+			}
 		}
 		
-		commerceLand = new ProvinceCommerce();
-		commerceLand.load(jsonObj.getJsonObject("trl"), prv);
-		commerceSea = new ProvinceCommerce();
-		commerceSea.load(jsonObj.getJsonObject("trs"), prv);
 		cash = jsonObj.getInt("cash");
 		
 		array = jsonObj.getJsonArray("stock");
@@ -125,12 +136,16 @@ public class Pop {
 		}
 		educationMoy = (float) jsonObj.getJsonNumber("edu").doubleValue();
 		sante = (float) jsonObj.getJsonNumber("pv").doubleValue();
+		
+		culture = CurrentGame.cultures.get(jsonObj.get("cultName"));
+		
 	}
+	
 	public void save(JsonObjectBuilder jsonOut){
 		jsonOut.add("nb", nbMensTotal);
 		jsonOut.add("nbArmy", nbMensInArmy);
 		jsonOut.add("nbUE", nbMensChomage);
-		jsonOut.add("nbBI", nbMensCommerce);
+//		jsonOut.add("nbBI", nbMensCommerce);
 		
 		JsonArrayBuilder array = Json.createArrayBuilder();
 		for(int i=0; i< nombreHabitantsParAge.length;i++){
@@ -138,9 +153,9 @@ public class Pop {
 		}
 		jsonOut.add("popD", array);
 		array = Json.createArrayBuilder();
-		for(Entry<ProvinceIndustry> good : nbMensEmployed.object2IntEntrySet()){
+		for(Entry<Job> good : nbMensEmployed.object2IntEntrySet()){
 			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-			objectBuilder.add("name", good.getKey().getIndustry().getName());
+			objectBuilder.add("name", good.getKey().getName());
 			objectBuilder.add("nb", good.getIntValue());
 			array.add(objectBuilder);
 		}
@@ -169,6 +184,8 @@ public class Pop {
 		}
 		jsonOut.add("edu", educationMoy);
 		jsonOut.add("pv", sante);
+
+		jsonOut.add("cultName", culture.getName());
 	}
 	
 }

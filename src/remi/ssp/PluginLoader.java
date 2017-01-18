@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -24,6 +25,7 @@ import javax.json.JsonWriter;
 
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Civilisation;
+import remi.ssp.politic.Culture;
 import remi.ssp.politic.Province;
 
 public class PluginLoader{
@@ -120,6 +122,17 @@ public class PluginLoader{
 		
 			JsonObject root = rdr.readObject();
 			
+			JsonArray arrayCult = root.getJsonArray("cults");
+			for(int i=0;i<arrayCult.size();i++){
+				Culture cult = new Culture();
+				cult.load(arrayCult.getJsonObject(i));
+				CurrentGame.cultures.put(cult.getName(), cult);
+			}
+			
+			//cultures
+			CurrentGame.cultures = new HashMap<>();
+			
+			
 			//Carte -> province -> pop -> popneed, stock, prvindus
 			// province-province links & plotplot links
 			CurrentGame.map = new Carte();
@@ -150,6 +163,14 @@ public class PluginLoader{
 		try (OutputStream out = url.openConnection().getOutputStream(); JsonWriter wtr = Json.createWriter(out)) {
 		
 			JsonObjectBuilder root = Json.createObjectBuilder();
+
+			JsonArrayBuilder arrayCults = Json.createArrayBuilder();
+			for(int i=0;i<CurrentGame.cultures.size();i++){
+				JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+				CurrentGame.cultures.get(i).save(objectBuilder);
+				arrayCults.add(objectBuilder);
+			}
+			root.add("cults", arrayCults);
 			
 			//Carte -> province -> pop -> popneed, stock, prvindus
 			JsonObjectBuilder object = Json.createObjectBuilder();

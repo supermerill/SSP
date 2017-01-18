@@ -14,7 +14,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import remi.ssp.politic.Province;
 import remi.ssp.utils.ComparatorValueDesc;
 
-public class ProvinceCommerce {
+public class ProvinceCommerce implements Job{
 
 	Province province;
 	
@@ -24,6 +24,10 @@ public class ProvinceCommerce {
 	Object2IntMap<Good> stock = new Object2IntOpenHashMap<Good>(); //raw goods + tools
 	int money;//bfr
 	int previousSalary;
+	
+	String name;
+	public String getName() { return name; }
+	public ProvinceCommerce(String name){ this.name = name; }
 	
 	public Province getProvince() { return province; }
 	public void setProvince(Province province) { this.province = province; }
