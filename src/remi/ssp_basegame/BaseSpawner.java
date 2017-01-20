@@ -1,22 +1,19 @@
-package remi.ssp;
+package remi.ssp_basegame;
 
-import java.util.Map;
+import remi.ssp.CurrentGame;
+import remi.ssp.algorithmes.Spawner;
+import remi.ssp.map.AnneauCarte;
 
-public class Spawner {
+public class BaseSpawner extends Spawner {
 
-
-	public Map<String,String> settings;
 	
-	//TODO define this
-	public void getSettings(){}
-	
-	
+
 	/**
 	 * populate CurrentGame.map (provinces +plots)
 	 * 
 	 */
 	public void createMap(){
-		
+		CurrentGame.map = new AnneauCarte().createMap(30, 30);
 	}
 	
 	/**
@@ -34,5 +31,4 @@ public class Spawner {
 	public void createPop(){
 		
 	}
-
 }

@@ -7,14 +7,34 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 public class Plot {
-	short x,y;
+	short x;
+	short y;
 	//can be 5 if making a globe... be careful!
-	public Plot[] around = new Plot[6]; // 0=  up, then direct direction
+	public Plot[] around = new Plot[6]; // 0= center, 1=up(or upleft), then direct direction (6=upperright)
 	Province province;
 	byte positionInProvince; // 0= center, 1=  up, then direct direction
 	
+	
+	///TODO: replace by "terrainview": rien(limite), sea, ocean, coast, island, plain, forest, hills, mountains
+	// sea, ocean, island and coast is navigable.
+	// coast, island, plain, forest, hills, mountains is walkable
 	public boolean isSea = false;
-
+	
+	
+	
+	
+	public Plot(short x, short y, Province province, byte positionInProvince) {
+		super();
+		System.out.println("create plot @"+x+":"+y);
+		this.x = x;
+		this.y = y;
+		this.province = province;
+		this.positionInProvince = positionInProvince;
+	}
+	public Plot(JsonObject jsonObject) {
+		load(jsonObject);
+	}
+	
 	public short getX() { return x; }
 	public short getY() { return y; }
 	public Plot[] getAround() { return around; }

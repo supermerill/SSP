@@ -29,6 +29,7 @@ public class Province{
 	
 	//can be 5 if making a globe... be careful!
 	public Plot[] myPLots = new Plot[6];
+	public Plot centerPlot;
 	public Province[] proche = new Province[6];
 	public int x, y; //'cache'
 
@@ -165,8 +166,9 @@ public class Province{
 	public void loadLinks(JsonObject jsonProvince, Carte carte){
 
 		JsonArray arrayPlot = jsonProvince.getJsonArray("plots");
+		centerPlot = carte.plots.get(arrayPlot.getInt(0)).get(arrayPlot.getInt(1));
 		if(myPLots.length != arrayPlot.size()/2) myPLots = new Plot[arrayPlot.size()/2];
-		for(int i=0;i<arrayPlot.size();i+=2){
+		for(int i=2;i<arrayPlot.size();i+=2){
 			myPLots[i/2] = carte.plots.get(arrayPlot.getInt(i)).get(arrayPlot.getInt(i+1));
 		}
 		
@@ -181,6 +183,8 @@ public class Province{
 
 
 		JsonArrayBuilder array = Json.createArrayBuilder();
+		array.add(centerPlot.x);
+		array.add(centerPlot.y);
 		for(Plot plot : myPLots){
 			array.add(plot.x);
 			array.add(plot.y);

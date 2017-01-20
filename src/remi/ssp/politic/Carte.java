@@ -22,14 +22,14 @@ public class Carte {
 	public List<List<Province>> provinces = new ArrayList<>();
 	public List<List<Plot>> plots = new ArrayList<>();
 	public int nbLigne = 0, nbColonne = 0;
+	public int nbPlotLigne = 0, nbPlotColonne = 0;
 	Random rand = new Random();
 	
 	public void load(JsonObject readObject) {
 		plots.clear();
 		JsonArray arrayPlot = readObject.getJsonArray("plots");
 		for(int i=0;i<arrayPlot.size();i++){
-			Plot plot = new Plot();
-			plot.load(arrayPlot.getJsonObject(i));
+			Plot plot = new Plot(arrayPlot.getJsonObject(i));
 			while(plots.size()<=plot.x){
 				plots.add(new ArrayList<>());
 			}

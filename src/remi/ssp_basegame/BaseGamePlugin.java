@@ -9,6 +9,7 @@ import com.google.auto.service.AutoService;
 import remi.ssp.Plugin;
 import remi.ssp.algorithmes.Battle;
 import remi.ssp.algorithmes.Economy;
+import remi.ssp.algorithmes.Spawner;
 import remi.ssp.algorithmes.Stability;
 
 @AutoService(Plugin.class)
@@ -26,6 +27,7 @@ public class BaseGamePlugin extends Plugin{
 		Economy.ptr = new BaseEconomy();
 		Stability.ptr = new BaseStability();
 		Battle.ptr = new BaseBattle.BaseBattleFactory();
+		Spawner.ptr = new BaseSpawner();
 	}
 
 	//load data & algo into containers

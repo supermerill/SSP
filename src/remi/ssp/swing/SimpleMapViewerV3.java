@@ -13,22 +13,23 @@ import remi.ssp.PluginLoader;
 import remi.ssp.algorithmes.Economy;
 import remi.ssp.map.AnneauCarte;
 import remi.ssp.map.AnneauCarteV2;
+import remi.ssp.map.FlatCarteV3;
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Plot;
 import remi.ssp.politic.Province;
 
 @SuppressWarnings("serial")
-public class SimpleMapViewer extends JComponent{
+public class SimpleMapViewerV3 extends JComponent{
 
 	private static PluginLoader manager;
 	private Carte map;
 	
-	public SimpleMapViewer() {
+	public SimpleMapViewerV3() {
 	}
 
 	public static void main(String[] args) {
 		JFrame fenetre = new JFrame();
-		SimpleMapViewer view = new SimpleMapViewer();
+		SimpleMapViewerV3 view = new SimpleMapViewerV3();
 		
 
 		//load algos & static data
@@ -39,7 +40,7 @@ public class SimpleMapViewer extends JComponent{
 		manager.loadStaticData(pluginNames);
 
 		//create map
-		view.map = new AnneauCarteV2().createMap(8, 8);
+		view.map = new FlatCarteV3().createMap(10, 10);
 		CurrentGame.map = view.map;
 		
 		//create civs
@@ -122,8 +123,8 @@ public class SimpleMapViewer extends JComponent{
 				}else{
 					g.setColor(Color.BLUE);
 				}
-				g.fillOval((i*3*taille)/4, ((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))), taille, taille);
-				maxX = Math.max(maxX, (i*3*taille)/4 + taille*2);
+				g.fillOval(((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))), (j*3*taille)/4, taille, taille);
+				maxX = Math.max(maxX, ((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))) + taille*2);
 				if(prv.getNbMens()>0){
 					g.setColor(Color.RED);
 					int tailleRond = 1;
@@ -143,7 +144,7 @@ public class SimpleMapViewer extends JComponent{
 						tailleRond = 2;
 					}
 					g.setColor(Color.RED);
-					g.fillOval((i*3*taille)/4 + taille/2 -tailleRond/2, ((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))) + taille/2 - tailleRond/2, tailleRond, tailleRond);
+					g.fillOval(((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))) + taille/2 - tailleRond/2, (j*3*taille)/4 + taille/2 -tailleRond/2, tailleRond, tailleRond);
 				}
 			}
 		}
@@ -153,7 +154,7 @@ public class SimpleMapViewer extends JComponent{
 				int i= prv.centerPlot.getX();
 				int j= prv.centerPlot.getY();
 				g.setColor(Color.BLACK);
-				g.fillOval(maxX - taille/2 -2 + (i*3*taille)/4, ((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))) - taille/2 - 2, taille*2+4, taille*2+4);
+				g.fillOval(maxX + ((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))) - taille/2 - 2, (j*3*taille)/4 - taille/2 -2 , taille*2+4, taille*2+4);
 				if(x%2==0){
 					if(y%2==0) g.setColor(Color.ORANGE);
 					else g.setColor(Color.YELLOW);
@@ -161,7 +162,7 @@ public class SimpleMapViewer extends JComponent{
 					if(y%2==0) g.setColor(Color.BLUE);
 					else g.setColor(Color.CYAN);
 				}
-				g.fillOval(maxX - taille/2 + (i*3*taille)/4, ((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))) - taille/2, taille*2, taille*2);
+				g.fillOval(maxX  + ((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))) - taille/2, (j*3*taille)/4 - taille/2, taille*2, taille*2);
 			}
 		}
 		//for each hex, draw it in blue or green
@@ -171,37 +172,42 @@ public class SimpleMapViewer extends JComponent{
 				Color mix = Color.BLACK;
 				if(plot != null){
 					Province prv = plot.getProvince();
-					Color altitudeColor = Color.BLACK; //new Color(0, 1-prv.relief,0);
-					Color grass = Color.GREEN;
-					Color desertColor = Color.YELLOW;
-					
-					mix = grass;
-					mix = mix(mix, Math.min(1, prv.humidite*2), 
-							desertColor, Math.max(0,1-prv.humidite*2));
-					mix = mix(mix, 1-prv.relief,
-							altitudeColor, prv.relief);
-					
-					
-				}
-				g.setColor(mix);
-				g.fillOval(1+maxX+(i*3*taille)/4, 1+((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))), taille-2, taille-2);
-			}
-		}
-		for(int x=0;x<map.provinces.size();x++){
-			for(int y=0;y<map.provinces.get(x).size();y++){
-				if(x%2==0){
-					if(y%2==0) g.setColor(Color.ORANGE);
-					else g.setColor(Color.YELLOW);
+					if(prv.surfaceSol > 10){
+						Color altitudeColor = Color.BLACK; //new Color(0, 1-prv.relief,0);
+						Color grass = Color.GREEN;
+						Color desertColor = Color.YELLOW;
+						
+						mix = grass;
+						mix = mix(mix, Math.min(1, prv.humidite*2), 
+								desertColor, Math.max(0,1-prv.humidite*2));
+						mix = mix(mix, 1-prv.relief,
+								altitudeColor, prv.relief);
+						g.setColor(mix);
+					}else{
+						g.setColor(Color.BLUE);
+					}
 				}else{
-					if(y%2==0) g.setColor(Color.BLUE);
-					else g.setColor(Color.CYAN);
+					g.setColor(Color.BLACK);
 				}
-				Province prv = map.provinces.get(x).get(y);
-				int i= prv.centerPlot.getX();
-				int j= prv.centerPlot.getY();
-				g.fillOval(maxX + taille/4 + (i*3*taille)/4, ((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))) + taille/4, taille/2, taille/2);
+				g.fillOval(maxX + 1+((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))), 1+(j*3*taille)/4, taille-2, taille-2);
 			}
 		}
+		//???
+//		for(int x=0;x<map.provinces.size();x++){
+//			for(int y=0;y<map.provinces.get(x).size();y++){
+//				if(x%2==0){
+//					if(y%2==0) g.setColor(Color.ORANGE);
+//					else g.setColor(Color.YELLOW);
+//				}else{
+//					if(y%2==0) g.setColor(Color.BLUE);
+//					else g.setColor(Color.CYAN);
+//				}
+//				Province prv = map.provinces.get(x).get(y);
+//				int i= prv.centerPlot.getX();
+//				int j= prv.centerPlot.getY();
+//				g.fillOval(maxX + ((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))) + taille/4, taille/4 + (j*3*taille)/4, taille/2, taille/2);
+//			}
+//		}
 		for(int i=0;i<map.plots.size();i++){
 			for(int j=0;j<map.plots.get(i).size();j++){
 				Plot plot = map.plots.get(i).get(j);
@@ -209,31 +215,31 @@ public class SimpleMapViewer extends JComponent{
 					for(int n=0;n<plot.around.length;n++){
 						if(plot.around[n] != null){
 							g.setColor(Color.RED);
-							g.drawLine(maxX + (i*3*taille)/4 + taille/2, 1+((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))) + taille/2, 
-									maxX + (plot.around[n].getX()*3*taille)/4 + taille/2, 
-										1+((plot.around[n].getX()%2==0)?(plot.around[n].getY()*(taille-1)):(taille/2+plot.around[n].getY()*(taille-1))) + taille/2);
+							g.drawLine(maxX + 1 +((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))) + taille/2, (j*3*taille)/4 + taille/2, 
+									maxX + 1 + ((plot.around[n].getY()%2==0)?(plot.around[n].getX()*(taille-1)):(taille/2+plot.around[n].getX()*(taille-1))) + taille/2, 
+									(plot.around[n].getY()*3*taille)/4 + taille/2);
 						}
 					}
 				}
 			}
 		}
 
-//		for(int x=0;x<map.provinces.size();x++){
-//			for(int y=0;y<map.provinces.get(x).size();y++){
-//				Province prv = map.provinces.get(x).get(y);
-//				int i= prv.centerPlot.getX();
-//				int j= prv.centerPlot.getY();
-//				g.setColor(Color.RED);
-//				for(int n=0;n<prv.proche.length;n++){
-//					if(prv.proche[n] != null){
-//						g.setColor(Color.RED);
-//						g.drawLine(maxX + (i*3*taille)/4 + taille/2, 1+((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))) + taille/2, 
-//								maxX + (prv.proche[n].centerPlot.getX()*3*taille)/4 + taille/2, 
-//									1+((prv.proche[n].centerPlot.getX()%2==0)?(prv.proche[n].centerPlot.getY()*(taille-1)):(taille/2+prv.proche[n].centerPlot.getY()*(taille-1))) + taille/2);
-//					}
-//				}
-//			}
-//		}
+		for(int x=0;x<map.provinces.size();x++){
+			for(int y=0;y<map.provinces.get(x).size();y++){
+				Province prv = map.provinces.get(x).get(y);
+				int i= prv.centerPlot.getX();
+				int j= prv.centerPlot.getY();
+				g.setColor(Color.RED);
+				for(int n=0;n<prv.proche.length;n++){
+					if(prv.proche[n] != null){
+						g.setColor(Color.RED);
+//						g.drawLine(maxX + 1+((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))) + taille/2, (j*3*taille)/4 + taille/2, 
+//								maxX + 1+((prv.proche[n].centerPlot.getY()%2==0)?(prv.proche[n].centerPlot.getX()*(taille-1)):(taille/2+prv.proche[n].centerPlot.getX()*(taille-1))) + taille/2, 
+//								(prv.proche[n].centerPlot.getY()*3*taille)/4 + taille/2);
+					}
+				}
+			}
+		}
 		
 	}
 
