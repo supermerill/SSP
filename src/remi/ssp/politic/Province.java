@@ -147,11 +147,13 @@ public class Province{
 	}
 	
 
+	public void addIndustry(ProvinceIndustry industry) { industries.put(industry.getIndustry(), industry); }
 	public Collection<ProvinceIndustry> getIndustries() { return industries.values(); }
 	public ProvinceIndustry getIndustry(Industry indus) { return industries.get(indus); }
 	public Map<Good, ProvinceGoods> getStock() { return stock; }
 	public Collection<Pop> getPops() { return this.pops; }
 	public Civilisation getOwner() { return owner; }
+	public void setOwner(Civilisation civ) { this.owner = civ; }
 	public int getMoney() { return money; }
 	public void setMoney(int money) { this.money = money; }
 	public void addMoney(int money) { this.money += money; }
@@ -347,6 +349,7 @@ public class Province{
 		jsonOut.add("stock", array);
 		
 	}
+
 	
 	
 }

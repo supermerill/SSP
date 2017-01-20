@@ -2,6 +2,7 @@ package remi.ssp_basegame.economy;
 
 import java.util.Collection;
 
+import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.politic.Pop;
@@ -13,6 +14,12 @@ public class WoodcutterIndustry extends Industry {
 	static protected WoodcutterIndustry ptr;
 	public static void load(){ ptr = new WoodcutterIndustry(); }
 	public static WoodcutterIndustry get(){ return ptr; }
+
+	protected WoodcutterIndustry() {
+		createThis = Good.get("wood");
+		myNeeds = new BasicIndustryNeeds(this)
+				.addToolGood(Good.get("wood_goods"), 1);
+	}
 
 	//pin maritime: (recolte en 50ans) 4,8 m3/ha/an en 1960 à 15 m3/ha/an en 2015
 	

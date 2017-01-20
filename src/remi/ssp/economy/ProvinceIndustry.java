@@ -16,6 +16,14 @@ import remi.ssp.politic.Province;
 
 public class ProvinceIndustry implements Job{
 	
+	public static class ProvinceIndustryFactory{
+		public static ProvinceIndustryFactory creator = new ProvinceIndustryFactory();
+		protected ProvinceIndustry prvIndus = new ProvinceIndustry();
+		public ProvinceIndustry create(){ ProvinceIndustry ret = prvIndus; prvIndus =  new ProvinceIndustry(); return ret; }
+		public ProvinceIndustryFactory setProvince(Province prv){ prvIndus.setProvince(prv); return this; };
+		public ProvinceIndustryFactory setInustry(Industry prv){ prvIndus.setIndustry(prv); return this; };
+	}
+	
 	Province province;
 	Industry industry;
 	public String getName(){return industry.getName();}
@@ -29,10 +37,10 @@ public class ProvinceIndustry implements Job{
 	
 	// used to run
 	Object2IntMap<Good> stock = new Object2IntOpenHashMap<Good>(); //raw goods + tools
-	int money;//bfr
-	int rawGoodsCost; // rawgoods + depreciation of owned stock
-	int previousProduction;
-	int previousSalary;
+	int money=0;//bfr
+	int rawGoodsCost=1; // rawgoods + depreciation of owned stock
+	int previousProduction=0;
+	int previousSalary=1;
 	
 	public Province getProvince() { return province; }
 	public void setProvince(Province province) { this.province = province; }

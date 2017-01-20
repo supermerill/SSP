@@ -25,7 +25,6 @@ public class Plot {
 	
 	public Plot(short x, short y, Province province, byte positionInProvince) {
 		super();
-		System.out.println("create plot @"+x+":"+y);
 		this.x = x;
 		this.y = y;
 		this.province = province;

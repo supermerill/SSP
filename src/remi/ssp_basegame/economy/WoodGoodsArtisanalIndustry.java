@@ -17,7 +17,7 @@ public class WoodGoodsArtisanalIndustry extends Industry {
 	public static WoodGoodsArtisanalIndustry get(){ return ptr; }
 	
 	//TODO: i need lumber!
-	private WoodGoodsArtisanalIndustry(){
+	protected WoodGoodsArtisanalIndustry(){
 		createThis = Good.get("wood_goods");
 		myNeeds = new BasicIndustryNeeds(this)
 				.addRawGood(Good.get("wood"), 2)

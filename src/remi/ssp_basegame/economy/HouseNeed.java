@@ -21,10 +21,10 @@ public class HouseNeed extends PopNeed{
 
 	public static List<Good> houses = new ArrayList<>();
 
-	private HouseNeed(Pop pop){super(pop);}
+	public HouseNeed(Pop pop){super(pop);}
 	
 	@Override
-	public NeedWish moneyNeeded(Province prv, int nbMensInPop, Object2IntMap<Good> currentStock,
+	public NeedWish moneyNeeded(Province prv, int nbMensInPop, Object2IntMap<Good> currentPopStock,
 			int totalMoneyThisTurn, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		
@@ -48,13 +48,13 @@ public class HouseNeed extends PopNeed{
 			ListIterator<Good> it = lowPriceHouse.listIterator();
 			while(it.hasNext()){
 				Good house = it.next();
-				if(nbHousesNeeded <= currentStock.getInt(house)){
+				if(nbHousesNeeded <= goodStock.get(house).stock){
 					wish.vitalNeed += nbHousesNeeded * goodPrice.getInt(house);
 					nbHousesNeeded = 0;
 					break;
 				}else{
-					wish.vitalNeed += currentStock.getInt(house) * goodPrice.getInt(house);
-					nbHousesNeeded -= currentStock.getInt(house);
+					wish.vitalNeed += goodStock.get(house).stock * goodPrice.getInt(house);
+					nbHousesNeeded -= goodStock.get(house).stock;
 					it.remove();
 				}
 			}
@@ -81,7 +81,7 @@ public class HouseNeed extends PopNeed{
 	}
 
 	@Override
-	public int spendMoney(Province prv, int nbMensInPop, Object2IntMap<Good> currentStock,
+	public int spendMoney(Province prv, int nbMensInPop, Object2IntMap<Good> currentPopStock,
 			NeedWish maxMoneyToSpend, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		
@@ -115,7 +115,8 @@ public class HouseNeed extends PopNeed{
 			ListIterator<Good> it = lowPriceHouse.listIterator();
 			while(it.hasNext()){
 				Good house = it.next();
-				int totalPrice = currentStock.getInt(house) * goodPrice.getInt(house);
+				int totalPrice = goodStock.get(house).stock * goodPrice.getInt(house);
+				if(totalPrice == 0) continue; //no house here
 				if(nbCoins <= totalPrice){
 					int quantityPicked = nbCoins / goodPrice.getInt(house);
 					nbGoods.put(house, quantityPicked);
@@ -126,7 +127,7 @@ public class HouseNeed extends PopNeed{
 				}else{
 					nbCoins -= totalPrice;
 					moneyUsed += totalPrice;
-					int quantityPicked = currentStock.getInt(house);
+					int quantityPicked = goodStock.get(house).stock;
 					nbHousesNeeded -= quantityPicked;
 					nbGoods.put(house, quantityPicked);
 				}
@@ -158,8 +159,10 @@ public class HouseNeed extends PopNeed{
 		//Use this money to buy 10 chunk of random house.
 		for(int i=0;i<10 && nbCoins > 0;i++){
 			Good house = normalHouse.get(GlobalRandom.aleat.getInt(normalHouse.size(), nbMensInPop));
-			int maxStock = currentStock.getInt(house) - nbGoods.getInt(house);
+			int maxStock = goodStock.get(house).stock - nbGoods.getInt(house);
 			int price = goodPrice.getInt(house);
+			if(maxStock == 0) continue; //no house here
+			if(price == 0){System.err.println("Error in food needs: no price"); continue;}
 			int nbPicked = Math.min(Math.max(1, chunk / price), maxStock);
 			if(nbCoins >= nbPicked * price){
 				nbCoins -= nbPicked * price;
@@ -180,8 +183,10 @@ public class HouseNeed extends PopNeed{
 		//Use this money to buy 10 chunk of random house.
 		for(int i=0;i<10 && nbCoins > 0;i++){
 			Good house = luxuryHouse.get(GlobalRandom.aleat.getInt(luxuryHouse.size(), nbMensInPop));
-			int maxStock = currentStock.getInt(house) - nbGoods.getInt(house);
+			int maxStock = goodStock.get(house).stock - nbGoods.getInt(house);
 			int price = goodPrice.getInt(house);
+			if(maxStock == 0) continue; //no house here
+			if(price == 0){System.err.println("Error in food needs: no price"); continue;}
 			int nbPicked = Math.min(Math.max(1, chunk / price), maxStock);
 			if(nbCoins >= nbPicked * price){
 				nbCoins -= nbPicked * price;

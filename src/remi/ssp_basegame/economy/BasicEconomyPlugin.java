@@ -5,6 +5,8 @@ import static remi.ssp.economy.Good.GoodFactory.create;
 import com.google.auto.service.AutoService;
 
 import remi.ssp.Plugin;
+import remi.ssp.economy.PopNeed;
+import remi.ssp.politic.Pop;
 
 @AutoService(Plugin.class)
 public class BasicEconomyPlugin extends Plugin {
@@ -24,13 +26,13 @@ public class BasicEconomyPlugin extends Plugin {
 		//create("rawWood",0.9f, 1);
 		//create("plank",0.95f, 10);
 		create("wood",0.95f, 10); //for now, split it in rawwood & plank later (extension)
-		HouseNeed.houses.add(create("wooden_house", 0.95f, 1).setCanBeMoved(false).get());
+		HouseNeed.houses.add(create("wood_house", 0.95f, 1).setCanBeMoved(false).get());
 		HouseNeed.houses.add(create("stone_house", 0.98f, 10).setCanBeMoved(false).get());
 		HouseNeed.houses.add(create("manoir_house", 0.99f, 100).setCanBeMoved(false).get());
 //		create("woodenBasicGoods",0.7f, 1); //extension
 //		create("woodenNormalGoods",0.7f, 3);
 //		create("woodenLuxuryGoods",0.7f, 10);
-		create("woodenGoods",0.7f, 10).setIndustryToolEfficiency(1);
+		create("wood_goods",0.7f, 10).setIndustryToolEfficiency(1);
 
 		create("coal",0.99f, 0);
 //		create("badSteel",0.9f, 0); //later
@@ -56,7 +58,9 @@ public class BasicEconomyPlugin extends Plugin {
 		WoodcutterIndustry.load();
 		WoodGoodsArtisanalIndustry.load();
 		WoodHouseIndustry.load();
-		
+
+		PopNeed.PopNeedFactoryStorage.put("food", pop -> new FoodNeed(pop));
+		PopNeed.PopNeedFactoryStorage.put("house", pop -> new HouseNeed(pop));
 		
 	}
 	

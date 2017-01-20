@@ -17,7 +17,8 @@ public class FisheryIndustry extends Industry {
 	public static FisheryIndustry get(){ return ptr; }
 
 	private FisheryIndustry(){
-		myNeeds = null;
+		myNeeds = new BasicIndustryNeeds(this)
+				.addToolGood(Good.get("wood_goods"), 1);
 		createThis = Good.get("fish");
 	}
 	

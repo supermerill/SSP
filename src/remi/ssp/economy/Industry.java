@@ -15,6 +15,7 @@ public abstract class Industry {
 	public static Industry get(String name) { return industryList.get(name); }
 	public static void put(String name, Industry indus) { industryList.put(name, indus); }
 	
+	
 	protected Good createThis = null; // we produce only one good for now, because it's easier to compute the profitability this way
 	protected Needs myNeeds = null; // ask for raw goods and tools.
 	

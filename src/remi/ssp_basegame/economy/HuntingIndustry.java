@@ -16,9 +16,17 @@ public class HuntingIndustry extends Industry {
 	public static void load(){ ptr = new HuntingIndustry(); }
 	public static HuntingIndustry get(){ return ptr; }
 
+
+	protected HuntingIndustry() {
+		createThis = Good.get("meat");
+		myNeeds = new BasicIndustryNeeds(this)
+				.addToolGood(Good.get("wood_goods"), 1);
+	}
+	
 	@Override
 	public int produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
 		Province prv = indus.getProvince();
+
 
 	
 	//TODO: use tools

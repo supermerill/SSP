@@ -17,6 +17,7 @@ import remi.ssp.map.FlatCarteV3;
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Plot;
 import remi.ssp.politic.Province;
+import remi.ssp_basegame.BaseSpawner;
 
 @SuppressWarnings("serial")
 public class SimpleMapViewerV3 extends JComponent{
@@ -39,13 +40,18 @@ public class SimpleMapViewerV3 extends JComponent{
 		List<String> pluginNames = manager.getPluginNames();
 		manager.loadStaticData(pluginNames);
 
+		BaseSpawner spawner = new BaseSpawner();
 		//create map
-		view.map = new FlatCarteV3().createMap(10, 10);
-		CurrentGame.map = view.map;
+//		view.map = new FlatCarteV3().createMap(10, 10);
+//		CurrentGame.map = view.map;
+		spawner.createMap();
+		view.map = CurrentGame.map;
 		
 		//create civs
+		spawner.createCivs();
 		
 		//create pops
+		spawner.createPop();
 		
 		//assign starting tech (basic industry & needs) 
 		
@@ -60,17 +66,12 @@ public class SimpleMapViewerV3 extends JComponent{
 	public void updateSimu(){
 //		Nourriture algoN = new Nourriture(){};
 		while(true){
-			//Economy.ptr.doTurn(map, 30);
-//			for(int i=0;i<map.provinces.size();i++){
-//				for(int j=0;j<map.provinces.get(i).size();j++){
-//					Province prv = map.provinces.get(i).get(j);
-//					
-////						algoN.getNourritureSemaine(prv);
-//				}
-//			}
+			System.out.println("start turn");
+			Economy.ptr.doTurn(map, 30);
+			System.out.println("economy done");
 			this.repaint();
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(4000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

@@ -3,6 +3,7 @@ package remi.ssp_basegame;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -80,6 +81,10 @@ public class BaseEconomy extends Economy {
 		for( List<Province> prvs: map.provinces){
 			//init map to compute prices
 			for( Province prv: prvs){
+				//do not make eco on sea tile and no-pop tiles.
+				if(prv.getNbMens() == 0){
+					continue;
+				}
 				if(!oldStock.containsKey(prv))oldStock.put(prv, new HashMap<>());
 				oldStock.get(prv).clear();
 				bfrThisTurn = 0;
@@ -507,7 +512,10 @@ public class BaseEconomy extends Economy {
 		//TODO SELL THINGS IF IN NEED OF MONEY (and it's possible)
 		
 		//particuliers
-		for(Pop pop : prv.getPops()){
+		//note: it's a discrimination for the pop that arrive in last.
+		Iterator<Pop> itPop = prv.getPops().iterator();
+		while(itPop.hasNext() ){
+			Pop pop =itPop.next();
 			//on scinde de 3
 			float repartitionRiche = pop.getRepartitionRevenu(5);
 			float repartitionMoyen = pop.getRepartitionRevenu(30) - repartitionRiche;
@@ -528,12 +536,20 @@ public class BaseEconomy extends Economy {
 			//on fait la répartition de besoin pour chaque catégorie
 
 			//les riches achetent en premier
+			System.out.println("RICHE POP CONSUME");
 			popBuy(pop, nbRiche, moneyRiche, durationInDay);
+			System.out.println("MEDIUM POP CONSUME");
 			popBuy(pop, nbMoyen, moneyMoyen, durationInDay);
+			System.out.println("POOR POP CONSUME");
 			popBuy(pop, nbPoor, moneyPoor, durationInDay);
-			
+
+			//TODO: if a pop is died, remove it
+			if(pop.getNbMens()==0){
+				itPop.remove();
+				System.out.println("A POP IS NOW EXTINCT @"+prv.x+":"+prv.y);
+			}
 		}
-		
+
 
 		//industry
 		for(ProvinceIndustry indus : prv.getIndustries()){
@@ -654,7 +670,7 @@ public class BaseEconomy extends Economy {
 			newPrice += gp.importPrice*(long)gp.nbImport;
 			newPrice += gp.prodPrice*(long)gp.nbProd;
 			newPrice += gp.oldPrice*(long)gp.oldStock;
-			newPrice /= gp.nbExport+gp.nbImport+gp.nbProd+gp.oldStock;
+			newPrice /= (1+gp.nbExport+gp.nbImport+gp.nbProd+gp.oldStock);
 
 			//test for shortage/overproduction
 			ProvinceGoods prvGood = prv.getStock().get(entry.getKey());

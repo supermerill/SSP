@@ -28,7 +28,11 @@ public class Good {
 	
 	public static class GoodFactory{
 		public static HashMap<String, Good> goodList = new HashMap<>();
-		public static Good get(String name) { return goodList.get(name); }
+		public static Good get(String name) {
+			Good dood = goodList.get(name); 
+			if(dood == null) throw new RuntimeException("error, try to get the good '"+name+"' but it doesn't exist");
+			return dood;
+		}
 		private static Good create(String name, int weight, float storageLossPerYear, int desirability){
 			Good good = new Good();
 			good.name = name;

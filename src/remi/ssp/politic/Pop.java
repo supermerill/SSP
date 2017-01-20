@@ -2,11 +2,7 @@ package remi.ssp.politic;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -15,16 +11,14 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.CurrentGame;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.Job;
-import remi.ssp.economy.Needs;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceCommerce;
-import remi.ssp.economy.ProvinceIndustry;
 
 public class Pop {
 	Culture culture; //TODO: save/load with index
@@ -33,8 +27,8 @@ public class Pop {
 	public Pop(){}
 	public Pop(/*Culture culture,*/ Province prv){ this.prv = prv; }
 	
-	int nbMensTotal=0;
-	int[] nombreHabitantsParAge = new int[100]; // de 0 à 100ans
+	private int nbMensTotal=0;
+	private int[] nombreHabitantsParAge = new int[100]; // de 0 à 100ans
 	int nbMensInArmy=0; //cf job?
 	int nbMensChomage=0;
 //	int nbMensCommerce=0;//cf job // more = more imports & exports. A part is used as a baseline for shop = efficacity of stock retention (TODO)
@@ -132,7 +126,9 @@ public class Pop {
 		array = jsonObj.getJsonArray("needs");
 		myNeeds.clear();
 		for(int i=0;i<array.size();i++){
-			myNeeds.add(PopNeed.get(array.getString(i)));
+			PopNeed need = PopNeed.create(array.getJsonObject(i).getString("name"), this);
+			need.load(array.getJsonObject(i));
+			myNeeds.add(need);
 		}
 		educationMoy = (float) jsonObj.getJsonNumber("edu").doubleValue();
 		sante = (float) jsonObj.getJsonNumber("pv").doubleValue();
@@ -180,7 +176,10 @@ public class Pop {
 		
 		jsonOut.add("needs", array);
 		for(int i=0;i<myNeeds.size();i++){
-			array.add(myNeeds.get(i).getName());
+			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+			myNeeds.get(i).save(objectBuilder);
+			objectBuilder.add("name", myNeeds.get(i).getName());
+			array.add(objectBuilder);
 		}
 		jsonOut.add("edu", educationMoy);
 		jsonOut.add("pv", sante);

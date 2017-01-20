@@ -36,13 +36,13 @@ public class ProvinceGoods {
 	}
 	
 	public int getPriceSellToMarket(Province prv, int durationInDay){
-		float coeff = prv.getMoney() / (durationInDay*prv.getMoneyChangePerDay());
+		float coeff = prv.getMoney() / (durationInDay*(1+prv.getMoneyChangePerDay()));
 		coeff = ( 0.2f / (1+ coeff*coeff) );
 		return (int)( price * (1-coeff) );
 	}
 	
 	public int getPriceBuyFromMarket(Province prv, int durationInDay){
-		float coeff = prv.getMoney() / (durationInDay*prv.getMoneyChangePerDay());
+		float coeff = prv.getMoney() / (durationInDay*(1+prv.getMoneyChangePerDay()));
 		coeff = ( 0.2f / (1+ coeff*coeff) );
 		return (int)( price * (1+coeff) );
 	}

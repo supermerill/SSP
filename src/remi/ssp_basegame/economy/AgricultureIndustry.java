@@ -16,7 +16,8 @@ public class AgricultureIndustry extends Industry {
 	public static AgricultureIndustry get(){ return ptr; }
 
 	private AgricultureIndustry(){
-		myNeeds = null;
+		myNeeds = new BasicIndustryNeeds(this)
+				.addToolGood(Good.get("wood_goods"), 1);
 		createThis = Good.get("crop");
 	}
 	

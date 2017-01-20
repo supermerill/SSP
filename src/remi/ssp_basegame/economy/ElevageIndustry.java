@@ -18,7 +18,8 @@ public class ElevageIndustry extends Industry {
 	public static ElevageIndustry get(){ return ptr; }
 	
 	private ElevageIndustry(){
-		myNeeds = null;
+		myNeeds = new BasicIndustryNeeds(this)
+				.addToolGood(Good.get("wood_goods"), 1);
 		createThis = Good.get("meat");
 	}
 	

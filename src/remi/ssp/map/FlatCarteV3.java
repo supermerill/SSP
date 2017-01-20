@@ -181,7 +181,7 @@ public class FlatCarteV3 implements MapFactory {
 //				System.out.println("offsetPlotY="+offsetPlotY+", offsetX = "+initPlotX);
 				currentPrv.centerPlot = new Plot((short)(plotx),(short)(ploty),currentPrv, (byte)-1);
 				plots.get(plotx).set(ploty, currentPrv.centerPlot);
-				System.out.println("Create nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
+//				System.out.println("Create nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
 				if(ploty%2==0){
 					currentPrv.myPLots[0] = new Plot((short)(plotx-1),(short)(ploty-1),currentPrv, (byte)0);
 					plots.get(plotx-1).set(ploty-1, currentPrv.myPLots[0]);
@@ -216,7 +216,7 @@ public class FlatCarteV3 implements MapFactory {
 				if(i%2==0){
 					plotx += 2*((j+1)%2);
 				}else{
-					System.out.println("special code: (((j)/2)%2)="+(((j)/2)%2)+", i:j="+i+":"+j);
+//					System.out.println("special code: (((j)/2)%2)="+(((j)/2)%2)+", i:j="+i+":"+j);
 					if(j%2==1){
 						plotx ++;
 					}else{
@@ -268,7 +268,7 @@ public class FlatCarteV3 implements MapFactory {
 				//for each prv, we add  all plots
 				Province currentPrv = currentColonne.get(j);
 				currentPrv.centerPlot.around=currentPrv.myPLots;
-				System.out.println("set nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
+//				System.out.println("set nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
 				if(ploty%2==0){
 					setNearbyPlot(plotx-1, ploty-1);
 					setNearbyPlot(plotx-1, ploty);
@@ -288,7 +288,6 @@ public class FlatCarteV3 implements MapFactory {
 				if(i%2==0){
 					plotx += 2*((j+1)%2);
 				}else{
-					System.out.println("special code: (((j)/2)%2)="+(((j)/2)%2)+", i:j="+i+":"+j);
 					if(j%2==1){
 						plotx ++;
 					}else{
@@ -309,7 +308,6 @@ public class FlatCarteV3 implements MapFactory {
 		createSol();
 		createRelief();
 		createDesert();
-		populate();
 	}
 	
 	//note: this doesn't work: it put null pointer because the map isn't square
@@ -318,7 +316,7 @@ public class FlatCarteV3 implements MapFactory {
 		int xp1 = x+1;
 		int ym1 = y-1;
 		int yp1 = y+1;
-		System.out.println("setnearby plot "+x+":"+y+ " "+xm1+"->"+xp1+" : "+ym1+"->"+yp1);
+//		System.out.println("setnearby plot "+x+":"+y+ " "+xm1+"->"+xp1+" : "+ym1+"->"+yp1);
 		if(y%2==0){
 			if(xm1>=0 && ym1>=0)								plots.get(x).get(y).around[0] = plots.get(xm1).get(ym1);
 			if(xm1>=0)											plots.get(x).get(y).around[1] = plots.get(xm1).get(y);
@@ -336,21 +334,7 @@ public class FlatCarteV3 implements MapFactory {
 		}
 	}
 
-	public void populate() {
-		Random rand = new Random();
-		for(int i=0;i<provinces.size();i++){
-			for(int j=0;j<provinces.get(i).size();j++){
-				Province prv = provinces.get(i).get(j);
-				if(prv.surfaceSol>0){
-					Pop pop = new Pop(prv);
-					pop.addHabitants(20, Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
-					prv.getPops().add(pop);
-//					System.out.println("create pop of " + prv.nombreHabitantsParAge[20]);
-				}
-			}
-		}
-		
-	}
+	
 
 	private void createRelief() {
 //		double nbCases = nbLigne * nbColonne;
@@ -405,9 +389,9 @@ public class FlatCarteV3 implements MapFactory {
 				Dessiner dessineur = new Dessiner() {
 					@Override public void dessine(Province prv) {
 						prv.humidite = humidite;
-						System.out.println("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
+//						System.out.println("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
 						prv.pourcentForet = (0.5f-Math.abs(humidite-0.5f))/2;
-						System.out.println("pourcentForet: "+prv.pourcentForet);
+//						System.out.println("pourcentForet: "+prv.pourcentForet);
 						prv.pourcentFriche = prv.pourcentForet;
 						prv.pourcentSterile = Math.abs(humidite-0.5f);
 					}};
