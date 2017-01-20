@@ -14,6 +14,8 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
@@ -118,7 +120,9 @@ public class Province{
 	int money; //BFR from the marketplace
 	int moneyChangePerDay;
 	List<TradeRoute> tradeRoutes = new ArrayList<>();
-	
+	//to compute the cultural exchange
+	Object2IntMap<Province> lastTradeRouteExchange = new Object2IntOpenHashMap<>(); //TODOSAVE, cache value for economy (TODO: reasert)
+		
 	//autres
 	public float rayonnementCulturel = 0; //0=nul, X=nombre de personnes connaissant cette province.
 	
@@ -154,6 +158,7 @@ public class Province{
 	public int getMoneyChangePerDay() { return moneyChangePerDay; }
 	public void setMoneyChangePerDay(int moneyChangePerDay) { this.moneyChangePerDay = moneyChangePerDay; }
 	public List<TradeRoute> getTradeRoute() { return tradeRoutes; }
+	public Object2IntMap<Province> getLastTradeRouteExchange(){return lastTradeRouteExchange;}
 
 	public float getRoutes() { return routes; }
 	public void setRoutes(float routes) { this.routes = routes; }

@@ -1,30 +1,31 @@
 package remi.ssp_basegame;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import remi.ssp.CurrentGame;
 import remi.ssp.algorithmes.Economy;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Job;
 import remi.ssp.economy.Needs;
 import remi.ssp.economy.Needs.NeedWish;
-import remi.ssp.politic.Carte;
-import remi.ssp.politic.Pop;
-import remi.ssp.politic.Province;
 import remi.ssp.economy.ProvinceCommerce;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.TradeRoute;
+import remi.ssp.politic.Carte;
+import remi.ssp.politic.Civilisation;
+import remi.ssp.politic.Pop;
+import remi.ssp.politic.Province;
+import remi.ssp.utils.U;
 
 public class BaseEconomy extends Economy {
 	
@@ -55,6 +56,7 @@ public class BaseEconomy extends Economy {
 		bfrThisTurn += price * quantity;
 	}
 	
+	
 	/**
 	 * TODO: rework: instead of a province-loop, it should be a:
 	 *  - produce goods in all province in the world (no order)
@@ -63,6 +65,16 @@ public class BaseEconomy extends Economy {
 	 *  - set prices in each province (no order)
 	 */
 	public void doTurn(Carte map, int durationInDay){
+		//TODO: REMINDER: don't forget to clear the TradeRouteExchange structure from all civ & prv before calling this
+		for(Civilisation civ : CurrentGame.civs){
+			civ.getTradeRouteExchange().clear();
+		}
+		for( List<Province> prvs: map.provinces){
+			for( Province prv: prvs){
+				prv.getLastTradeRouteExchange().clear();
+			}
+		}
+		
 		final Object2IntMap<Province> prv2Wealth = new Object2IntOpenHashMap<Province>();
 		final List<Province> allPrvs = new ArrayList<>();
 		for( List<Province> prvs: map.provinces){
@@ -294,6 +306,14 @@ public class BaseEconomy extends Economy {
 						tradeOffer.from.setMoney(tradeOffer.from.getMoney() - nbGoodsToChange * tradeOffer.buyerPrice ); //he buy, he give us (merchant) money
 						data.addMoney(nbGoodsToChange * (tradeOffer.buyerPrice - tradeOffer.sellerPrice));
 //						data.addToPreviousSalary(nbGoodsToChange * (tradeOffer.buyerPrice - tradeOffer.sellerPrice));
+						U.add(tradeOffer.from.getLastTradeRouteExchange(),tradeOffer.to, trMerchantUsed);
+						U.add(tradeOffer.to.getLastTradeRouteExchange(),tradeOffer.from, trMerchantUsed);
+						if(tradeOffer.from.getOwner() != tradeOffer.to.getOwner()){
+							Civilisation civFrom = tradeOffer.from.getOwner();
+							Civilisation civTo = tradeOffer.to.getOwner();
+							U.add(civTo.getTradeRouteExchange(), civFrom, trMerchantUsed);
+							U.add(civFrom.getTradeRouteExchange(), civTo, trMerchantUsed);
+						}
 						
 						if(availableMerchantSlot<0) break;
 					}
@@ -328,6 +348,14 @@ public class BaseEconomy extends Economy {
 						tradeOffer.from.setMoney(tradeOffer.from.getMoney() - nbGoodsToChange * tradeOffer.buyerPrice ); //he buy, he give us (merchant) money
 						data.addMoney(nbGoodsToChange * (tradeOffer.buyerPrice - tradeOffer.sellerPrice));
 //						data.addToPreviousSalary(nbGoodsToChange * (tradeOffer.buyerPrice - tradeOffer.sellerPrice));
+						U.add(tradeOffer.from.getLastTradeRouteExchange(),tradeOffer.to, trMerchantUsed);
+						U.add(tradeOffer.to.getLastTradeRouteExchange(),tradeOffer.from, trMerchantUsed);
+						if(tradeOffer.from.getOwner() != tradeOffer.to.getOwner()){
+							Civilisation civFrom = tradeOffer.from.getOwner();
+							Civilisation civTo = tradeOffer.to.getOwner();
+							U.add(civTo.getTradeRouteExchange(), civFrom, trMerchantUsed);
+							U.add(civFrom.getTradeRouteExchange(), civTo, trMerchantUsed);
+						}
 						
 						if(availableMerchantSlot<0) break;
 					}

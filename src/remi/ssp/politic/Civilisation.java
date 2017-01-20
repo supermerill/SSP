@@ -35,6 +35,9 @@ public class Civilisation {
 	int mensInReserve = 0;
 	Object2IntMap<EquipmentDevelopped> equipmentReserve = new Object2IntOpenHashMap<>();
 
+	// to compute tech movements. 
+	Object2IntMap<Civilisation> lastTradeRouteExchange = new Object2IntOpenHashMap<>(); //TODOSAVE cache value for economy (TODO: reasert)
+	
 	
 	Culture mainCulture;
 
@@ -44,6 +47,7 @@ public class Civilisation {
 	public List<Battalion> getBattalionTemplate() { return battalionTemplate; }
 	public int getMensInReserve() { return mensInReserve; }
 	public Object2IntMap<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
+	public Object2IntMap<Civilisation> getTradeRouteExchange() { return lastTradeRouteExchange; }
 	
 
 	public void load(JsonObject jsonObj, Carte carte){
