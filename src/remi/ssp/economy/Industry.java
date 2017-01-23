@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import remi.ssp.politic.Pop;
+import remi.ssp.politic.Province;
 
 // unlocked by technologies
 // then added to your pool of industry.
@@ -21,7 +22,8 @@ public abstract class Industry {
 	
 	public String getName(){return getClass().getName();}
 	
-	//produce goods and pay people for this
+	//produce goods, by consuming needed things ( people are payedd in economy plugin)
+	// !!! you muist update setRawGoodsCost
 	public abstract int produce(ProvinceIndustry indus, Collection<Pop> pop, int durationInDay);
 
 
@@ -37,5 +39,14 @@ public abstract class Industry {
 	//done by needs
 	//	public abstract void consume(Province prv, Object2IntMap<Pop> alreadyUsed); // le habitants peuvent dépenser de l'argnet pour acheter ces biens (selon le fric qu'il leur reste
 
+	
+	protected void sellProductToMarket(Province prv, int quantity, int nbDays){
+		int price = prv.getStock().get(createThis).getPriceSellToMarket(prv, nbDays);
+		
+		prv.addMoney(-price*quantity);
+		prv.getStock().get(createThis).stock += quantity;
+		prv.getIndustry(this).addMoney(price*quantity);
+		
+	}
 	
 }

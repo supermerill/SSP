@@ -16,11 +16,14 @@ public class ElevageIndustry extends Industry {
 	static protected ElevageIndustry ptr;
 	public static void load(){ ptr = new ElevageIndustry(); }
 	public static ElevageIndustry get(){ return ptr; }
+
+	BasicIndustryNeeds myBasicNeeds;
 	
 	private ElevageIndustry(){
-		myNeeds = new BasicIndustryNeeds(this)
+		myBasicNeeds = new BasicIndustryNeeds(this)
 				.addToolGood(Good.get("wood_goods"), 1);
 		createThis = Good.get("meat");
+		myNeeds = myBasicNeeds;
 	}
 	
 	@Override
@@ -31,7 +34,6 @@ public class ElevageIndustry extends Industry {
 		//TODO: use tools
 		//TODO: evolution de la surface agricole prv.surfaceSol*prv.pourcentChamps*prv.champsRendement
 		//TODO evolution de la surface cultivable par personne
-		int production = 0;
 		int nbFields = (int) ( (prv.pourcentPrairie * prv.surface * 100 )); // 1 hectare per sheep
 		int nbSheep = (indus.getStock().getInt(Good.GoodFactory.get("meat"))/100); //100kg per sheep
 		
@@ -63,12 +65,16 @@ public class ElevageIndustry extends Industry {
 			nbMens += pop.getNbMensEmployed().getInt(indus);
 		}
 		if(nbSheep > 30 * nbMens){ //30 sheep per people: can sustain an other men
-			nbSheepToSell = nbSheep - 30 * nbMens;
+			nbSheepToSell = 30 * nbMens;
 			nbSheep -= nbSheepToSell;
 		}
 		if(nbSheep > nbFields){ //30 sheep per people: can sustain an other men
-			nbSheepToSell = nbSheep - nbFields;
+			nbSheepToSell += (nbSheep - nbFields) * nbMens / (10+nbMens);
 			nbSheep -= nbSheepToSell;
+		}
+		
+		if(nbSheep > nbFields){ //fall into a canyon
+			nbSheep -= nbSheep - nbFields;
 		}
 			
 		//set new livestock
@@ -77,7 +83,11 @@ public class ElevageIndustry extends Industry {
 		
 		//TODO: sell more sheep if the price is high and famine is occurring.
 		
-		return nbSheepToSell * 100;
+		//sell sheep to province market
+		int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbSheepToSell * 100, durationInDay);
+		super.sellProductToMarket(prv, intproduction, durationInDay);
+
+		return intproduction;
 	}
 
 }

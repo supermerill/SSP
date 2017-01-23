@@ -18,13 +18,15 @@ public class WoodHouseIndustry extends Industry {
 		ptr = new WoodHouseIndustry();
 	}
 	public static WoodHouseIndustry get(){ return ptr; }
+
+	BasicIndustryNeeds myBasicNeeds;
 	
-	//TODO: i need lumber!
 	private WoodHouseIndustry(){
 		createThis = Good.get("wood_house");
-		myNeeds = new BasicIndustryNeeds(this)
+		myBasicNeeds = new BasicIndustryNeeds(this)
 				.addRawGood(Good.get("wood"), 2)
 				.addToolGood(Good.get("wood_goods"), 1);
+		myNeeds = myBasicNeeds;
 	}
 	
 	static protected Good good;
@@ -46,11 +48,11 @@ public class WoodHouseIndustry extends Industry {
 		float production = nbMens * 0.25f;;
 		production += 0.75f * Math.max(prv.getIndustry(ptr).getStock().getInt(createThis), nbMens) * createThis.getIndustryToolEfficiency();
 		production *= durationInDay;
-		
-		// break some tools (0.5% of tools break per use per day)
-		stock.put(createThis, (int)(Math.min(stock.getInt(createThis), production) * 0.005f * durationInDay)  );
-		
+
+		// produce
+		int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)production, durationInDay);
+		super.sellProductToMarket(prv, intproduction, durationInDay);
 	
-		return 0;
+		return intproduction;
 	}
 }

@@ -8,7 +8,6 @@ import java.util.Random;
 
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Plot;
-import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 
 //like v2 but rotated by 90°
@@ -49,6 +48,10 @@ public class FlatCarteV3 implements MapFactory {
 		carte.nbLigne = nbLigne;
 		carte.nbColonne = nbColonne;
 		createAnneau(height, width);
+		// now, the structure is done, launch a creation of map
+		createSol();
+		createRelief();
+		createDesert();
 		return carte;
 	}
 
@@ -304,10 +307,6 @@ public class FlatCarteV3 implements MapFactory {
 			initPlotX += 2 + (i%2);
 		}
 
-		// now, the structure is done, launch a creation of map
-		createSol();
-		createRelief();
-		createDesert();
 	}
 	
 	//note: this doesn't work: it put null pointer because the map isn't square
@@ -429,6 +428,11 @@ public class FlatCarteV3 implements MapFactory {
 				prv.surfaceSol = 0;
 			}
 		}
+		
+		Province centreu = provinces.get(0).get(0);
+		int taillePatcheu = 0;
+		dessine(centreu, taillePatcheu, 10000);
+		if(true)return;
 
 		// on prend des points au pif
 		int ordreGrandeurInit = (int) Math.log1p(nbLigne * nbColonne);

@@ -1,14 +1,17 @@
 package remi.ssp_basegame;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import remi.ssp.CurrentGame;
 import remi.ssp.algorithmes.Spawner;
 import remi.ssp.economy.Good;
+import remi.ssp.economy.Job;
 import remi.ssp.economy.ProvinceGoods;
-import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.ProvinceIndustry.ProvinceIndustryFactory;
 import remi.ssp.map.FlatCarteV3;
 import remi.ssp.politic.Civilisation;
@@ -31,7 +34,7 @@ public class BaseSpawner extends Spawner {
 	 * 
 	 */
 	public void createMap(){
-		CurrentGame.map = new FlatCarteV3().createMap(10, 10);
+		CurrentGame.map = new FlatCarteV3().createMap(2, 2);
 	}
 	
 	/**
@@ -63,10 +66,10 @@ public class BaseSpawner extends Spawner {
 						prv.getStock().put(good, new ProvinceGoods());
 					}
 					//place some food and houses
-					prv.getStock().get(Good.get("meat")).stock = 5000;
-					prv.getStock().get(Good.get("meat")).price = 1;
-					prv.getStock().get(Good.get("wood_house")).stock = 10;
-					prv.getStock().get(Good.get("wood_house")).price = 1;
+					prv.getStock().get(Good.get("meat")).setStock(15000);
+					prv.getStock().get(Good.get("meat")).setPrice(1);
+					prv.getStock().get(Good.get("wood_house")).setStock(10);
+					prv.getStock().get(Good.get("wood_house")).setPrice(1);
 				}
 			}
 		}
@@ -83,7 +86,8 @@ public class BaseSpawner extends Spawner {
 				Province prv = CurrentGame.map.provinces.get(i).get(j);
 				if(prv.surfaceSol > 10){
 					Pop pop = new Pop(prv);
-					pop.addHabitants(20, Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
+//					pop.addHabitants(20, Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
+					pop.addHabitants(20, 136);
 					prv.getPops().add(pop);
 	//						System.out.println("create pop of " + prv.nombreHabitantsParAge[20]);
 					//set pop to chomage
@@ -96,6 +100,32 @@ public class BaseSpawner extends Spawner {
 				}
 			}
 		
+		}
+		
+		fixJobFromIndustryAndCommerce();
+	}
+	
+	/**
+	 * call this when you add a new indutry to some provinces. Or do the job yourself ffs!
+	 */
+	public static void fixJobFromIndustryAndCommerce(){
+		for(int i=0;i<CurrentGame.map.provinces.size();i++){
+			for(int j=0;j<CurrentGame.map.provinces.get(i).size();j++){
+				Province prv = CurrentGame.map.provinces.get(i).get(j);
+				Set<Job> jobs = new HashSet<>();
+				for(Pop pop: prv.getPops()){
+					jobs.clear();
+					jobs.addAll(prv.getIndustries());
+					jobs.add(pop.getLandCommerce());
+					jobs.add(pop.getSeaCommerce());
+					for(Entry<Job> job : pop.getNbMensEmployed().object2IntEntrySet()){
+						jobs.remove(job.getKey());
+					}
+					for(Job job : jobs){
+						pop.getNbMensEmployed().put(job, 0);
+					}
+				}
+			}
 		}
 	}
 }

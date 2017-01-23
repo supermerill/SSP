@@ -1,5 +1,7 @@
 package remi.ssp_basegame.economy;
 
+import java.util.Map;
+
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
@@ -8,6 +10,7 @@ import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.Needs;
 import remi.ssp.economy.ProvinceGoods;
+import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.politic.Province;
 
 //TODO: a more complex one: raw from the map, and tools from goods available in market & their tools efficiency (and an upgrade of stock tools)
@@ -55,7 +58,7 @@ public class BasicIndustryNeeds extends Needs {
 	}
 
 	/**
-	 * Spend money: sped your money for buying goods from market and puttig into our stock. !!!! return the money spend, do not remove it yourself from the IndustryProvince instance !!!
+	 * Spend money: sped your money for buying goods from market and putting into our stock. !!!! return the money spend, do not remove it yourself from the IndustryProvince instance !!!
 	 * @param prv province (market)
 	 * @param lastProductionSamePeriod Number of goods produced the last time (same nbDays as now)
 	 * @param currentStock Our stock (put new goods inside that)
@@ -67,12 +70,13 @@ public class BasicIndustryNeeds extends Needs {
 	public int spendMoney(Province prv, int lastProductionSamePeriod, Object2IntMap<Good> currentStock, NeedWish maxMoneyToSpend,
 			int nbDays) {
 		//TODO: better one.
+		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		final int maxMoney = maxMoneyToSpend.normalNeed + maxMoneyToSpend.vitalNeed + maxMoneyToSpend.luxuryNeed;
 		int moneyToSpend = maxMoney;
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
 			int currentStockNumber = currentStock.getInt(needed.getKey());
-			ProvinceGoods market = prv.getStock().get(needed.getKey());
-			int quantityBuy = Math.min(market.stock, (int)(lastProductionSamePeriod * needed.getFloatValue()) - currentStockNumber);
+			ProvinceGoods market = goodStock.get(needed.getKey());
+			int quantityBuy = Math.min(market.getStock(), (int)(lastProductionSamePeriod * needed.getFloatValue()) - currentStockNumber);
 			int price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
 				quantityBuy = moneyToSpend / price;
@@ -80,28 +84,35 @@ public class BasicIndustryNeeds extends Needs {
 			//buy
 			moneyToSpend  -= quantityBuy * price;
 			prv.addMoney(quantityBuy * price);
+			System.out.println("1indus "+indus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
+			goodStock.get(needed.getKey()).addNbConsumePerDay(quantityBuy / (float)nbDays);
 			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
-			market.stock -= quantityBuy;
+			market.addStock( -quantityBuy);
 		}
 		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
 			int currentStockNumber = currentStock.getInt(needed.getKey());
-			ProvinceGoods market = prv.getStock().get(needed.getKey());
-			int quantityBuy = Math.min(market.stock, (int)(lastProductionSamePeriod * needed.getFloatValue()) - currentStockNumber);
+			ProvinceGoods market = goodStock.get(needed.getKey());
+			int quantityBuy = Math.min(market.getStock(), (int)(lastProductionSamePeriod * needed.getFloatValue()) - currentStockNumber);
 			int price = market.getPriceBuyFromMarket(prv, nbDays);
-			if(quantityBuy * price > moneyToSpend){
+			if(quantityBuy * price > moneyToSpend && moneyToSpend>0){
 				quantityBuy = moneyToSpend / price;
 			}
 			//buy
 			moneyToSpend  -= quantityBuy * price;
 			prv.addMoney(quantityBuy * price);
+			System.out.println("2indus "+indus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
+			if(quantityBuy<0){
+				System.out.println(moneyToSpend+" "+market.getStock()+" , "+( (int)(lastProductionSamePeriod * needed.getFloatValue()) - currentStockNumber));
+			}
+			goodStock.get(needed.getKey()).addNbConsumePerDay(quantityBuy / (float)nbDays);
 			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
-			market.stock -= quantityBuy;
+			market.addStock( -quantityBuy);
 		}
 		//then buy some more stock
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
 			int currentStockNumber = currentStock.getInt(needed.getKey());
-			ProvinceGoods market = prv.getStock().get(needed.getKey());
-			int quantityBuy = Math.min(market.stock, (int)(lastProductionSamePeriod * needed.getFloatValue()*0.5));
+			ProvinceGoods market = goodStock.get(needed.getKey());
+			int quantityBuy = Math.min(market.getStock(), (int)(lastProductionSamePeriod * needed.getFloatValue()*0.5));
 			int price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
 				quantityBuy = moneyToSpend / price;
@@ -109,13 +120,15 @@ public class BasicIndustryNeeds extends Needs {
 			//buy
 			moneyToSpend  -= quantityBuy * price;
 			prv.addMoney(quantityBuy * price);
+			System.out.println("3indus "+indus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
+			goodStock.get(needed.getKey()).addNbConsumePerDay(quantityBuy / (float)nbDays);
 			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
-			market.stock -= quantityBuy;
+			market.addStock( -quantityBuy);
 		}
 		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
 			int currentStockNumber = currentStock.getInt(needed.getKey());
-			ProvinceGoods market = prv.getStock().get(needed.getKey());
-			int quantityBuy = Math.min(market.stock, (int)(lastProductionSamePeriod * needed.getFloatValue()*0.5));
+			ProvinceGoods market = goodStock.get(needed.getKey());
+			int quantityBuy = Math.min(market.getStock(), (int)(lastProductionSamePeriod * needed.getFloatValue()*0.5));
 			int price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
 				quantityBuy = moneyToSpend / price;
@@ -123,10 +136,32 @@ public class BasicIndustryNeeds extends Needs {
 			//buy
 			moneyToSpend  -= quantityBuy * price;
 			prv.addMoney(quantityBuy * price);
+			System.out.println("4indus "+indus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
+			goodStock.get(needed.getKey()).addNbConsumePerDay(quantityBuy / (float)nbDays);
 			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
-			market.stock -= quantityBuy;
+			market.addStock( -quantityBuy);
 		}
 		return maxMoney - moneyToSpend;
 	}
 
+	
+	public int useGoodsAndTools(ProvinceIndustry stock, int quantity, int nbDays){
+		
+		int realProd = quantity;
+		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
+			realProd = Math.min(realProd, (int)(stock.getStock().getInt(needed.getKey())/needed.getFloatValue()));
+		}
+		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
+			stock.getStock().put(needed.getKey(), stock.getStock().getInt(needed.getKey()) - (int)(needed.getFloatValue()* realProd));
+		}
+
+		// break some tools (0.5% of tools break per use per day)
+		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
+			stock.getStock().put(needed.getKey(), (int)(
+					Math.min(stock.getStock().getInt(needed.getKey()), realProd) * 0.005f * nbDays * needed.getFloatValue())  );
+		}
+		
+		return realProd;
+	}
+	
 }

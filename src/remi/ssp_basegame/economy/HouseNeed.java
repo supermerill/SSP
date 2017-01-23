@@ -48,13 +48,13 @@ public class HouseNeed extends PopNeed{
 			ListIterator<Good> it = lowPriceHouse.listIterator();
 			while(it.hasNext()){
 				Good house = it.next();
-				if(nbHousesNeeded <= goodStock.get(house).stock){
+				if(nbHousesNeeded <= goodStock.get(house).getStock()){
 					wish.vitalNeed += nbHousesNeeded * goodPrice.getInt(house);
 					nbHousesNeeded = 0;
 					break;
 				}else{
-					wish.vitalNeed += goodStock.get(house).stock * goodPrice.getInt(house);
-					nbHousesNeeded -= goodStock.get(house).stock;
+					wish.vitalNeed += goodStock.get(house).getStock() * goodPrice.getInt(house);
+					nbHousesNeeded -= goodStock.get(house).getStock();
 					it.remove();
 				}
 			}
@@ -115,7 +115,7 @@ public class HouseNeed extends PopNeed{
 			ListIterator<Good> it = lowPriceHouse.listIterator();
 			while(it.hasNext()){
 				Good house = it.next();
-				int totalPrice = goodStock.get(house).stock * goodPrice.getInt(house);
+				int totalPrice = goodStock.get(house).getStock() * goodPrice.getInt(house);
 				if(totalPrice == 0) continue; //no house here
 				if(nbCoins <= totalPrice){
 					int quantityPicked = nbCoins / goodPrice.getInt(house);
@@ -127,7 +127,7 @@ public class HouseNeed extends PopNeed{
 				}else{
 					nbCoins -= totalPrice;
 					moneyUsed += totalPrice;
-					int quantityPicked = goodStock.get(house).stock;
+					int quantityPicked = goodStock.get(house).getStock();
 					nbHousesNeeded -= quantityPicked;
 					nbGoods.put(house, quantityPicked);
 				}
@@ -159,7 +159,7 @@ public class HouseNeed extends PopNeed{
 		//Use this money to buy 10 chunk of random house.
 		for(int i=0;i<10 && nbCoins > 0;i++){
 			Good house = normalHouse.get(GlobalRandom.aleat.getInt(normalHouse.size(), nbMensInPop));
-			int maxStock = goodStock.get(house).stock - nbGoods.getInt(house);
+			int maxStock = goodStock.get(house).getStock() - nbGoods.getInt(house);
 			int price = goodPrice.getInt(house);
 			if(maxStock == 0) continue; //no house here
 			if(price == 0){System.err.println("Error in food needs: no price"); continue;}
@@ -183,7 +183,7 @@ public class HouseNeed extends PopNeed{
 		//Use this money to buy 10 chunk of random house.
 		for(int i=0;i<10 && nbCoins > 0;i++){
 			Good house = luxuryHouse.get(GlobalRandom.aleat.getInt(luxuryHouse.size(), nbMensInPop));
-			int maxStock = goodStock.get(house).stock - nbGoods.getInt(house);
+			int maxStock = goodStock.get(house).getStock() - nbGoods.getInt(house);
 			int price = goodPrice.getInt(house);
 			if(maxStock == 0) continue; //no house here
 			if(price == 0){System.err.println("Error in food needs: no price"); continue;}
@@ -215,7 +215,6 @@ public class HouseNeed extends PopNeed{
 			nbHousesNeeded += chunk;
 			int totalCost = chunk * price;
 			moneyUsed -= totalCost;
-			prv.addMoney(totalCost);
 			nbCoins += totalCost;
 		}
 		
@@ -224,9 +223,13 @@ public class HouseNeed extends PopNeed{
 		for(it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Good> entry : nbGoods.object2IntEntrySet()){
 			Good house = entry.getKey();
 			int nbBuy = entry.getIntValue();
-			goodStock.get(house).stock -= nbBuy;
+			goodStock.get(house).addStock( -nbBuy);
+			currentPopStock.put(house, currentPopStock.get(house)+nbBuy);
+			goodStock.get(house).addNbConsumePerDay(nbBuy / (float)nbDays);
+			System.out.println("buy "+nbBuy+" "+house.getName());
 		}
-		
+
+		prv.addMoney(moneyUsed);
 		return moneyUsed;
 	}
 

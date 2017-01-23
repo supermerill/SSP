@@ -16,11 +16,13 @@ public class HuntingIndustry extends Industry {
 	public static void load(){ ptr = new HuntingIndustry(); }
 	public static HuntingIndustry get(){ return ptr; }
 
+	BasicIndustryNeeds myBasicNeeds;
 
 	protected HuntingIndustry() {
 		createThis = Good.get("meat");
-		myNeeds = new BasicIndustryNeeds(this)
+		myBasicNeeds = new BasicIndustryNeeds(this)
 				.addToolGood(Good.get("wood_goods"), 1);
+		myNeeds = myBasicNeeds;
 	}
 	
 	@Override
@@ -30,7 +32,6 @@ public class HuntingIndustry extends Industry {
 
 	
 	//TODO: use tools
-	int production = 0;
 	int nbForest = (int) ( (prv.pourcentForet * prv.surface * 100 )); // 1 hectare per Rabbit
 	int nbRabbit = (indus.getStock().getInt(Good.GoodFactory.get("meat"))); //100kg per Rabbit
 	
@@ -52,7 +53,7 @@ public class HuntingIndustry extends Industry {
 	
 	//if too many rabbit, reduce their birth
 	if(nbRabbit>nbForest){
-		newRabbit -= newRabbit * (1-(nbRabbit-nbForest)/nbForest);
+		newRabbit -= newRabbit * (1-(nbRabbit-nbForest)/(1+nbForest));
 	}
 	
 	nbRabbit += newRabbit;
@@ -69,9 +70,10 @@ public class HuntingIndustry extends Industry {
 		nbMens += pop.getNbMensEmployed().getInt(indus);
 	}
 
+
 	// reduce efficacity of hunting per rabbit density.
 	//at full livestock, it can hunt 6 rabbit per day (food for 4 mens)
-	nbRabbitToSell = (int)(nbRabbit - durationInDay * 6 * nbMens * (nbRabbit / (float)nbForest));
+	nbRabbitToSell = (int)(durationInDay * 6 * nbMens * (nbRabbit / (float)nbForest));
 	nbRabbit -= nbRabbitToSell;
 	
 	//note: over-hunt can happen easily (no hunter limit), it's intended.
@@ -79,10 +81,12 @@ public class HuntingIndustry extends Industry {
 	//set new livestock
 	indus.getStock().put(Good.GoodFactory.get("meat"), nbRabbit);
 	
-	
-	//TODO: sell more Rabbit if the price is high and famine is occurring ?
-	
-	return nbRabbitToSell;
+
+	// produce
+	int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbRabbitToSell, durationInDay);
+	super.sellProductToMarket(prv, intproduction, durationInDay);
+
+	return intproduction;
 }
 
 }

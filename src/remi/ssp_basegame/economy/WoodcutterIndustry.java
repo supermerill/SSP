@@ -15,10 +15,13 @@ public class WoodcutterIndustry extends Industry {
 	public static void load(){ ptr = new WoodcutterIndustry(); }
 	public static WoodcutterIndustry get(){ return ptr; }
 
+	BasicIndustryNeeds myBasicNeeds;
+
 	protected WoodcutterIndustry() {
 		createThis = Good.get("wood");
-		myNeeds = new BasicIndustryNeeds(this)
+		myBasicNeeds = new BasicIndustryNeeds(this)
 				.addToolGood(Good.get("wood_goods"), 1);
+		myNeeds = myBasicNeeds;
 	}
 
 	//pin maritime: (recolte en 50ans) 4,8 m3/ha/an en 1960 à 15 m3/ha/an en 2015
@@ -29,7 +32,6 @@ public class WoodcutterIndustry extends Industry {
 
 	
 	//TODO: use tools
-	int production = 0;
 	long nbTree = (long) ( (prv.pourcentForet * prv.surface * 100000l )); // 1 tree per 10 m² 
 	
 	//multiplicate
@@ -69,10 +71,12 @@ public class WoodcutterIndustry extends Industry {
 	float percentMove = prv.pourcentForet * (float)nbTreeCut/(float)nbTree;
 	prv.pourcentForet -= percentMove;
 	prv.pourcentFriche += percentMove;
-	
-	//TODO: break some tools
-	
-	return nbWoodCut;
+
+	// produce
+	int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbWoodCut, durationInDay);
+	super.sellProductToMarket(prv, intproduction, durationInDay);
+
+	return intproduction;
 }
 
 }

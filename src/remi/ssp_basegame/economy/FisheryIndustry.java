@@ -16,10 +16,13 @@ public class FisheryIndustry extends Industry {
 	public static void load(){ ptr = new FisheryIndustry(); }
 	public static FisheryIndustry get(){ return ptr; }
 
+	BasicIndustryNeeds myBasicNeeds;
+
 	private FisheryIndustry(){
-		myNeeds = new BasicIndustryNeeds(this)
+		myBasicNeeds = new BasicIndustryNeeds(this)
 				.addToolGood(Good.get("wood_goods"), 1);
 		createThis = Good.get("fish");
+		myNeeds = myBasicNeeds;
 	}
 	
 	
@@ -46,7 +49,11 @@ public class FisheryIndustry extends Industry {
 		
 		//TODO set a rendement décroissant pour modeliser la surpeche
 		
-		return production * durationInDay;
+		// produce
+		int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)production * durationInDay, durationInDay);
+		super.sellProductToMarket(prv, intproduction, durationInDay);
+
+		return intproduction;
 	}
 
 }

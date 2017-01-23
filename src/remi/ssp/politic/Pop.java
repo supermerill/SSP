@@ -58,7 +58,7 @@ public class Pop {
 	 // pour y = 1-(1/(1+(x*repartitionMult))), x est la fraction la plus riche de la pop. 
 	//y est la fraction de la richesse possédé. 
 	//Ne fonctionne pas pour un grand x
-	float repartitionMult = 5; //5 => 80/20
+	float repartitionMult = 20; //20 => 80/20
 	
 	
 	public Culture getCulture() { return culture; }
@@ -81,7 +81,7 @@ public class Pop {
 	public void setMoney(int money) { this.cash = money; }
 	public Object2IntMap<Good> getStock() { return stock; }
 	public float getRepartitionRevenuMult() { return repartitionMult; }
-	public float getRepartitionRevenu(int i){ return 1-(1/(1+(i*repartitionMult))); }
+	public float getRepartitionRevenu(float i){ return 1-(1/(1+(i*repartitionMult))); }
 	public ProvinceCommerce getLandCommerce() { return commerceLand; }
 	public ProvinceCommerce getSeaCommerce() { return commerceSea; }
 	

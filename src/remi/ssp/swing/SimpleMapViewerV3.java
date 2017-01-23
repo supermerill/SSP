@@ -57,7 +57,7 @@ public class SimpleMapViewerV3 extends JComponent{
 		
 		fenetre.add(view);
 		fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		fenetre.setSize(800,1000);
+		fenetre.setSize(80,100);
 		fenetre.setVisible(true);
 		
 		view.updateSimu();
@@ -66,9 +66,9 @@ public class SimpleMapViewerV3 extends JComponent{
 	public void updateSimu(){
 //		Nourriture algoN = new Nourriture(){};
 		while(true){
-			System.out.println("start turn");
+			System.out.println("================================== start turn =======================================");
 			Economy.ptr.doTurn(map, 30);
-			System.out.println("economy done");
+			System.out.println("================================= economy done ======================================");
 			this.repaint();
 			try {
 				Thread.sleep(4000);

@@ -15,10 +15,13 @@ public class AgricultureIndustry extends Industry {
 	public static void load(){ ptr = new AgricultureIndustry(); }
 	public static AgricultureIndustry get(){ return ptr; }
 
+	BasicIndustryNeeds myBasicNeeds;
+
 	private AgricultureIndustry(){
-		myNeeds = new BasicIndustryNeeds(this)
+		myBasicNeeds = new BasicIndustryNeeds(this)
 				.addToolGood(Good.get("wood_goods"), 1);
 		createThis = Good.get("crop");
+		myNeeds = myBasicNeeds;
 	}
 	
 	@Override
@@ -39,8 +42,12 @@ public class AgricultureIndustry extends Industry {
 		}
 		
 		
-		
-		return production * durationInDay;
+
+		//produce
+		int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)production, durationInDay);
+		super.sellProductToMarket(prv, intproduction, durationInDay);
+
+		return intproduction;
 	}
 
 }

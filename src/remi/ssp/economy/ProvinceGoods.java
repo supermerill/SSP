@@ -10,17 +10,27 @@ public class ProvinceGoods {
 //	protected Province prv;
 //	protected Good good;
 	
-	public int stock=0;
-	public int price=0;
-	public int nbConsumePerDay=0; // BFR, we need to keep this as stock, so choose the price accordingly
+	protected int stock=0;
+	protected int price=0;
+	protected float nbConsumePerDay=0; // BFR, we need to keep this as stock, so choose the price accordingly
 	
 	//TODO "demande" pour permettre aux pop et à l'etat de demander aux marchants d'apporter des trucs
 	
 	
-	public ProvinceGoods() {
-		super();
-	}
-//	public ProvinceGoods(Province prv, Good good, int stock, int price) {
+	
+	
+	public ProvinceGoods() { super(); }
+	public int getStock() { return stock; }
+	public int getPrice() { return price; }
+	public float getNbConsumePerDay() { return nbConsumePerDay; }
+	public void setPrice(int price) { this.price = price; }
+	public void setStock(int stock) { this.stock = stock; }
+	public void setNbConsumePerDay(float nbConsumePerDay) { this.nbConsumePerDay = nbConsumePerDay; }
+//	public void addPrice(int price) { this.price += price; }
+	public void addStock(int stock) { this.stock += stock; }
+	public void addNbConsumePerDay(float nbConsumePerDay) { this.nbConsumePerDay += nbConsumePerDay; }
+	
+	//	public ProvinceGoods(Province prv, Good good, int stock, int price) {
 //		super();
 //		this.prv = prv;
 //		this.good = good;
