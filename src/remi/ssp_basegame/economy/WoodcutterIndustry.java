@@ -27,7 +27,7 @@ public class WoodcutterIndustry extends Industry {
 	//pin maritime: (recolte en 50ans) 4,8 m3/ha/an en 1960 à 15 m3/ha/an en 2015
 	
 	@Override
-	public int produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
 		Province prv = indus.getProvince();
 
 	
@@ -51,29 +51,29 @@ public class WoodcutterIndustry extends Industry {
 	//how much lumber per man?
 	float productivity = 10 * durationInDay; //base: 10kg per day (will be much better with tools)
 
-	int nbMens = 0;
+	long nbMens = 0;
 	for(Pop pop : pops){
 		//TODO tools
-		nbMens += pop.getNbMensEmployed().getInt(indus);
+		nbMens += pop.getNbMensEmployed().getLong(indus);
 		//don't take into account personal tools
 	}
-	int nbWoodCut = (int)(productivity * nbMens);
+	long nbWoodCut = (long)(productivity * nbMens);
 	
 	//pin maritime: 1,2m² per tree, 450/650 kg/m²
 	//a tree is 1000 kg (seems good)
 	//if cut toomuch, reduction from concurence
 	if(nbWoodCut > nbTree * 100){
-		nbWoodCut = (int)( (nbWoodCut * nbTree * 100.0) /nbWoodCut);
+		nbWoodCut = (long)( (nbWoodCut * nbTree * 100.0) /nbWoodCut);
 	}
 	
 	//remove forest
-	int nbTreeCut = 1 + nbWoodCut / 1000;
+	long nbTreeCut = 1 + nbWoodCut / 1000;
 	float percentMove = prv.pourcentForet * (float)nbTreeCut/(float)nbTree;
 	prv.pourcentForet -= percentMove;
 	prv.pourcentFriche += percentMove;
 
 	// produce
-	int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbWoodCut, durationInDay);
+	long intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbWoodCut, durationInDay);
 	super.sellProductToMarket(prv, intproduction, durationInDay);
 
 	return intproduction;

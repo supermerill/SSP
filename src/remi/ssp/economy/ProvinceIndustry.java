@@ -1,17 +1,14 @@
 package remi.ssp.economy;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.politic.Province;
 
 public class ProvinceIndustry implements Job{
@@ -36,11 +33,11 @@ public class ProvinceIndustry implements Job{
 
 	
 	// used to run
-	Object2IntMap<Good> stock = new Object2IntOpenHashMap<Good>(); //raw goods + tools
-	int money=0;//bfr
-	int rawGoodsCost=1; // rawgoods + depreciation of owned stock
-	int previousProduction=0;
-	int previousSalary=1;
+	Object2LongMap<Good> stock = new Object2LongOpenHashMap<Good>(); //raw goods + tools
+	long money=0;//bfr
+	long rawGoodsCost=1; // rawgoods + depreciation of owned stock
+	long previousProduction=0;
+	long previousSalary=1;
 	
 	public Province getProvince() { return province; }
 	public void setProvince(Province province) { this.province = province; }
@@ -54,28 +51,28 @@ public class ProvinceIndustry implements Job{
 //	public void setPrice(int price) { this.price = price; }
 //	public int getEfficiency() { return efficiency; }
 //	public void setEfficiency(int efficiency) { this.efficiency = efficiency; }
-	public int getMoney() { return money; }
-	public void addMoney(int money) { this.money += money; }
-	public void setMoney(int money) { this.money = money; }
-	public int getRawGoodsCost() { return rawGoodsCost; }
-	public void setRawGoodsCost(int rawGoodsCost) { this.rawGoodsCost = rawGoodsCost; }
-	public Object2IntMap<Good> getStock() { return stock; }
-	public int getPreviousProduction() { return previousProduction; }
-	public void setPreviousProduction(int previousProduction) { this.previousProduction = previousProduction; }
-	public int getPreviousSalary() { return previousSalary; }
-	public void setPreviousSalary(int previousSalary) { this.previousSalary = previousSalary; }
+	public long getMoney() { return money; }
+	public void addMoney(long money) { this.money += money; }
+	public void setMoney(long money) { this.money = money; }
+	public long getRawGoodsCost() { return rawGoodsCost; }
+	public void setRawGoodsCost(long rawGoodsCost) { this.rawGoodsCost = rawGoodsCost; }
+	public Object2LongMap<Good> getStock() { return stock; }
+	public long getPreviousProduction() { return previousProduction; }
+	public void setPreviousProduction(long previousProduction) { this.previousProduction = previousProduction; }
+	public long getPreviousSalary() { return previousSalary; }
+	public void setPreviousSalary(long previousSalary) { this.previousSalary = previousSalary; }
 	
 	
 	public void load(JsonObject jsonObj){
-		money = jsonObj.getInt("money");
-		rawGoodsCost = jsonObj.getInt("cost");
-		previousProduction = jsonObj.getInt("prod");
-		previousSalary = jsonObj.getInt("salary");
+		money = jsonObj.getJsonNumber("money").longValue();
+		rawGoodsCost = jsonObj.getJsonNumber("cost").longValue();
+		previousProduction = jsonObj.getJsonNumber("prod").longValue();
+		previousSalary = jsonObj.getJsonNumber("salary").longValue();
 		JsonArray array = jsonObj.getJsonArray("stock");
 		stock.clear();
 		for(int i=0;i<array.size();i++){
 			JsonObject object = array.getJsonObject(i);
-			stock.put(Good.get(object.getString("name")), object.getInt("nb"));
+			stock.put(Good.get(object.getString("name")), object.getJsonNumber("nb").longValue());
 		}
 	}
 	public void save(JsonObjectBuilder jsonOut){
@@ -84,10 +81,10 @@ public class ProvinceIndustry implements Job{
 		jsonOut.add("prod", previousProduction);
 		jsonOut.add("salary", previousSalary);
 		JsonArrayBuilder array = Json.createArrayBuilder();
-		for(Entry<Good> good : stock.object2IntEntrySet()){
+		for(Entry<Good> good : stock.object2LongEntrySet()){
 			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
 			objectBuilder.add("name", good.getKey().getName());
-			objectBuilder.add("nb", good.getIntValue());
+			objectBuilder.add("nb", good.getLongValue());
 			array.add(objectBuilder);
 		}
 		jsonOut.add("stock", array);

@@ -26,25 +26,26 @@ public class HuntingIndustry extends Industry {
 	}
 	
 	@Override
-	public int produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
 		Province prv = indus.getProvince();
 
 
 	
 	//TODO: use tools
-	int nbForest = (int) ( (prv.pourcentForet * prv.surface * 100 )); // 1 hectare per Rabbit
-	int nbRabbit = (indus.getStock().getInt(Good.GoodFactory.get("meat"))); //100kg per Rabbit
+	long nbForest = (int) ( (prv.pourcentForet * prv.surface * 100 )); // 1 hectare per Rabbit
+	long nbRabbit = (indus.getStock().getLong(Good.GoodFactory.get("meat"))); //100kg per Rabbit
 	
 	//temp booststrap (there are always at least two rabbit)
 	if(nbRabbit == 0){
-		indus.getStock().put(Good.GoodFactory.get("meat"), 2);
-		nbRabbit = 2;
+		indus.getStock().put(Good.GoodFactory.get("meat"), nbForest/2);
+		nbRabbit = nbForest/2;
 	}
 	
 	
 	//multiplicate
 	// * 1.2 every year => +0.05556% per day
-	int newRabbit = (int) (nbRabbit * durationInDay * 0.00056);
+	// * 2 every year => +0.0028
+	long newRabbit = 1+(int) (nbRabbit * durationInDay * 0.0028);
 	if(newRabbit <= 0){
 		if( GlobalRandom.aleat.getInt(1000, (int)(prv.pourcentPrairie*1000000)) < (int) (nbRabbit * durationInDay * 1.39) ){
 			newRabbit = 1;
@@ -64,10 +65,10 @@ public class HuntingIndustry extends Industry {
 	// - X Rabbit per prairie
 	
 	//TODO
-	int nbRabbitToSell = 0;
-	int nbMens = 0;
+	long nbRabbitToSell = 0;
+	long nbMens = 0;
 	for(Pop pop : pops){
-		nbMens += pop.getNbMensEmployed().getInt(indus);
+		nbMens += pop.getNbMensEmployed().getLong(indus);
 	}
 
 
@@ -75,7 +76,8 @@ public class HuntingIndustry extends Industry {
 	//at full livestock, it can hunt 6 rabbit per day (food for 4 mens)
 	nbRabbitToSell = (int)(durationInDay * 6 * nbMens * (nbRabbit / (float)nbForest));
 	nbRabbit -= nbRabbitToSell;
-	
+
+	System.out.println("nbRabbitToSell= "+nbRabbitToSell+"="+durationInDay+"*6*"+nbMens+(nbRabbit / (float)nbForest));
 	//note: over-hunt can happen easily (no hunter limit), it's intended.
 		
 	//set new livestock
@@ -83,8 +85,14 @@ public class HuntingIndustry extends Industry {
 	
 
 	// produce
-	int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbRabbitToSell, durationInDay);
+	long intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbRabbitToSell, durationInDay);
 	super.sellProductToMarket(prv, intproduction, durationInDay);
+	
+	//and rare_meat (note: industry is not designed to handle multi-products right now. be careful with these "bonus")
+	long price = prv.getStock().get(Good.GoodFactory.get("rare_meat")).getPriceSellToMarket(prv, durationInDay);
+	prv.addMoney(-price*nbRabbitToSell/10);
+	prv.getStock().get(Good.GoodFactory.get("rare_meat")).addStock(nbRabbitToSell/10);
+	prv.getIndustry(this).addMoney(price*nbRabbitToSell/10);
 
 	return intproduction;
 }

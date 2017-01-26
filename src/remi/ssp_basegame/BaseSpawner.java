@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import remi.ssp.CurrentGame;
 import remi.ssp.algorithmes.Spawner;
 import remi.ssp.economy.Good;
@@ -66,10 +66,9 @@ public class BaseSpawner extends Spawner {
 						prv.getStock().put(good, new ProvinceGoods());
 					}
 					//place some food and houses
-					prv.getStock().get(Good.get("meat")).setStock(15000);
-					prv.getStock().get(Good.get("meat")).setPrice(1);
+					prv.getStock().get(Good.get("meat")).setStock(5000);
+					prv.getStock().get(Good.get("crop")).setStock(55000);
 					prv.getStock().get(Good.get("wood_house")).setStock(10);
-					prv.getStock().get(Good.get("wood_house")).setPrice(1);
 				}
 			}
 		}
@@ -93,7 +92,7 @@ public class BaseSpawner extends Spawner {
 					//set pop to chomage
 					pop.setNbMensChomage(pop.getNbMens());
 					//create some money from "the previous time" (ie, fine air)
-					pop.setMoney(pop.getNbMens()*1000);
+					pop.setMoney(pop.getNbMens()*10000); //10 "coin" per men (can be /1000)
 					//add needs (TODO: get them from techs researched at startup)
 					pop.getPopNeeds().add(FoodNeed.create("food", pop));
 //					pop.getPopNeeds().add(FoodNeed.create("house", pop));
@@ -104,7 +103,7 @@ public class BaseSpawner extends Spawner {
 		
 		fixJobFromIndustryAndCommerce();
 	}
-	
+
 	/**
 	 * call this when you add a new indutry to some provinces. Or do the job yourself ffs!
 	 */
@@ -118,7 +117,7 @@ public class BaseSpawner extends Spawner {
 					jobs.addAll(prv.getIndustries());
 					jobs.add(pop.getLandCommerce());
 					jobs.add(pop.getSeaCommerce());
-					for(Entry<Job> job : pop.getNbMensEmployed().object2IntEntrySet()){
+					for(Entry<Job> job : pop.getNbMensEmployed().object2LongEntrySet()){
 						jobs.remove(job.getKey());
 					}
 					for(Job job : jobs){

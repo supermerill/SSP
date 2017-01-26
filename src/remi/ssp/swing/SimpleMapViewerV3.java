@@ -71,7 +71,7 @@ public class SimpleMapViewerV3 extends JComponent{
 			System.out.println("================================= economy done ======================================");
 			this.repaint();
 			try {
-				Thread.sleep(4000);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

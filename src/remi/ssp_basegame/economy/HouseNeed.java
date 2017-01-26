@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.PopNeed;
@@ -24,36 +25,36 @@ public class HouseNeed extends PopNeed{
 	public HouseNeed(Pop pop){super(pop);}
 	
 	@Override
-	public NeedWish moneyNeeded(Province prv, int nbMensInPop, Object2IntMap<Good> currentPopStock,
-			int totalMoneyThisTurn, int nbDays) {
+	public NeedWish moneyNeeded(Province prv, long nbMensInPop, Object2LongMap<Good> currentPopStock,
+			long totalMoneyThisTurn, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		
 		NeedWish wish = new NeedWish(0, 0, 0);
 		
-		int moneyObj = (int) (totalMoneyThisTurn * 0.25);
+		long moneyObj = (long) (totalMoneyThisTurn * 0.25);
 		
 		//get the prices (1 house = 4 hab, per default)
-		int nbHousesNeeded = nbMensInPop/4;
+		long nbHousesNeeded = nbMensInPop/4;
 		List<Good> lowPriceHouse = new ArrayList<>();
-		Object2IntMap<Good> goodPrice = new Object2IntOpenHashMap<>();
+		Object2LongMap<Good> goodPrice = new Object2LongOpenHashMap<>();
 		for(Good house : houses){
 			
-			nbHousesNeeded -= myPop.getStock().getInt(house);
+			nbHousesNeeded -= myPop.getStock().getLong(house);
 			goodPrice.put(house, goodStock.get(house).getPriceBuyFromMarket(prv, nbDays));
 		}
 		
 		//vital: at least the worst house for every clodo
 		if(nbHousesNeeded > 0){
-			lowPriceHouse.sort(new ComparatorValueDesc<>(goodPrice));
+			lowPriceHouse.sort((o0,o1) -> Long.compare(goodPrice.getLong(o0), goodPrice.getLong(o1)));
 			ListIterator<Good> it = lowPriceHouse.listIterator();
 			while(it.hasNext()){
 				Good house = it.next();
 				if(nbHousesNeeded <= goodStock.get(house).getStock()){
-					wish.vitalNeed += nbHousesNeeded * goodPrice.getInt(house);
+					wish.vitalNeed += nbHousesNeeded * goodPrice.getLong(house);
 					nbHousesNeeded = 0;
 					break;
 				}else{
-					wish.vitalNeed += goodStock.get(house).getStock() * goodPrice.getInt(house);
+					wish.vitalNeed += goodStock.get(house).getStock() * goodPrice.getLong(house);
 					nbHousesNeeded -= goodStock.get(house).getStock();
 					it.remove();
 				}
@@ -69,33 +70,33 @@ public class HouseNeed extends PopNeed{
 		//normal: upgrade some house (up to normal). Do not consume too much money
 		moneyObj -= wish.vitalNeed;
 		if(moneyObj <0){
-			moneyObj = (int) (wish.vitalNeed * 0.2);
+			moneyObj = (long) (wish.vitalNeed * 0.2);
 		}
-		wish.normalNeed = (int) (moneyObj * 0.5);
+		wish.normalNeed = (long) (moneyObj * 0.5);
 		
 		
 		//luxury: upgrade some house (up to lux). Do not consume too much money
-		wish.luxuryNeed = (int) (moneyObj * 0.5);
+		wish.luxuryNeed = (long) (moneyObj * 0.5);
 		
 		return wish;
 	}
 
 	@Override
-	public int spendMoney(Province prv, int nbMensInPop, Object2IntMap<Good> currentPopStock,
+	public long spendMoney(Province prv, long nbMensInPop, Object2LongMap<Good> currentPopStock,
 			NeedWish maxMoneyToSpend, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		
-		int moneyUsed = 0;
+		long moneyUsed = 0;
 		
 		//get the prices (1 house = 4 hab, per default)
-		int nbHousesNeeded = nbMensInPop/4;
+		long nbHousesNeeded = nbMensInPop/4;
 		List<Good> lowPriceHouse = new ArrayList<>();
 		List<Good> normalHouse = new ArrayList<>();
 		List<Good> luxuryHouse = new ArrayList<>();
-		Object2IntMap<Good> goodPrice = new Object2IntOpenHashMap<>();
+		Object2LongMap<Good> goodPrice = new Object2LongOpenHashMap<>();
 		for(Good house : houses){
 			
-			nbHousesNeeded -= myPop.getStock().getInt(house);
+			nbHousesNeeded -= myPop.getStock().getLong(house);
 			goodPrice.put(house, goodStock.get(house).getPriceBuyFromMarket(prv, nbDays));
 			
 			lowPriceHouse.add(house);
@@ -107,18 +108,18 @@ public class HouseNeed extends PopNeed{
 			}
 		}
 
-		int nbCoins = maxMoneyToSpend.vitalNeed;
-		Object2IntMap<Good> nbGoods = new Object2IntOpenHashMap<>();
+		long nbCoins = maxMoneyToSpend.vitalNeed;
+		Object2LongMap<Good> nbGoods = new Object2LongOpenHashMap<>();
 		//first, buy all basic houses.
 		if(nbHousesNeeded > 0){
-			lowPriceHouse.sort(new ComparatorValueDesc<>(goodPrice));
+			lowPriceHouse.sort((o0,o1) -> Long.compare(goodPrice.getLong(o0), goodPrice.getLong(o1)));
 			ListIterator<Good> it = lowPriceHouse.listIterator();
 			while(it.hasNext()){
 				Good house = it.next();
-				int totalPrice = goodStock.get(house).getStock() * goodPrice.getInt(house);
+				long totalPrice = goodStock.get(house).getStock() * goodPrice.getLong(house);
 				if(totalPrice == 0) continue; //no house here
 				if(nbCoins <= totalPrice){
-					int quantityPicked = nbCoins / goodPrice.getInt(house);
+					long quantityPicked = (long)(nbCoins / goodPrice.getLong(house));
 					nbGoods.put(house, quantityPicked);
 					nbHousesNeeded -= quantityPicked;
 					nbCoins = 0 ;
@@ -127,14 +128,15 @@ public class HouseNeed extends PopNeed{
 				}else{
 					nbCoins -= totalPrice;
 					moneyUsed += totalPrice;
-					int quantityPicked = goodStock.get(house).getStock();
+					long quantityPicked = goodStock.get(house).getStock();
 					nbHousesNeeded -= quantityPicked;
 					nbGoods.put(house, quantityPicked);
 				}
 			}
 			if(nbHousesNeeded > 0){
 				//make homeless die
-				int nbPopToDie = 1+ (int)(nbHousesNeeded * 0.0001 * nbDays); // 0.3% per month ->3.6% per year (it's 2% per year in paris 2013 450/22500)
+				// 0.3% per month ->3.6% per year (it's 2% per year in paris 2013 450/22500)
+				int nbPopToDie = 1+ (int)(Math.min(Integer.MAX_VALUE, nbHousesNeeded * 0.0001 * nbDays)); 
 				System.out.print("homeless die! ( "+nbHousesNeeded+" houme needed => "+nbPopToDie+" victim");
 				while(nbPopToDie > 0 && nbMensInPop > 0){
 					if(GlobalRandom.aleat.getInt(2, nbPopToDie) == 0){
@@ -153,17 +155,16 @@ public class HouseNeed extends PopNeed{
 		//then, upgrade random houses to better ones (max normal)
 		nbHousesNeeded = 0;
 		nbCoins += maxMoneyToSpend.normalNeed;
-		int chunk = nbCoins / 10;
-		normalHouse.sort(new ComparatorValueDesc<>(goodPrice));
-		ListIterator<Good> it = normalHouse.listIterator();
+		long chunkCoins = nbCoins / 10;
+		normalHouse.sort((o0,o1) -> Long.compare(goodPrice.getLong(o0), goodPrice.getLong(o1)));
 		//Use this money to buy 10 chunk of random house.
 		for(int i=0;i<10 && nbCoins > 0;i++){
-			Good house = normalHouse.get(GlobalRandom.aleat.getInt(normalHouse.size(), nbMensInPop));
-			int maxStock = goodStock.get(house).getStock() - nbGoods.getInt(house);
-			int price = goodPrice.getInt(house);
+			Good house = normalHouse.get(GlobalRandom.aleat.getInt(normalHouse.size(), (int)nbMensInPop));
+			long maxStock = goodStock.get(house).getStock() - nbGoods.getLong(house);
+			long price = goodPrice.getLong(house);
 			if(maxStock == 0) continue; //no house here
 			if(price == 0){System.err.println("Error in food needs: no price"); continue;}
-			int nbPicked = Math.min(Math.max(1, chunk / price), maxStock);
+			long nbPicked = Math.min(Math.max(1, chunkCoins / price), maxStock);
 			if(nbCoins >= nbPicked * price){
 				nbCoins -= nbPicked * price;
 				moneyUsed += nbPicked * price;
@@ -171,23 +172,22 @@ public class HouseNeed extends PopNeed{
 				nbHousesNeeded -= nbPicked;
 			}
 			if(i==8){
-				chunk = nbCoins;
+				chunkCoins = nbCoins;
 			}
 		}
 		
 		//upgrade to luxurious houses, if possible
 		nbCoins += maxMoneyToSpend.luxuryNeed;
-		chunk = nbCoins / 10;
-		luxuryHouse.sort(new ComparatorValueDesc<>(goodPrice));
-		it = luxuryHouse.listIterator();
+		chunkCoins = nbCoins / 10;
+		luxuryHouse.sort((o0,o1) -> Long.compare(goodPrice.getLong(o0), goodPrice.getLong(o1)));
 		//Use this money to buy 10 chunk of random house.
 		for(int i=0;i<10 && nbCoins > 0;i++){
-			Good house = luxuryHouse.get(GlobalRandom.aleat.getInt(luxuryHouse.size(), nbMensInPop));
-			int maxStock = goodStock.get(house).getStock() - nbGoods.getInt(house);
-			int price = goodPrice.getInt(house);
+			Good house = luxuryHouse.get(GlobalRandom.aleat.getInt(luxuryHouse.size(), (int)nbMensInPop));
+			long maxStock = goodStock.get(house).getStock() - nbGoods.getLong(house);
+			long price = goodPrice.getLong(house);
 			if(maxStock == 0) continue; //no house here
 			if(price == 0){System.err.println("Error in food needs: no price"); continue;}
-			int nbPicked = Math.min(Math.max(1, chunk / price), maxStock);
+			long nbPicked = Math.min(Math.max(1, chunkCoins / price), maxStock);
 			if(nbCoins >= nbPicked * price){
 				nbCoins -= nbPicked * price;
 				moneyUsed += nbPicked * price;
@@ -195,34 +195,34 @@ public class HouseNeed extends PopNeed{
 				nbHousesNeeded -= nbPicked;
 			}
 			if(i==8){
-				chunk = nbCoins;
+				chunkCoins = nbCoins;
 			}
 		}
 		
 		// send empty houses to stock
-		chunk = Math.max(1, -nbHousesNeeded / 10);
+		long chunkHouses = Math.max(1, -nbHousesNeeded / 10);
 		while(nbHousesNeeded < 0){
-			int randomHouseToSell = GlobalRandom.aleat.getInt(lowPriceHouse.size(), nbMensInPop);
-			randomHouseToSell += GlobalRandom.aleat.getInt(lowPriceHouse.size(), nbMensInPop);
-			randomHouseToSell += GlobalRandom.aleat.getInt(lowPriceHouse.size(), nbMensInPop);
+			int randomHouseToSell = GlobalRandom.aleat.getInt(lowPriceHouse.size(), (int)nbMensInPop);
+			randomHouseToSell += GlobalRandom.aleat.getInt(lowPriceHouse.size(), (int)nbMensInPop+7);
+			randomHouseToSell += GlobalRandom.aleat.getInt(lowPriceHouse.size(), (int)nbMensInPop+13);
 			// randomHouseToSell is now between 0 and 3*lowPriceHouse.size, with a mean at lowPriceHouse.size*1.5
 			randomHouseToSell = (int)(Math.abs( (randomHouseToSell - nbMensInPop * 1.5)/1.5));
 			Good house = lowPriceHouse.get(Math.min(randomHouseToSell, lowPriceHouse.size()-1));
 			//sell it
 			//TODO create a renovation industry (sell house to renovation -> then sell house to market)
-			int price = goodStock.get(house).getPriceSellToMarket(prv, nbDays);
-			nbGoods.put(house, nbGoods.get(house) - chunk);
-			nbHousesNeeded += chunk;
-			int totalCost = chunk * price;
+			long price = goodStock.get(house).getPriceSellToMarket(prv, nbDays);
+			nbGoods.put(house, nbGoods.get(house) - chunkHouses);
+			nbHousesNeeded += chunkHouses;
+			long totalCost = chunkHouses * price;
 			moneyUsed -= totalCost;
 			nbCoins += totalCost;
 		}
 		
 		//now tranfert the properties
 		moneyUsed = 0;
-		for(it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Good> entry : nbGoods.object2IntEntrySet()){
+		for(it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<Good> entry : nbGoods.object2LongEntrySet()){
 			Good house = entry.getKey();
-			int nbBuy = entry.getIntValue();
+			long nbBuy = entry.getLongValue();
 			goodStock.get(house).addStock( -nbBuy);
 			currentPopStock.put(house, currentPopStock.get(house)+nbBuy);
 			goodStock.get(house).addNbConsumePerDay(nbBuy / (float)nbDays);

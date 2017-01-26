@@ -2,7 +2,6 @@ package remi.ssp_basegame.economy;
 
 import java.util.Collection;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceIndustry;
@@ -32,25 +31,24 @@ public class WoodHouseIndustry extends Industry {
 	static protected Good good;
 	
 	@Override
-	public int produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
 		Province prv = indus.getProvince();
-		Object2IntMap<Good> stock = prv.getIndustry(ptr).getStock();
 		
-		int nbMens = 0;
+		long nbMens = 0;
 		for(Pop pop : pops){
 			//TODO tools
-			nbMens += pop.getNbMensEmployed().getInt(indus);
+			nbMens += pop.getNbMensEmployed().getLong(indus);
 			// take into account personal tools ?
 		}
 
 		//a kilo of goods per worker per day with a kilo of tools
 		// the quarter if no tools
 		float production = nbMens * 0.25f;;
-		production += 0.75f * Math.max(prv.getIndustry(ptr).getStock().getInt(createThis), nbMens) * createThis.getIndustryToolEfficiency();
+		production += 0.75f * Math.max(prv.getIndustry(ptr).getStock().getLong(createThis), nbMens) * createThis.getIndustryToolEfficiency();
 		production *= durationInDay;
 
 		// produce
-		int intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)production, durationInDay);
+		long intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)production, durationInDay);
 		super.sellProductToMarket(prv, intproduction, durationInDay);
 	
 		return intproduction;

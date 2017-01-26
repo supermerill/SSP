@@ -26,7 +26,6 @@ import javax.json.JsonWriter;
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Civilisation;
 import remi.ssp.politic.Culture;
-import remi.ssp.politic.Province;
 
 public class PluginLoader{
 

@@ -13,9 +13,9 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import remi.ssp.CurrentGame;
 import remi.ssp.army.Battalion;
 import remi.ssp.army.DivisionTemplate;
@@ -33,10 +33,10 @@ public class Civilisation {
 	List<DivisionUnit> divisions = new ArrayList<>();
 	List<Battalion> battalionTemplate = new ArrayList<>();
 	int mensInReserve = 0;
-	Object2IntMap<EquipmentDevelopped> equipmentReserve = new Object2IntOpenHashMap<>();
+	Object2LongMap<EquipmentDevelopped> equipmentReserve = new Object2LongOpenHashMap<>();
 
 	// to compute tech movements. 
-	Object2IntMap<Civilisation> lastTradeRouteExchange = new Object2IntOpenHashMap<>(); //TODOSAVE cache value for economy (TODO: reasert)
+	Object2LongMap<Civilisation> lastTradeRouteExchange = new Object2LongOpenHashMap<>(); //TODOSAVE cache value for economy (TODO: reasert)
 	
 	
 	Culture mainCulture;
@@ -46,8 +46,8 @@ public class Civilisation {
 	public List<DivisionTemplate> getDivisionTemplate() { return divisionTemplate; }
 	public List<Battalion> getBattalionTemplate() { return battalionTemplate; }
 	public int getMensInReserve() { return mensInReserve; }
-	public Object2IntMap<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
-	public Object2IntMap<Civilisation> getTradeRouteExchange() { return lastTradeRouteExchange; }
+	public Object2LongMap<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
+	public Object2LongMap<Civilisation> getTradeRouteExchange() { return lastTradeRouteExchange; }
 	
 
 	public void load(JsonObject jsonObj, Carte carte){
@@ -102,11 +102,11 @@ public class Civilisation {
 		jsonOut.add("prvs", array);
 
 		array = Json.createArrayBuilder();
-		for(Entry<EquipmentDevelopped> prv : equipmentReserve.object2IntEntrySet()){
+		for(Entry<EquipmentDevelopped> prv : equipmentReserve.object2LongEntrySet()){
 			JsonObjectBuilder objBuild = Json.createObjectBuilder();
 			prv.getKey().save(objBuild);
 			objBuild.add("id", prv.getKey().getId());
-			objBuild.add("nbStock", prv.getIntValue());
+			objBuild.add("nbStock", prv.getLongValue());
 			array.add(objBuild);
 		}
 		jsonOut.add("prvs", array);

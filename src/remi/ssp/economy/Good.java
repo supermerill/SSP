@@ -59,6 +59,7 @@ public class Good {
 		public GoodFactory setStorageLossPerYear(float storageLossPerYear) { currentGood.storageLossPerYear = storageLossPerYear; return me; }
 		public GoodFactory setCommerceCapacityPerMen(int commerceCapacityPerMen) { currentGood.commerceCapacityPerMen = commerceCapacityPerMen; return me; }
 		public GoodFactory setIndustryToolEfficiency(int industryToolEfficiency) {	currentGood.industryToolEfficiency = industryToolEfficiency; return me; }
+		public GoodFactory setOptimalStockPerMen(float optimalStockPerMen) {	currentGood.optimalStockPerMen = optimalStockPerMen; return me; }
 		public Good get() { return currentGood; }
 	}
 	public static Good get(String name){
@@ -83,6 +84,8 @@ public class Good {
 	
 	protected int desirability=0; //  +1 = 20% better, +5 = two time better!
 	
+	protected float optimalStockPerMen = 0.1f;
+	
 	
 	//stats
 	protected int commerceCapacityPerMen = 0; //increase the commerce capacity of a men by a certain amount
@@ -93,10 +96,10 @@ public class Good {
 	 * @param previousStock
 	 * @return new stock
 	 */
-	public int storageLoss(int previousStock, int durationInDay) {
+	public long storageLoss(long previousStock, long durationInDay) {
 		//TODO: change his with tech
 		//reduce the quantity by X% per month
-		return (int)(previousStock * Math.pow(storageLossPerYear, durationInDay/360.0));
+		return (long)(previousStock * Math.pow(storageLossPerYear, durationInDay/360.0));
 	}
 
 	public boolean isNaval() { return false; }
@@ -108,10 +111,14 @@ public class Good {
 	public int getDesirability() { return desirability; }
 	public int getCommerceCapacityPerMen() { return commerceCapacityPerMen; }
 	public int getIndustryToolEfficiency() { return industryToolEfficiency;	}
+	public float getOptimalStockPerMen() { return optimalStockPerMen;	}
 	
 	
 	
 	
-	
+	@Override
+	public String toString() {
+		return getName();
+	}
 	
 }

@@ -2,6 +2,7 @@ package remi.ssp.politic;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.json.Json;
@@ -10,9 +11,9 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.CurrentGame;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
@@ -27,20 +28,20 @@ public class Pop {
 	public Pop(){}
 	public Pop(/*Culture culture,*/ Province prv){ this.prv = prv; }
 	
-	private int nbMensTotal=0;
+	private long nbMensTotal=0;
 	private int[] nombreHabitantsParAge = new int[100]; // de 0 à 100ans
-	int nbMensInArmy=0; //cf job?
-	int nbMensChomage=0;
+	long nbMensInArmy=0; //cf job?
+	long nbMensChomage=0;
 //	int nbMensCommerce=0;//cf job // more = more imports & exports. A part is used as a baseline for shop = efficacity of stock retention (TODO)
-	Object2IntMap<Job> nbMensEmployed = new Object2IntOpenHashMap<>();
+	Object2LongMap<Job> nbMensEmployed = new Object2LongOpenHashMap<>();
 
 	// commerce
 	ProvinceCommerce commerceLand = new ProvinceCommerce("commLand"); //fake industry to contains commerce data
 	ProvinceCommerce commerceSea = new ProvinceCommerce("commSea"); //fake industry to contains commerce data
 //	int revenueCommerce = 0; //industry one is stored in factories, military in civilisation.
 
-	int cash = 0; // during a tunr, people receive cash. Then, they use it to buy goods.
-	Object2IntMap<Good> stock = new Object2IntOpenHashMap<>();
+	long cash = 0; // during a tunr, people receive cash. Then, they use it to buy goods.
+	Object2LongMap<Good> stock = new Object2LongOpenHashMap<>();
 	List<PopNeed> myNeeds = new ArrayList<>();
 //	SortedSet<Needs> popNeeds = new TreeSet<>();
 	public Collection<PopNeed> getPopNeeds() { return myNeeds; }
@@ -65,35 +66,77 @@ public class Pop {
 	public Province getProvince() { return prv; }
 	public int getNombreHabitantsParAge(int age) { if(age>=nombreHabitantsParAge.length) return 0; return nombreHabitantsParAge[age]; }
 	public void addHabitants(int age, int nb){ nombreHabitantsParAge[age] += nb; nbMensTotal += nb; }
-	public void removeHabitants(int age, int nb){ nombreHabitantsParAge[age] -= nb; nbMensTotal -= nb; }
-	public int getNbMensInArmy() { return nbMensInArmy; }
-	public int getNbMensChomage() { return nbMensChomage; }
-	public void setNbMensChomage(int nb) { nbMensChomage = nb; }
-	public void addNbMensChomage(int nb) { nbMensChomage += nb; }
+	public long getNbMensInArmy() { return nbMensInArmy; }
+	public long getNbMensChomage() { return nbMensChomage; }
+	public void setNbMensChomage(long nb) { nbMensChomage = nb; }
+	public void addNbMensChomage(long nb) { nbMensChomage += nb; }
 //	public int getNbMensCommerce() { return nbMensCommerce; }
-	public Object2IntMap<Job> getNbMensEmployed() { return nbMensEmployed; }
+	public Object2LongMap<Job> getNbMensEmployed() { return nbMensEmployed; }
 	public float getEducationMoy() { return educationMoy; }
 	public float getSante() { return sante; }
 //	public SocialStatus getStatus() { return status; }
-	public int getNbMens() { return nbMensTotal; }
-	public int getMoney() { return cash; }
-	public void addMoney(int money) { this.cash += money; }
-	public void setMoney(int money) { this.cash = money; }
-	public Object2IntMap<Good> getStock() { return stock; }
+	public long getNbMens() { return nbMensTotal; }
+	public long getMoney() { return cash; }
+	public void addMoney(long money) { this.cash += money; }
+	public void setMoney(long money) { this.cash = money; }
+	public Object2LongMap<Good> getStock() { return stock; }
 	public float getRepartitionRevenuMult() { return repartitionMult; }
 	public float getRepartitionRevenu(float i){ return 1-(1/(1+(i*repartitionMult))); }
 	public ProvinceCommerce getLandCommerce() { return commerceLand; }
 	public ProvinceCommerce getSeaCommerce() { return commerceSea; }
 	
+
+	public int removeHabitants(final int age, final int nb){ 
+		long nbRemoved = Math.min(nb, nbMensTotal);
+		int removed = 0;
+		if(nbMensChomage >0){
+			long minus = Math.min(nbMensChomage, nbRemoved);
+			nbMensChomage -=minus;
+			nbRemoved -= minus;
+			removed += minus;
+		}
+		if(nbMensEmployed.size()>0 && nbRemoved>0){
+			boolean canContinue = false;
+			List<Job> jobs = new ArrayList<>(nbMensEmployed.keySet());
+			do{
+				canContinue = false;
+				Collections.shuffle(jobs);
+				for(Job job : jobs){
+					if(nbMensEmployed.getLong(job)>0 && nbRemoved>0){
+						nbMensEmployed.put(job, nbMensEmployed.getLong(job) -1);
+						nbRemoved --;
+						removed ++;
+						canContinue = true;
+					}
+				}
+			}while(canContinue);
+		}
+		if(nbMensInArmy>0 && nbRemoved>0){
+			//army ?
+			long minus = Math.min(nbMensInArmy, nbRemoved);
+			nbMensInArmy -=minus;
+			nbRemoved -= minus;
+			removed += minus;
+		}
+		if(nbRemoved>0){
+			//not possible
+			System.err.println("Error, can't find a pop men job. So he don't die");
+			nombreHabitantsParAge[age] -= nbRemoved; 
+			nbMensTotal -= nbRemoved; 
+		}
+		nombreHabitantsParAge[age] -= removed; 
+		nbMensTotal -= removed; 
+		return removed;
+	}
 	
 	//public float criminalite=0; //0=> auncun, 1=> anarchie
 
 	public void load(JsonObject jsonObj, Province prv){
 		this.prv = prv;
-		nbMensTotal = jsonObj.getInt("nb");
-		nbMensInArmy = jsonObj.getInt("nbArmy");
-		nbMensChomage = jsonObj.getInt("nbUE");
-//		nbMensCommerce = jsonObj.getInt("nbBI");
+		nbMensTotal = jsonObj.getJsonNumber("nb").longValue();
+		nbMensInArmy = jsonObj.getJsonNumber("nbArmy").longValue();
+		nbMensChomage = jsonObj.getJsonNumber("nbUE").longValue();
+//		nbMensCommerce = jsonObj.getLong("nbBI");
 		JsonArray array = jsonObj.getJsonArray("popD");
 		for(int i=0;i<array.size() && i< nombreHabitantsParAge.length;i++){
 			nombreHabitantsParAge[i] = array.getInt(i);
@@ -105,7 +148,7 @@ public class Pop {
 			String jobName = object.getString("name");
 			Industry jobIndustry = Industry.get(jobName);
 			if(jobIndustry != null){
-				nbMensEmployed.put(prv.industries.get(jobIndustry), object.getInt("nb"));
+				nbMensEmployed.put(prv.industries.get(jobIndustry), object.getJsonNumber("nb").longValue());
 			}else if(jobName.equals("commLand")){
 				commerceLand = new ProvinceCommerce("commLand"); //TODO: use moddable factories in all load() method in the project
 				commerceLand.load(jsonObj.getJsonObject("trl"), prv);
@@ -115,13 +158,13 @@ public class Pop {
 			}
 		}
 		
-		cash = jsonObj.getInt("cash");
+		cash = jsonObj.getJsonNumber("cash").longValue();
 		
 		array = jsonObj.getJsonArray("stock");
 		stock.clear();
 		for(int i=0;i<array.size();i++){
 			JsonObject object = array.getJsonObject(i);
-			stock.put(Good.get(object.getString("name")), object.getInt("nb"));
+			stock.put(Good.get(object.getString("name")), object.getJsonNumber("nb").longValue());
 		}
 		array = jsonObj.getJsonArray("needs");
 		myNeeds.clear();
@@ -149,10 +192,10 @@ public class Pop {
 		}
 		jsonOut.add("popD", array);
 		array = Json.createArrayBuilder();
-		for(Entry<Job> good : nbMensEmployed.object2IntEntrySet()){
+		for(Entry<Job> good : nbMensEmployed.object2LongEntrySet()){
 			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
 			objectBuilder.add("name", good.getKey().getName());
-			objectBuilder.add("nb", good.getIntValue());
+			objectBuilder.add("nb", good.getLongValue());
 			array.add(objectBuilder);
 		}
 		jsonOut.add("nbE", array);
@@ -166,10 +209,10 @@ public class Pop {
 		jsonOut.add("cash", cash);
 
 		array = Json.createArrayBuilder();
-		for(Entry<Good> good : stock.object2IntEntrySet()){
+		for(Entry<Good> good : stock.object2LongEntrySet()){
 			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
 			objectBuilder.add("name", good.getKey().getName());
-			objectBuilder.add("nb", good.getIntValue());
+			objectBuilder.add("nb", good.getLongValue());
 			array.add(objectBuilder);
 		}
 		jsonOut.add("stock", array);

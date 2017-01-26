@@ -14,8 +14,8 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
@@ -117,11 +117,12 @@ public class Province{
 	//economic
 	Map<Industry, ProvinceIndustry> industries = new HashMap<>();
 	Map<Good, ProvinceGoods> stock = new HashMap<>(); //market : industry & pop & merchant buy goods from this. industry & merchant sell goods into this
-	int money; //BFR from the marketplace
-	int moneyChangePerDay;
+	long money; //BFR from the marketplace
+	long previousMoney;
+	long moneyChangePerDay;
 	List<TradeRoute> tradeRoutes = new ArrayList<>();
 	//to compute the cultural exchange
-	Object2IntMap<Province> lastTradeRouteExchange = new Object2IntOpenHashMap<>(); //TODOSAVE, cache value for economy (TODO: reasert)
+	Object2LongMap<Province> lastTradeRouteExchange = new Object2LongOpenHashMap<>(); //TODOSAVE, cache value for economy (TODO: reasert)
 		
 	//autres
 	public float rayonnementCulturel = 0; //0=nul, X=nombre de personnes connaissant cette province.
@@ -154,13 +155,14 @@ public class Province{
 	public Collection<Pop> getPops() { return this.pops; }
 	public Civilisation getOwner() { return owner; }
 	public void setOwner(Civilisation civ) { this.owner = civ; }
-	public int getMoney() { return money; }
-	public void setMoney(int money) { this.money = money; }
-	public void addMoney(int money) { this.money += money; }
-	public int getMoneyChangePerDay() { return moneyChangePerDay; }
-	public void setMoneyChangePerDay(int moneyChangePerDay) { this.moneyChangePerDay = moneyChangePerDay; }
+	public long getMoney() { return money; }
+	public long getPreviousMoney() { return previousMoney; }
+	public void setMoney(long money) { this.money = money; }
+	public void addMoney(long money) { this.money += money; moneyChangePerDay+=Math.abs(money); }
+	public long getMoneyChangePerDay() { return moneyChangePerDay; }
+	public void resetMoneyComputeNewTurn() { this.moneyChangePerDay = 0; previousMoney = money; }
 	public List<TradeRoute> getTradeRoute() { return tradeRoutes; }
-	public Object2IntMap<Province> getLastTradeRouteExchange(){return lastTradeRouteExchange;}
+	public Object2LongMap<Province> getLastTradeRouteExchange(){return lastTradeRouteExchange;}
 
 	public float getRoutes() { return routes; }
 	public void setRoutes(float routes) { this.routes = routes; }
@@ -237,8 +239,8 @@ public class Province{
 		routes = (float)jsonProvince.getJsonNumber("routes").doubleValue();
 		rail = (float)jsonProvince.getJsonNumber("rail").doubleValue();
 		criminalite = (float)jsonProvince.getJsonNumber("criminalite").doubleValue();
-		money = jsonProvince.getInt("money");
-		moneyChangePerDay = jsonProvince.getInt("money");
+		money = jsonProvince.getJsonNumber("money").longValue();
+		moneyChangePerDay = jsonProvince.getJsonNumber("money").longValue();
 		rayonnementCulturel = (float)jsonProvince.getJsonNumber("rayonnementCulturel").doubleValue();
 		nbElites = jsonProvince.getInt("nbElites");
 		

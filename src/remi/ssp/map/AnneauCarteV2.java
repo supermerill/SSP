@@ -358,6 +358,9 @@ public class AnneauCarteV2 implements MapFactory {
 						prv.pourcentForet = (0.5f-Math.abs(humidite-0.5f))/2;
 						System.out.println("pourcentForet: "+prv.pourcentForet);
 						prv.pourcentFriche = prv.pourcentForet;
+						prv.pourcentChamps = prv.pourcentFriche/4;
+						prv.pourcentPrairie = prv.pourcentFriche/4;
+						prv.pourcentFriche = prv.pourcentFriche/2;
 						prv.pourcentSterile = Math.abs(humidite-0.5f);
 					}};
 				dessine(centre, tailleMontagne/3, dessineur);

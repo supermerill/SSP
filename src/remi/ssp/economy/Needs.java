@@ -1,13 +1,8 @@
 package remi.ssp.economy;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import remi.ssp.economy.Good.GoodFactory;
-import remi.ssp.economy.Needs.NeedWish;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import remi.ssp.politic.Province;
 
 /**
@@ -47,7 +42,7 @@ public abstract class Needs implements Comparable<Needs>{
 	float optimalStockPerPop = 0.1f; // if the stock increase for more than that, it will decrease in price. (like 0.1 for house, 200 for food)
 	
 
-	public String getName() { return name; }
+	public String getName() { if(name!=null)return name; else return getClass().getName(); }
 	public float getOptimalStockPerPop() { return optimalStockPerPop; }
 	public float getMinimumStockPerPop() { return minimumStockPerPop; }
 	
@@ -60,7 +55,7 @@ public abstract class Needs implements Comparable<Needs>{
 	 * @param nbDays
 	 * @return
 	 */
-	public abstract NeedWish moneyNeeded(Province prv, int nb, Object2IntMap<Good> currentStock, int totalMoneyThisTurn, int nbDays);
+	public abstract NeedWish moneyNeeded(Province prv, long nb, Object2LongMap<Good> currentStock, long totalMoneyThisTurn, int nbDays);
 
 	/**
 	 * You should watch the BasicIndutryNeed or FoodNeed instead.
@@ -71,7 +66,7 @@ public abstract class Needs implements Comparable<Needs>{
 	 * @param nbDays
 	 * @return
 	 */
-	public abstract int spendMoney(Province prv, int nb, Object2IntMap<Good> currentStock, NeedWish maxMoneyToSpend, int nbDays);
+	public abstract long spendMoney(Province prv, long nb, Object2LongMap<Good> currentStock, NeedWish maxMoneyToSpend, int nbDays);
 	
 	
 	@Override
@@ -82,10 +77,10 @@ public abstract class Needs implements Comparable<Needs>{
 	
 	
 	public static class NeedWish{
-		public int vitalNeed; // MUST be completed. No need for more.
-		public int normalNeed; // should be completed. Okay to have some more
-		public int luxuryNeed; // may be completed. Put as many more as you want into this.
-		public NeedWish(int vital, int normal, int luxury){
+		public long vitalNeed; // MUST be completed. No need for more.
+		public long normalNeed; // should be completed. Okay to have some more
+		public long luxuryNeed; // may be completed. Put as many more as you want into this.
+		public NeedWish(long vital, long normal, long luxury){
 			vitalNeed = vital;
 			normalNeed = normal;
 			luxuryNeed = luxury;
@@ -94,6 +89,13 @@ public abstract class Needs implements Comparable<Needs>{
 			vitalNeed += moneyNeeds.vitalNeed;
 			normalNeed += moneyNeeds.normalNeed;
 			luxuryNeed += moneyNeeds.luxuryNeed;
+		}
+		
+		public String toString(){
+			return vitalNeed+":"+normalNeed+":"+luxuryNeed;
+		}
+		public long getMoney() {
+			return vitalNeed+normalNeed+luxuryNeed;
 		}
 	}
 	

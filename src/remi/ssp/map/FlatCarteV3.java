@@ -372,10 +372,12 @@ public class FlatCarteV3 implements MapFactory {
 	
 
 	private void createDesert() {
+		System.out.println("createDesert?");
 		int ordreGrandeurInit = (int) Math.log1p(nbLigne * nbColonne) - 2;
 
 		for (int tailleMontagne = 0; tailleMontagne < ordreGrandeurInit*2; tailleMontagne++) {
 			for (int i = 0; i < ordreGrandeurInit; i++) {
+				System.out.println("createDesert");
 				// on prend un point sur la terre au pif
 				int abscice = rand.nextInt(nbColonne);
 				int ordonnee = rand.nextInt(nbLigne);
@@ -392,6 +394,9 @@ public class FlatCarteV3 implements MapFactory {
 						prv.pourcentForet = (0.5f-Math.abs(humidite-0.5f))/2;
 //						System.out.println("pourcentForet: "+prv.pourcentForet);
 						prv.pourcentFriche = prv.pourcentForet;
+						prv.pourcentChamps = prv.pourcentFriche/4;
+						prv.pourcentPrairie = prv.pourcentFriche/4;
+						prv.pourcentFriche = prv.pourcentFriche/2;
 						prv.pourcentSterile = Math.abs(humidite-0.5f);
 					}};
 				dessine(centre, tailleMontagne/3, dessineur);
@@ -416,6 +421,17 @@ public class FlatCarteV3 implements MapFactory {
 	}
 
 	private void createSol() {
+		System.out.println("createSol");
+		for(List<Province> prvs : provinces){
+			for(Province prv : prvs){
+				prv.pourcentForet = 0.5f;
+				prv.pourcentFriche = prv.pourcentForet;
+				prv.pourcentChamps = prv.pourcentFriche/4;
+				prv.pourcentPrairie = prv.pourcentFriche/4;
+				prv.pourcentFriche = prv.pourcentFriche/2;
+			}
+		}
+		
 		// 50% water
 
 		// on va envoyer des patch de terre et d'eau de + en plus petits au pif

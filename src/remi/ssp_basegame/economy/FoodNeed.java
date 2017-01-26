@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.PopNeed;
@@ -37,8 +39,8 @@ public class FoodNeed extends PopNeed {
 	}
 
 	@Override
-	public NeedWish moneyNeeded(Province prv, int nbMensInPop, Object2IntMap<Good> currentPopStock,
-			int totalMoneyThisTurn, int nbDays) {
+	public NeedWish moneyNeeded(Province prv, long nbMensInPop, Object2LongMap<Good> currentPopStock,
+			long totalMoneyThisTurn, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 
 		NeedWish wish = new NeedWish(0, 0, 0);
@@ -61,7 +63,7 @@ public class FoodNeed extends PopNeed {
 		List<Good> lowPriceFood = new ArrayList<>();
 		List<Good> normalFood = new ArrayList<>();
 		List<Good> luxuryFood = new ArrayList<>();
-		Object2IntMap<Good> goodPrice = new Object2IntOpenHashMap<>();
+		Object2LongMap<Good> goodPrice = new Object2LongOpenHashMap<>();
 		for (Entry<Good, ProvinceGoods> entry : goodStock.entrySet()) {
 //			System.out.println("there are a stock of "+entry.getValue().getStock()+" of "+entry.getKey().getName()+" @"+prv.x+":"+prv.y);
 			Good good = entry.getKey();
@@ -80,18 +82,19 @@ public class FoodNeed extends PopNeed {
 		}
 		// NOTE: we don't use the joule value yet, we assume a joule value of
 		// 16000 kJ per kilo of food for everything
-		lowPriceFood.sort(new ComparatorValueDesc<>(goodPrice));
+		//sort by price (lower first)
+		lowPriceFood.sort((o1,o2)->Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
 		kgNeeded = maxKgNeeded;
 		for (Good food : lowPriceFood) {
-			System.out.println("i try buy " + food.getName());
+			System.out.println("i try buy " + food.getName()+" @ "+goodPrice.getLong(food));
 			if (kgNeeded <= goodStock.get(food).getStock()) {
-				System.out.println("enough " + food.getName() + " : " + kgNeeded + "/" + goodStock.get(food).getStock());
-				wish.vitalNeed += kgNeeded * goodPrice.getInt(food);
+//				System.out.println("enough " + food.getName() + " : " + kgNeeded + "/" + goodStock.get(food).getStock());
+				wish.vitalNeed += kgNeeded * goodPrice.getLong(food);
 				kgNeeded = 0;
 				break;
 			} else {
-				System.out.println("not enough " + food.getName() + " : " + kgNeeded + "/" + goodStock.get(food).getStock());
-				wish.vitalNeed += goodStock.get(food).getStock() * goodPrice.getInt(food);
+//				System.out.println("not enough " + food.getName() + " : " + kgNeeded + "/" + goodStock.get(food).getStock());
+				wish.vitalNeed += goodStock.get(food).getStock() * goodPrice.getLong(food);
 				kgNeeded -= goodStock.get(food).getStock();
 			}
 		}
@@ -105,28 +108,30 @@ public class FoodNeed extends PopNeed {
 			return wish;
 		}
 
-		normalFood.sort(new ComparatorValueDesc<>(goodPrice));
+		//sort by price (lower first)
+		normalFood.sort((o1,o2)->Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
 		kgNeeded = maxKgNeeded;
 		for (Good food : normalFood) {
 			if (kgNeeded <= goodStock.get(food).getStock()) {
-				wish.normalNeed += kgNeeded * goodPrice.getInt(food);
+				wish.normalNeed += kgNeeded * goodPrice.getLong(food);
 				kgNeeded = 0;
 				break;
 			} else {
-				wish.normalNeed += goodStock.get(food).getStock() * goodPrice.getInt(food);
+				wish.normalNeed += goodStock.get(food).getStock() * goodPrice.getLong(food);
 				kgNeeded -= goodStock.get(food).getStock();
 			}
 		}
 
-		luxuryFood.sort(new ComparatorValueDesc<>(goodPrice));
+		//sort by price (lower first)
+		luxuryFood.sort((o1,o2)->Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
 		kgNeeded = maxKgNeeded;
 		for (Good food : luxuryFood) {
 			if (kgNeeded <= goodStock.get(food).getStock()) {
-				wish.luxuryNeed += kgNeeded * goodPrice.getInt(food);
+				wish.luxuryNeed += kgNeeded * goodPrice.getLong(food);
 				kgNeeded = 0;
 				break;
 			} else {
-				wish.luxuryNeed += goodStock.get(food).getStock() * goodPrice.getInt(food);
+				wish.luxuryNeed += goodStock.get(food).getStock() * goodPrice.getLong(food);
 				kgNeeded -= goodStock.get(food).getStock();
 			}
 		}
@@ -142,7 +147,7 @@ public class FoodNeed extends PopNeed {
 	}
 
 	@Override
-	public int spendMoney(Province prv, int nbMensInPop, Object2IntMap<Good> currentPopStock, NeedWish maxMoneyToSpend,
+	public long spendMoney(Province prv, long nbMensInPop, Object2LongMap<Good> currentPopStock, NeedWish maxMoneyToSpend,
 			int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		System.out.println("@" + myPop.getProvince().x + ":" + myPop.getProvince().y + ", to buy food, i have  "
@@ -163,8 +168,8 @@ public class FoodNeed extends PopNeed {
 		List<Good> normalFood = new ArrayList<>();
 		List<Good> luxuryFood = new ArrayList<>();
 		List<Good> allFood = new ArrayList<>();
-		Object2IntMap<Good> goodPrice = new Object2IntOpenHashMap<>();
-		Object2IntMap<Good> nbGoods = new Object2IntOpenHashMap<>();
+		Object2LongMap<Good> goodPrice = new Object2LongOpenHashMap<>();
+		Object2LongMap<Good> nbGoods = new Object2LongOpenHashMap<>();
 		for (Entry<Good, ProvinceGoods> entry : goodStock.entrySet()) {
 			Good good = entry.getKey();
 			if (kJoules.containsKey(good) && entry.getValue().getStock() > 0) {
@@ -182,77 +187,88 @@ public class FoodNeed extends PopNeed {
 		}
 		// NOTE: we don't use the joule value yet, we assume a joule value of
 		// 16000 kJ per kilo of food for everything
-		lowPriceFood.sort(new ComparatorValueDesc<>(goodPrice));
-		normalFood.sort(new ComparatorValueDesc<>(goodPrice));
-		luxuryFood.sort(new ComparatorValueDesc<>(goodPrice));
+		//sort by price (lower first)
+		lowPriceFood.sort((o1,o2)->Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
+		normalFood.sort((o1,o2)->Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
+		luxuryFood.sort((o1,o2)->Long.compare(goodPrice.getLong(o1) / o1.getDesirability(), goodPrice.getLong(o2) / o2.getDesirability()));
+		allFood.sort((o1,o2)->Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
 
 		nbGoods.defaultReturnValue(-1);
 		int nbKiloVital = 0;
 		int nbKiloNormal = 0;
 		int nbKiloLuxe = 0;
 
-		int nbCoinsVital = maxMoneyToSpend.vitalNeed;
-		int nbCoins = nbCoinsVital;
-		for (Good food : lowPriceFood) {
-			int totalPrice = goodStock.get(food).getStock() * goodPrice.getInt(food);
+		long nbCoinsVital = maxMoneyToSpend.vitalNeed;
+		long nbCoins = nbCoinsVital;
+		for (Good food : allFood) {
+			long quantityWanted = Math.min(goodStock.get(food).getStock(), kgNeeded-nbKiloVital);
+			long totalPrice = quantityWanted * goodPrice.getLong(food);
+			System.out.println("i try buy " + food.getName()+" @ "+goodPrice.getLong(food));
 			if (totalPrice == 0)
 				continue; // no food here
 			if (nbCoins <= totalPrice) {
-				int quantityPicked = nbCoins / goodPrice.getInt(food);
+				long quantityPicked = nbCoins / goodPrice.getLong(food);
 				nbKiloVital += quantityPicked;
 				nbGoods.put(food, quantityPicked);
+				System.out.println("i buy crap "+quantityPicked+" " + food.getName()+" @ "+goodPrice.getLong(food)+" for "+nbCoins);
 				nbCoins = 0;
 				break;
 			} else {
 				nbCoins -= totalPrice;
-				int quantityPicked = goodStock.get(food).getStock();
+				long quantityPicked = quantityWanted;
 				nbKiloVital += goodStock.get(food).getStock();
 				nbGoods.put(food, quantityPicked);
+				System.out.println("i buy crap "+quantityPicked+" " + food.getName()+" @ "+goodPrice.getLong(food)+" for "+totalPrice);
 			}
 		}
 
 		nbCoinsVital -= nbCoins; // keep the remaining, because shortage.
-		int nbCoinsNormal = maxMoneyToSpend.normalNeed + nbCoins;
+		long nbCoinsNormal = maxMoneyToSpend.normalNeed + nbCoins;
 		nbCoins = nbCoinsNormal;
 		for (Good food : normalFood) {
-			int totalPrice = goodStock.get(food).getStock() * goodPrice.getInt(food);
+			long quantityWanted = Math.min(goodStock.get(food).getStock(), (3*kgNeeded/2)-(nbKiloVital+nbKiloNormal));
+			long totalPrice = quantityWanted * goodPrice.getLong(food);
 			if (totalPrice == 0)
 				continue; // no food here
 			if (nbCoins <= totalPrice) {
-				int quantityPicked = nbCoins / goodPrice.getInt(food);
+				long quantityPicked = nbCoins / goodPrice.getLong(food);
 				nbKiloNormal += quantityPicked;
 				nbGoods.put(food, quantityPicked);
+				System.out.println("i buy "+quantityPicked+" " + food.getName()+" @ "+goodPrice.getLong(food)+" for "+nbCoins+" (q="+(nbCoins / goodPrice.getLong(food))+"="+(nbCoins / (double)goodPrice.getLong(food)));
 				nbCoins = 0;
 				break;
 			} else {
-				int quantityPicked = goodStock.get(food).getStock();
+				long quantityPicked = quantityWanted;
 				nbCoins -= totalPrice;
 				nbKiloNormal += quantityPicked;
 				nbGoods.put(food, quantityPicked);
+				System.out.println("i buy "+quantityPicked+" " + food.getName()+" @ "+goodPrice.getLong(food)+" for "+totalPrice+" (now i hav "+nbCoins+")");
 			}
 		}
 
 		nbCoinsNormal -= nbCoins; // keep the remaining, because shortage.
-		int nbCoinsluxe = maxMoneyToSpend.luxuryNeed + nbCoins; // keep the
+		long nbCoinsluxe = maxMoneyToSpend.luxuryNeed + nbCoins; // keep the
 																// remaining,
 																// because
 																// shortage.
 		nbCoins = nbCoinsluxe;
 		for (Good food : luxuryFood) {
-			int totalPrice = goodStock.get(food).getStock() * goodPrice.getInt(food);
+			long totalPrice = goodStock.get(food).getStock() * goodPrice.getLong(food);
 			if (totalPrice == 0)
 				continue; // no food here
 			if (nbCoins <= totalPrice) {
-				int quantityPicked = nbCoins / goodPrice.getInt(food);
+				long quantityPicked = nbCoins / goodPrice.getLong(food);
 				nbKiloLuxe += quantityPicked;
 				nbGoods.put(food, quantityPicked);
+				System.out.println("i buy good "+quantityPicked+" " + food.getName()+" @ "+goodPrice.getLong(food)+" for "+nbCoins);
 				nbCoins = 0;
 				break;
 			} else {
-				int quantityPicked = goodStock.get(food).getStock();
+				long quantityPicked = goodStock.get(food).getStock();
 				nbCoins -= totalPrice;
 				nbKiloLuxe += quantityPicked;
 				nbGoods.put(food, quantityPicked);
+				System.out.println("i buy good "+quantityPicked+" " + food.getName()+" @ "+goodPrice.getLong(food)+" for "+totalPrice);
 			}
 		}
 
@@ -272,6 +288,7 @@ public class FoodNeed extends PopNeed {
 			int newMoney = 0;
 
 			if (nbSurplus < 0) {
+				
 				// TODO: add a bit of random
 				// TODO: give some from others to vital, if possible?
 
@@ -283,7 +300,7 @@ public class FoodNeed extends PopNeed {
 																		// personne
 																		// par
 																		// jour
-				int nbPopToDie = Math.min(nbMensInPop, (int) (nbPopNoFood * 0.5));
+				int nbPopToDie = (int)Math.min(Integer.MAX_VALUE, Math.min(nbMensInPop, (int) (nbPopNoFood * 0.5)));
 				if (nbPopToDie > 0) {
 					System.out.println("famine! (" + nbPopNoFood + "+" + (nbKiloVital + nbKiloNormal + nbKiloLuxe)
 							+ "<=" + kgNeeded + " => " + prv.rationReserve + ")" + nbMensInPop + " => ");
@@ -321,6 +338,7 @@ public class FoodNeed extends PopNeed {
 
 			} else {
 				// TODO: add a bit of random
+				//TODO: this algo is WRONG
 
 				// grab the money back
 				if (nbSurplus >= nbKiloVital) {
@@ -336,44 +354,44 @@ public class FoodNeed extends PopNeed {
 						// nbCoinsNormal = 0;
 
 						for (Good food : luxuryFood) {
-							int nb = nbGoods.getInt(food);
+							long nb = nbGoods.getLong(food);
 							if (nb == -1)
 								System.err.println("Error in food needs");
 							if (nb == 0)
 								continue; // no food here
-							if (goodPrice.getInt(food) == 0) {
+							if (goodPrice.getLong(food) == 0) {
 								System.err.println("Error in food needs: no price for " + food.getName());
 								continue;
 							} // no price here ?
 							if (nbSurplus <= nb) {
-								newMoney += nbSurplus * goodPrice.getInt(food);
+								newMoney += nbSurplus * goodPrice.getLong(food);
 								nbGoods.put(food, nb - nbSurplus);
 								nbSurplus = 0;
 								break;
 							} else {
-								newMoney += nb * goodPrice.getInt(food);
+								newMoney += nb * goodPrice.getLong(food);
 								nbGoods.put(food, 0);
 								nbSurplus -= nb;
 							}
 						}
 					} else {
 						for (Good food : normalFood) {
-							int nb = nbGoods.getInt(food);
+							long nb = nbGoods.getLong(food);
 							if (nb == -1)
 								System.err.println("Error in food needs");
 							if (nb == 0)
 								continue; // no food here
-							if (goodPrice.getInt(food) == 0) {
+							if (goodPrice.getLong(food) == 0) {
 								System.err.println("Error in food needs: no price for " + food.getName());
 								continue;
 							}
 							if (nbSurplus <= nb) {
-								newMoney += nbSurplus * goodPrice.getInt(food);
+								newMoney += nbSurplus * goodPrice.getLong(food);
 								nbGoods.put(food, nb - nbSurplus);
 								nbSurplus = 0;
 								break;
 							} else {
-								newMoney += nb * goodPrice.getInt(food);
+								newMoney += nb * goodPrice.getLong(food);
 								nbGoods.put(food, 0);
 								nbSurplus -= nb;
 							}
@@ -382,22 +400,22 @@ public class FoodNeed extends PopNeed {
 
 				} else {
 					for (Good food : lowPriceFood) {
-						int nb = nbGoods.getInt(food);
+						long nb = nbGoods.getLong(food);
 						if (nb == -1)
 							System.err.println("Error in food needs");
 						if (nb == 0)
 							continue; // no food here
-						if (goodPrice.getInt(food) == 0) {
+						if (goodPrice.getLong(food) == 0) {
 							System.err.println("Error in food needs: no price for " + food.getName());
 							continue;
 						}
 						if (nbSurplus <= nb) {
-							newMoney += nbSurplus * goodPrice.getInt(food);
+							newMoney += nbSurplus * goodPrice.getLong(food);
 							nbGoods.put(food, nb - nbSurplus);
 							nbSurplus = 0;
 							break;
 						} else {
-							newMoney += nb * goodPrice.getInt(food);
+							newMoney += nb * goodPrice.getLong(food);
 							nbGoods.put(food, 0);
 							nbSurplus -= nb;
 						}
@@ -429,19 +447,19 @@ public class FoodNeed extends PopNeed {
 				}
 
 				// Use this money to buy 10 chunk of random food.
-				int moneyToSpend = newMoney / 10;
+				long moneyToSpend = newMoney / 10;
 				if (!allFood.isEmpty()) {
 					for (int i = 0; i < 10; i++) {
-						Good food = allFood.get(GlobalRandom.aleat.getInt(allFood.size(), nbMensInPop));
-						int maxStock = goodStock.get(food).getStock() - nbGoods.getInt(food);
-						int price = goodPrice.getInt(food);
+						Good food = allFood.get(GlobalRandom.aleat.getInt(allFood.size(), (int)(nbMensInPop%Integer.MAX_VALUE)));
+						long maxStock = goodStock.get(food).getStock() - nbGoods.getLong(food);
+						long price = goodPrice.getLong(food);
 						if (maxStock == 0)
 							continue; // no food here
 						if (price == 0) {
 							System.err.println("Error in food needs: no price for " + food.getName());
 							continue;
 						}
-						int nbPicked = Math.min(moneyToSpend / price, maxStock);
+						long nbPicked = Math.min(moneyToSpend / price, maxStock);
 						newMoney -= nbPicked * price;
 						nbGoods.put(food, nbGoods.get(food) + nbPicked);
 					}
@@ -452,18 +470,24 @@ public class FoodNeed extends PopNeed {
 
 		// now eat these items (from the more tasty to the least one)
 		allFood.sort( (food1, food2) -> - Integer.compare(food1.getDesirability(), food2.getDesirability()));
-		int kiloToEat = kgNeeded;
-		int moneyUsed = 0;
+		int kiloToEatMax = kgNeeded * 2; // max eating: 2 time more Kj than needed
+		long moneyUsed = 0;
 		for (Good food : allFood){
 			//it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Good> entry : nbGoods.object2IntEntrySet());
 			//Good food = entry.getKey();
-			int nbFood = Math.min(kiloToEat, nbGoods.getInt(food));
+			long nbFood = Math.min(kiloToEatMax, nbGoods.getLong(food));
 			goodStock.get(food).addStock( -nbFood);
 			goodStock.get(food).addNbConsumePerDay(nbFood / (float)nbDays);
-			int cost = goodPrice.getInt(food) * nbFood;
-			prv.addMoney(cost);
+			long cost = goodPrice.getLong(food) * nbFood;
 			moneyUsed += cost;
-			kiloToEat -= nbFood;
+			if(maxMoneyToSpend.getMoney() < moneyUsed){
+				cost = cost + maxMoneyToSpend.getMoney() - moneyUsed;
+				moneyUsed = maxMoneyToSpend.getMoney();
+				nbFood = cost / goodPrice.getLong(food);
+			}
+			prv.addMoney(cost);
+			kiloToEatMax -= nbFood;
+			System.out.println("i eat " + food.getName()+" @ "+goodPrice.getLong(food)+" for an amount of "+nbFood+" (total cost="+cost+")");
 		}
 
 		return moneyUsed;

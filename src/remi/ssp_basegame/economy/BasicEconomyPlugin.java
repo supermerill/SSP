@@ -18,11 +18,11 @@ public class BasicEconomyPlugin extends Plugin {
 		super.loadGoods();
 		
 
-		FoodNeed.kJoules.put(create("crop",0.8f, 1).get(), 2000);
-		FoodNeed.kJoules.put(create("fish",0.1f, 4).get(), 2000);
-		FoodNeed.kJoules.put(create("rare_fish",0.1f, 10).get(), 2000);
-		FoodNeed.kJoules.put(create("meat",0.1f, 3).get(), 2000);
-		FoodNeed.kJoules.put(create("rare_meat",0.1f, 6).get(), 2000);
+		FoodNeed.kJoules.put(create("crop",0.8f, 1).setOptimalStockPerMen(600).get(), 2000);
+		FoodNeed.kJoules.put(create("fish",0.1f, 4).setOptimalStockPerMen(2).get(), 2000);
+		FoodNeed.kJoules.put(create("rare_fish",0.1f, 10).setOptimalStockPerMen(0.5f).get(), 2000);
+		FoodNeed.kJoules.put(create("meat",0.1f, 3).setOptimalStockPerMen(200).get(), 2000);
+		FoodNeed.kJoules.put(create("rare_meat",0.1f, 6).setOptimalStockPerMen(0.5f).get(), 2000);
 		//create("rawWood",0.9f, 1);
 		//create("plank",0.95f, 10);
 		create("wood",0.95f, 10); //for now, split it in rawwood & plank later (extension)

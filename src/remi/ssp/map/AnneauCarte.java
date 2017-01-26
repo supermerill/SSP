@@ -166,6 +166,8 @@ public class AnneauCarte implements MapFactory {
 						prv.pourcentForet = (0.5f-Math.abs(humidite-0.5f))/2;
 						System.out.println("pourcentForet: "+prv.pourcentForet);
 						prv.pourcentFriche = prv.pourcentForet;
+						prv.pourcentPrairie = prv.pourcentFriche/2;
+						prv.pourcentFriche = prv.pourcentFriche/2;
 						prv.pourcentSterile = Math.abs(humidite-0.5f);
 					}};
 				dessine(centre, tailleMontagne/3, dessineur);
