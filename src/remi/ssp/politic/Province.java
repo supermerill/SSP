@@ -22,6 +22,7 @@ import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.TradeRoute;
+import remi.ssp.technology.Idea;
 
 public class Province{
 	private static final long serialVersionUID = ((long)"Province".hashCode()) + 1L;
@@ -123,9 +124,13 @@ public class Province{
 	List<TradeRoute> tradeRoutes = new ArrayList<>();
 	//to compute the cultural exchange
 	Object2LongMap<Province> lastTradeRouteExchange = new Object2LongOpenHashMap<>(); //TODOSAVE, cache value for economy (TODO: reasert)
-		
+	
 	//autres
 	public float rayonnementCulturel = 0; //0=nul, X=nombre de personnes connaissant cette province.
+	
+	//TODO: serialization
+	List<Idea> ideas = new ArrayList<>();
+	
 	
 	public int getNbMens(){
 		int nbHabitants = 0;

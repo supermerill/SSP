@@ -1,6 +1,7 @@
 package remi.ssp.politic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,8 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
@@ -23,6 +26,7 @@ import remi.ssp.army.DivisionUnit;
 import remi.ssp.army.EquipmentDevelopped;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Needs;
+import remi.ssp.technology.Technology;
 
 public class Civilisation {
 
@@ -49,7 +53,34 @@ public class Civilisation {
 	public Object2LongMap<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
 	public Object2LongMap<Civilisation> getTradeRouteExchange() { return lastTradeRouteExchange; }
 	
-
+	//TODO: serialization
+	List<Technology> techs = new ArrayList<>();
+	Object2IntMap<Technology> researchingTechs = new Object2IntOpenHashMap<Technology>(1);
+	Technology selectedResearch = null;
+	int overflowTechPoint = 0;
+	
+	public Object2IntMap<Technology> getResearchingTechs() {
+		return researchingTechs;
+	}
+	public Technology getSelectedResearch() {
+		return selectedResearch;
+	}
+	public void setSelectedResearch(Technology selectedResearch) {
+		this.selectedResearch = selectedResearch;
+	}
+	public int getOverflowTechPoint() {
+		return overflowTechPoint;
+	}
+	public void setOverflowTechPoint(int overflowTechPoint) {
+		this.overflowTechPoint = overflowTechPoint;
+	}
+	public Collection<Technology> getTechs() {
+		return techs;
+	}
+	public Technology getCurrentResearch() {
+		return selectedResearch;
+	}
+	
 	public void load(JsonObject jsonObj, Carte carte){
 		
 		mensInReserve = jsonObj.getInt("mensRsv");

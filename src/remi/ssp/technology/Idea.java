@@ -5,7 +5,7 @@ import remi.ssp.politic.Province;
 /**
  * @author meril_000
  * 
- * An idea is an improvement than can be learn by the population. When learned it  give bonuses
+ * An idea is an improvement than can be learn by the -population- / province. When learned it  give bonuses
  * 
  * 
  */

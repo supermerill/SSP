@@ -111,7 +111,7 @@ public class BaseEconomy extends Economy {
 				}
 				prv2Wealth.put(prv, richesse / prv.getNbMens());
 
-				// procude goods
+				// produce goods
 				produce(prv, durationInDay);
 			}
 		}
@@ -529,12 +529,11 @@ public class BaseEconomy extends Economy {
 				for (Pop pop : prv.getPops()) {
 					nbEmployes += pop.getNbMensEmployed().getLong(indus);
 				}
-
 				
 				if (quantity == 0) {
 					System.out.println(" but can't produce for a reason");
 					//check if we need investment
-					NeedWish wish = indus.getIndustry().getMyNeeds().moneyNeeded(prv, 0, indus.getStock(), indus.getMoney(), durationInDay);
+					NeedWish wish = indus.getIndustry().getMyNeeds().moneyNeeded(prv, nbEmployes, indus.getStock(), indus.getMoney(), durationInDay);
 					long notNeeded = indus.getMoney() - wish.getMoney();
 					for (Pop pop : prv.getPops()) {
 						long employesHere = pop.getNbMensEmployed().getLong(indus);
@@ -738,7 +737,12 @@ public class BaseEconomy extends Economy {
 		// industry
 		for (ProvinceIndustry indus : prv.getIndustries()) {
 			Needs need = indus.getIndustry().getMyNeeds();
-			NeedWish wish = need.moneyNeeded(prv, indus.getPreviousProduction(), indus.getStock(), indus.getMoney(),
+			// get employes
+			long nbEmployes = 0;
+			for (Pop pop : prv.getPops()) {
+				nbEmployes += pop.getNbMensEmployed().getLong(indus);
+			}
+			NeedWish wish = need.moneyNeeded(prv, nbEmployes, indus.getStock(), indus.getMoney(),
 					durationInDay);
 			long moneyLeft = indus.getMoney();
 			if (wish.vitalNeed > moneyLeft) {

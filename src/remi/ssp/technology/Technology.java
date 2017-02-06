@@ -5,7 +5,7 @@ import java.util.List;
 import remi.ssp.army.EquipmentTemplate;
 import remi.ssp.politic.Civilisation;
 
-public class Research extends NameDescription{
+public class Technology extends NameDescription{
 
 	protected final boolean isVisible = false;
 	protected final boolean isResearchable = false;
@@ -47,21 +47,37 @@ public class Research extends NameDescription{
 	 */
 	public List<EquipmentTemplate> equipmentUnlocked(){ return equipments; }
 	
+	
 	/**
-	 * Do some stuff: has appeared magically? is my research points are enough? 
-	 * Also, use the tr between civs
-	 * @param civ
-	 * @param nbDays
+	 * If something is needed to be done when researched
 	 */
-	public void research(Civilisation civ, int nbResearchPointUsed, int nbDays){
-		//TODO
+	public void researched(Civilisation civ) {
+		// TODO Auto-generated method stub
 		
-		//research
-		// get research from tr
-		//for each civ
-			//has they researched me?
-				//transfert some research
-		//did i have some scientist on me?
 	}
+	
+//	/**
+//	 * Do some stuff: has appeared magically? is my research points are enough? 
+//	 * Also, use the tr between civs
+//	 * @param civ
+//	 * @param nbDays
+//	 * @return unused research points
+//	 */
+//	public int research(Civilisation civ, int nbResearchPointUsed, int nbDays){
+//		//TODO
+//		
+//		//research
+//		// get research from tr (not yet, TODO)
+//		//get research from ideas (not yet, TODO) (if an ieda spread to me without its research being researched)
+//		//for each civ
+//			//has they researched me?
+//				//transfert some research
+//		
+//		//add research points
+//		
+//		
+//		return 0;
+//	}
+
 	
 }

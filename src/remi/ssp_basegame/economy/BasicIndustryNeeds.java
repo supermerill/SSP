@@ -37,23 +37,26 @@ public class BasicIndustryNeeds extends Needs {
 
 
 	@Override
-	public NeedWish moneyNeeded(Province prv, long lastProductionSamePeriod, Object2LongMap<Good> currentStock, long totalMoneyThisTurn,
+	public NeedWish moneyNeeded(Province prv, long nbEmployes, Object2LongMap<Good> currentStock, long totalMoneyThisTurn,
 			int nbDays) {
 		NeedWish wish = new NeedWish(0, 0, 0);
+		
+		long maxLastProd = Math.max(nbEmployes, prv.getIndustry(indus).getPreviousProduction());
 		//vital: raw needed
 		//normal: tools (and a bit more raw)
 		//luxury : a bit more tools & raw
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
 			long price = prv.getStock().get(needed.getKey()).getPriceBuyFromMarket(prv, nbDays);
-			wish.vitalNeed += (long)(lastProductionSamePeriod * needed.getFloatValue()) - currentStock.getLong(needed.getKey()) * price;
-			wish.normalNeed +=  (long)(lastProductionSamePeriod * needed.getFloatValue()*0.3f) - currentStock.getLong(needed.getKey()) * price;
-			wish.luxuryNeed +=  (long)(lastProductionSamePeriod * needed.getFloatValue()*0.2f) - currentStock.getLong(needed.getKey()) * price;
+			wish.vitalNeed += (long)(maxLastProd * needed.getFloatValue()) - currentStock.getLong(needed.getKey()) * price;
+			wish.normalNeed +=  (long)(maxLastProd * needed.getFloatValue()*0.3f) - currentStock.getLong(needed.getKey()) * price;
+			wish.luxuryNeed +=  (long)(maxLastProd * needed.getFloatValue()*0.2f) - currentStock.getLong(needed.getKey()) * price;
 		}
 		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
 			long price = prv.getStock().get(needed.getKey()).getPriceBuyFromMarket(prv, nbDays);
-			wish.normalNeed +=  (long)(lastProductionSamePeriod * needed.getFloatValue()*0.9f) - currentStock.getLong(needed.getKey()) * price;
-			wish.luxuryNeed +=  (long)(lastProductionSamePeriod * needed.getFloatValue()*0.6f) - currentStock.getLong(needed.getKey()) * price;
+			wish.normalNeed +=  (long)(maxLastProd * needed.getFloatValue()*0.9f) - currentStock.getLong(needed.getKey()) * price;
+			wish.luxuryNeed +=  (long)(maxLastProd * needed.getFloatValue()*0.6f) - currentStock.getLong(needed.getKey()) * price;
 		}
+		System.out.println("2indus "+indus.getName()+" need "+wish);
 		return wish;
 	}
 
@@ -67,9 +70,10 @@ public class BasicIndustryNeeds extends Needs {
 	 * @return the amount of money that must be removed from the provinceindustry instance
 	 */
 	@Override
-	public long spendMoney(Province prv, long lastProductionSamePeriod, Object2LongMap<Good> currentStock, NeedWish maxMoneyToSpend,
+	public long spendMoney(Province prv, long nbEmployes, Object2LongMap<Good> currentStock, NeedWish maxMoneyToSpend,
 			int nbDays) {
-		if(lastProductionSamePeriod==0) lastProductionSamePeriod = 1;
+		long maxLastProd = Math.max(nbEmployes, prv.getIndustry(indus).getPreviousProduction());
+		if(maxLastProd==0) maxLastProd = 1;
 		//TODO: better one.
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		System.out.println("2indus "+indus.getName()+" has "+prv.getIndustry(indus).getMoney()+" : "+maxMoneyToSpend);
@@ -78,7 +82,7 @@ public class BasicIndustryNeeds extends Needs {
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
 			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
-			long quantityBuy = Math.min(market.getStock(), (int)(lastProductionSamePeriod * needed.getFloatValue()) - currentStockNumber);
+			long quantityBuy = Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber);
 			long price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
 				quantityBuy = (long)(moneyToSpend / price);
@@ -94,7 +98,7 @@ public class BasicIndustryNeeds extends Needs {
 		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
 			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
-			long quantityBuy = Math.min(market.getStock(), (int)(lastProductionSamePeriod * needed.getFloatValue()) - currentStockNumber);
+			long quantityBuy = Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber);
 			long price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend && moneyToSpend>0){
 				quantityBuy = (long)(moneyToSpend / price);
@@ -104,7 +108,7 @@ public class BasicIndustryNeeds extends Needs {
 			prv.addMoney(quantityBuy * price);
 			System.out.println("2indus "+indus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
 			if(quantityBuy<0){
-				System.out.println(moneyToSpend+" "+market.getStock()+" , "+( (int)(lastProductionSamePeriod * needed.getFloatValue()) - currentStockNumber));
+				System.out.println(moneyToSpend+" "+market.getStock()+" , "+( (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber));
 			}
 			market.addNbConsumePerDay(quantityBuy / (float)nbDays);
 			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
@@ -114,7 +118,7 @@ public class BasicIndustryNeeds extends Needs {
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
 			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
-			long quantityBuy = Math.min(market.getStock(), (int)(lastProductionSamePeriod * needed.getFloatValue()*0.5));
+			long quantityBuy = Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()*0.5));
 			long price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
 				quantityBuy = (long)(moneyToSpend / price);
@@ -130,7 +134,7 @@ public class BasicIndustryNeeds extends Needs {
 		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
 			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
-			long quantityBuy = Math.min(market.getStock(), (int)(lastProductionSamePeriod * needed.getFloatValue()*0.5));
+			long quantityBuy = Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()*0.5));
 			long price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
 				quantityBuy = (long)(moneyToSpend / price);
