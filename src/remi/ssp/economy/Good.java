@@ -37,7 +37,7 @@ public class Good {
 			Good good = new Good();
 			good.name = name;
 			good.transportability = weight;
-			good.storageLossPerYear = storageLossPerYear;
+			good.storageKeepPerYear = storageLossPerYear;
 			good.desirability = desirability;
 			goodList.put(name, good);
 			return good;
@@ -47,8 +47,8 @@ public class Good {
 		private static GoodFactory me = new GoodFactory();;
 		protected GoodFactory(){}
 		
-		public static GoodFactory create(String name, float storageLossPerYear, int desirability){
-			me.currentGood = create(name, 1000, storageLossPerYear, desirability);
+		public static GoodFactory create(String name, float storageRetainPerYear, int desirability){
+			me.currentGood = create(name, 1000, storageRetainPerYear, desirability);
 			return me;
 		}
 
@@ -56,13 +56,15 @@ public class Good {
 		public GoodFactory setTransportability(int transportability) { currentGood.transportability = transportability; return me; }
 		public GoodFactory setCanBeMoved(boolean canBeMoved) { currentGood.canBeMoved = canBeMoved; return me; }
 		public GoodFactory setNaval(boolean isNaval) { currentGood.isNaval = isNaval; return me; }
-		public GoodFactory setStorageLossPerYear(float storageLossPerYear) { currentGood.storageLossPerYear = storageLossPerYear; return me; }
+		public GoodFactory setStorageKeepPerYear(float storageKeepPerYear) { currentGood.storageKeepPerYear = storageKeepPerYear; return me; }
 		public GoodFactory setCommerceCapacityPerMen(int commerceCapacityPerMen) { currentGood.commerceCapacityPerMen = commerceCapacityPerMen; return me; }
 		public GoodFactory setIndustryToolEfficiency(int industryToolEfficiency) {	currentGood.industryToolEfficiency = industryToolEfficiency; return me; }
-		public GoodFactory setOptimalStockPerMen(float optimalStockPerMen) {	currentGood.optimalStockPerMen = optimalStockPerMen; return me; }
+		public GoodFactory setOptimalNbDayStock(float optimalStockPerMen) {	currentGood.optimalStockNbDays = optimalStockPerMen; return me; }
+		public GoodFactory setVolatility(float volatility) {	currentGood.volatility = volatility; return me; }
 		public Good get() { return currentGood; }
 	}
 	public static Good get(String name){
+		if(GoodFactory.get(name) == null) System.err.println("error, good '"+name+"' doesn't exist");
 		return GoodFactory.get(name);
 	}
 	
@@ -80,12 +82,14 @@ public class Good {
 	protected boolean canBeMoved = true;
 	protected boolean isNaval = false;
 	
-	protected float storageLossPerYear = 0.95f;
+	protected float storageKeepPerYear = 0.95f;
 	
 	protected int desirability=0; //  +1 = 20% better, +5 = two time better!
 	
-	protected float optimalStockPerMen = 0.1f;
-	
+	//nb days of stock is healthy for a marketplace
+	protected float optimalStockNbDays = 0.1f;
+	// coeff for the price increase and decrease algorithm
+	protected float volatility = 1f;
 	
 	//stats
 	protected int commerceCapacityPerMen = 0; //increase the commerce capacity of a men by a certain amount
@@ -99,7 +103,7 @@ public class Good {
 	public long storageLoss(long previousStock, long durationInDay) {
 		//TODO: change his with tech
 		//reduce the quantity by X% per month
-		return (long)(previousStock * Math.pow(storageLossPerYear, durationInDay/360.0));
+		return (long)(previousStock * Math.pow(storageKeepPerYear, durationInDay/360.0));
 	}
 
 	public boolean isNaval() { return false; }
@@ -107,15 +111,13 @@ public class Good {
 	public String getName() { return name; }
 	public int getTransportability() { return transportability; }
 	public boolean isCanBeMoved() { return canBeMoved; }
-	public float getStorageLossPerYear() { return storageLossPerYear; }
+	public float getStorageKeepPerYear() { return storageKeepPerYear; }
 	public int getDesirability() { return desirability; }
 	public int getCommerceCapacityPerMen() { return commerceCapacityPerMen; }
 	public int getIndustryToolEfficiency() { return industryToolEfficiency;	}
-	public float getOptimalStockPerMen() { return optimalStockPerMen;	}
-	
-	
-	
-	
+	public float getOptimalNbDayStock() { return optimalStockNbDays;	}
+	public float getVolatility() { return volatility; }
+
 	@Override
 	public String toString() {
 		return getName();

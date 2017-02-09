@@ -23,7 +23,7 @@ public class ProvinceCommerce implements Job{
 	// used to run
 	Object2LongMap<Good> stock = new Object2LongOpenHashMap<Good>(); //raw goods + tools
 	long money;//bfr
-	long previousSalary;
+	double previousSalary;
 	
 	String name;
 	public String getName() { return name; }
@@ -35,8 +35,8 @@ public class ProvinceCommerce implements Job{
 	public void addMoney(long money) { this.money += money; }
 	public void setMoney(long money) { this.money = money; }
 	public Object2LongMap<Good> getStock() { return stock; }
-	public long getPreviousSalary() { return previousSalary; }
-	public void setPreviousSalary(long previousSalary) { this.previousSalary = previousSalary; }
+	public double getPreviousSalary() { return previousSalary; }
+	public void setPreviousSalary(double previousSalary) { this.previousSalary = previousSalary; }
 	public void addToPreviousSalary(long newIncome) { this.previousSalary += newIncome; }
 	
 	/**

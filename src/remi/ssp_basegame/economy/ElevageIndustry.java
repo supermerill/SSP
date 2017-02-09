@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
-import remi.ssp.economy.Needs;
+import remi.ssp.economy.IndustryNeed;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
@@ -18,32 +18,34 @@ public class ElevageIndustry extends Industry {
 	static protected ElevageIndustry ptr;
 	public static void load(){ ptr = new ElevageIndustry(); }
 	public static ElevageIndustry get(){ return ptr; }
-
-	ElevageNeeds myElevageNeeds;
 	
 	private ElevageIndustry(){
-		myElevageNeeds = new ElevageNeeds();
 		createThis = Good.get("meat");
-		myNeeds = myElevageNeeds;
+		myNeedsFactory = pi -> new ElevageNeeds(pi);
 	}
 	
-	public class ElevageNeeds extends Needs{
+	private ElevageNeeds getNeed(ProvinceIndustry indus){
+		return (ElevageNeeds)indus.getNeed();
+	}
+	
+	public class ElevageNeeds extends IndustryNeed{
 		
 		BasicIndustryNeeds basicIndustryNeeds;
 		
-		ElevageNeeds(){
-			basicIndustryNeeds = new BasicIndustryNeeds(ElevageIndustry.this)
+		ElevageNeeds(ProvinceIndustry pi){
+			super(pi);
+			basicIndustryNeeds = new BasicIndustryNeeds(pi)
 					.addToolGood(Good.get("wood_goods"), 1);
 		}
 
 		@Override
-		public NeedWish moneyNeeded(Province prv, long nbPrevProd, Object2LongMap<Good> currentStock, long totalMoneyThisTurn,
-				int nbDays) {
+		public NeedWish moneyNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
+			Object2LongMap<Good> currentStock = myIndus.getStock();
 			long nb = 0;
 			for(Pop pop : prv.getPops()){
 				nb += pop.getNbMensEmployed().get(prv.getIndustry(ElevageIndustry.this));
 			}
-			NeedWish wishes = basicIndustryNeeds.moneyNeeded(prv, nb, currentStock, totalMoneyThisTurn, nbDays);
+			NeedWish wishes = basicIndustryNeeds.moneyNeeded(prv, totalMoneyThisTurn, nbDays);
 			long nbSheep = (currentStock.getLong(Good.GoodFactory.get("meat"))/100);
 			
 			System.out.println("Need more sheeps? "+nbSheep+" ? "+nb*10);
@@ -60,8 +62,10 @@ public class ElevageIndustry extends Industry {
 		}
 
 		@Override
-		public long spendMoney(Province prv, long nbPrevProd, Object2LongMap<Good> currentStock, NeedWish maxMoneyToSpend,
-				int nbDays) {
+		public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
+			Object2LongMap<Good> currentStock = myIndus.getStock();
+			System.out.println("before elevage has "+ currentStock);
+//			long nbPrevProd = prv.getIndustry(ptr).getPreviousProduction();
 			long spent = 0;
 			long nb = 0;
 			for(Pop pop : prv.getPops()){
@@ -81,14 +85,16 @@ public class ElevageIndustry extends Industry {
 				long quantityBuy = vitalSpend / (price*100);
 				nbSheep += quantityBuy;
 				quantityBuy  *= 100;
+				maxMoneyToSpend.vitalNeed -= vitalSpend;
 
 				//buy
 				prv.addMoney(quantityBuy * price);
+				myIndus.addMoney(-quantityBuy * price);
 				prv.getStock().get(meat).addNbConsumePerDay(quantityBuy / (float)nbDays);
 				currentStock.put(meat,nbSheep*100);
 				prv.getStock().get(meat).addStock( -quantityBuy);
 				spent += quantityBuy * price;
-				System.out.println("buy "+quantityBuy+" vital sheeps");
+				System.out.println("buy "+quantityBuy+" vital sheeps for "+price+"€ each (tot "+(quantityBuy * price)+"€)");
 				
 				long normalSpend = Math.min(maxMoneyToSpend.normalNeed, Math.max(0, nbNeedToBuy * price - vitalSpend));
 				quantityBuy = normalSpend / (price*100);
@@ -96,18 +102,20 @@ public class ElevageIndustry extends Industry {
 				quantityBuy  *= 100;
 
 				//buy
-				prv.addMoney(quantityBuy * price);
-				prv.getStock().get(meat).addNbConsumePerDay(quantityBuy / (float)nbDays);
-				currentStock.put(meat, nbSheep*100);
-				prv.getStock().get(meat).addStock( -quantityBuy);
-				spent += quantityBuy * price;
+//				prv.addMoney(quantityBuy * price);
+//				prv.getStock().get(meat).addNbConsumePerDay(quantityBuy / (float)nbDays);
+//				currentStock.put(meat, nbSheep*100);
+//				prv.getStock().get(meat).addStock( -quantityBuy);
+//				spent += quantityBuy * price;
+//				maxMoneyToSpend.normalNeed -= normalSpend;
+				super.storeProductFromMarket(meat, quantityBuy, nbDays);
 				System.out.println("buy "+quantityBuy+" normal sheeps");
 				
 			}
 			
 			//then, buy some tools
-			spent += basicIndustryNeeds.spendMoney(prv, nb, currentStock, maxMoneyToSpend, nbDays);
-			
+			spent += basicIndustryNeeds.spendMoney(prv, maxMoneyToSpend, nbDays);
+
 			
 			System.out.println("now elevage has "+ currentStock);
 			return spent;
@@ -180,7 +188,7 @@ public class ElevageIndustry extends Industry {
 		//TODO: sell more sheep if the price is high and famine is occurring.
 		
 		//sell sheep to province market
-		long intproduction = myElevageNeeds.basicIndustryNeeds.useGoodsAndTools(indus, (long)nbSheepToSell * 100, durationInDay);
+		long intproduction = getNeed(indus).basicIndustryNeeds.useGoodsAndTools(indus, (long)nbSheepToSell * 100, durationInDay);
 		super.sellProductToMarket(prv, intproduction, durationInDay);
 
 		return intproduction;

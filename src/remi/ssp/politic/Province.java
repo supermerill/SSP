@@ -121,6 +121,7 @@ public class Province{
 	long money; //BFR from the marketplace
 	long previousMoney;
 	long moneyChangePerDay;
+	long moneyChangePerDayConsolidated=0;
 	List<TradeRoute> tradeRoutes = new ArrayList<>();
 	//to compute the cultural exchange
 	Object2LongMap<Province> lastTradeRouteExchange = new Object2LongOpenHashMap<>(); //TODOSAVE, cache value for economy (TODO: reasert)
@@ -132,11 +133,11 @@ public class Province{
 	List<Idea> ideas = new ArrayList<>();
 	
 	
-	public int getNbMens(){
+	public int getNbAdult(){
 		int nbHabitants = 0;
 //		if(nbHabitants<0){
 		for(Pop pop : pops)
-			nbHabitants += pop.getNbMens();
+			nbHabitants += pop.getNbAdult();
 		return nbHabitants;
 	}
 	
@@ -157,15 +158,16 @@ public class Province{
 	public Collection<ProvinceIndustry> getIndustries() { return industries.values(); }
 	public ProvinceIndustry getIndustry(Industry indus) { return industries.get(indus); }
 	public Map<Good, ProvinceGoods> getStock() { return stock; }
-	public Collection<Pop> getPops() { return this.pops; }
+	public List<Pop> getPops() { return this.pops; }
+	public void addPop(Pop newPop) { this.pops.add(newPop); this.pops.sort((p1,p2) -> - Integer.compare(p1.getPopType(), p2.getPopType())); }
 	public Civilisation getOwner() { return owner; }
 	public void setOwner(Civilisation civ) { this.owner = civ; }
 	public long getMoney() { return money; }
 	public long getPreviousMoney() { return previousMoney; }
-	public void setMoney(long money) { this.money = money; }
-	public void addMoney(long money) { this.money += money; moneyChangePerDay+=Math.abs(money); }
+//	public void setMoney(long money) { this.money = money; }
+	public void addMoney(long moneyAdd) { this.money += moneyAdd; moneyChangePerDay+=Math.abs(moneyAdd); }
 	public long getMoneyChangePerDay() { return moneyChangePerDay; }
-	public void resetMoneyComputeNewTurn() { this.moneyChangePerDay = 0; previousMoney = money; }
+	public long getMoneyChangePerDayConsolidated() { return moneyChangePerDayConsolidated; }
 	public List<TradeRoute> getTradeRoute() { return tradeRoutes; }
 	public Object2LongMap<Province> getLastTradeRouteExchange(){return lastTradeRouteExchange;}
 
@@ -176,6 +178,11 @@ public class Province{
 	public float getRelief() { return relief; }
 	public boolean isCoastal(){ return plages>0; }
 
+	public void resetMoneyComputeNewTurn() { 
+		moneyChangePerDayConsolidated = (moneyChangePerDayConsolidated*5+this.moneyChangePerDay)/6 ;
+		this.moneyChangePerDay = 0; 
+		previousMoney = money; 
+	}
 
 	public void loadLinks(JsonObject jsonProvince, Carte carte){
 
@@ -245,7 +252,8 @@ public class Province{
 		rail = (float)jsonProvince.getJsonNumber("rail").doubleValue();
 		criminalite = (float)jsonProvince.getJsonNumber("criminalite").doubleValue();
 		money = jsonProvince.getJsonNumber("money").longValue();
-		moneyChangePerDay = jsonProvince.getJsonNumber("money").longValue();
+		moneyChangePerDay = jsonProvince.getJsonNumber("moneyChange").longValue();
+		moneyChangePerDayConsolidated = jsonProvince.getJsonNumber("moneyChangeConso").longValue();
 		rayonnementCulturel = (float)jsonProvince.getJsonNumber("rayonnementCulturel").doubleValue();
 		nbElites = jsonProvince.getInt("nbElites");
 		
@@ -268,10 +276,11 @@ public class Province{
 		array = jsonProvince.getJsonArray("stock");
 		stock.clear();
 		for(int i=0;i<array.size();i++){
-			ProvinceGoods good = new ProvinceGoods();
 			object = array.getJsonObject(i);
-			good.load(object);
-			stock.put(Good.get(object.getString("name")), good);
+			Good good = Good.get(object.getString("name"));
+			ProvinceGoods prvgood = new ProvinceGoods(good);
+			prvgood.load(object);
+			stock.put(good, prvgood);
 		}
 		
 		//need to be done after loading industries
@@ -319,7 +328,8 @@ public class Province{
 		jsonOut.add("rail", rail);
 		jsonOut.add("criminalite", criminalite);
 		jsonOut.add("money", money);
-		jsonOut.add("money", moneyChangePerDay);
+		jsonOut.add("moneyChange", moneyChangePerDay);
+		jsonOut.add("moneyChangeConso", moneyChangePerDayConsolidated);
 		jsonOut.add("rayonnementCulturel", rayonnementCulturel);
 		jsonOut.add("nbElites", nbElites);
 		

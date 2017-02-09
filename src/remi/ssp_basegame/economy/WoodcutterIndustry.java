@@ -15,13 +15,14 @@ public class WoodcutterIndustry extends Industry {
 	public static void load(){ ptr = new WoodcutterIndustry(); }
 	public static WoodcutterIndustry get(){ return ptr; }
 
-	BasicIndustryNeeds myBasicNeeds;
-
 	protected WoodcutterIndustry() {
 		createThis = Good.get("wood");
-		myBasicNeeds = new BasicIndustryNeeds(this)
+		myNeedsFactory = pi -> new BasicIndustryNeeds(pi)
 				.addToolGood(Good.get("wood_goods"), 1);
-		myNeeds = myBasicNeeds;
+	}
+	
+	private BasicIndustryNeeds getNeed(ProvinceIndustry indus){
+		return (BasicIndustryNeeds)indus.getNeed();
 	}
 
 	//pin maritime: (recolte en 50ans) 4,8 m3/ha/an en 1960 à 15 m3/ha/an en 2015
@@ -73,9 +74,10 @@ public class WoodcutterIndustry extends Industry {
 	prv.pourcentFriche += percentMove;
 
 	// produce
-	long intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbWoodCut, durationInDay);
+	long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)nbWoodCut, durationInDay);
 	super.sellProductToMarket(prv, intproduction, durationInDay);
 
+	
 	return intproduction;
 }
 

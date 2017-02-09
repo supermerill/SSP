@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
+import remi.ssp.economy.IndustryNeed;
+import remi.ssp.economy.IndustryNeed.IndustryNeedsFactoryStorage;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
@@ -15,13 +17,14 @@ public class AgricultureIndustry extends Industry {
 	public static void load(){ ptr = new AgricultureIndustry(); }
 	public static AgricultureIndustry get(){ return ptr; }
 
-	BasicIndustryNeeds myBasicNeeds;
-
 	private AgricultureIndustry(){
-		myBasicNeeds = new BasicIndustryNeeds(this)
-				.addToolGood(Good.get("wood_goods"), 1);
 		createThis = Good.get("crop");
-		myNeeds = myBasicNeeds;
+		myNeedsFactory = pi -> new BasicIndustryNeeds(pi)
+				.addToolGood(Good.get("wood_goods"), 1);
+	}
+	
+	private BasicIndustryNeeds getNeed(ProvinceIndustry indus){
+		return (BasicIndustryNeeds)indus.getNeed();
 	}
 	
 	@Override
@@ -45,7 +48,7 @@ public class AgricultureIndustry extends Industry {
 		
 
 		//produce
-		long intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)production, durationInDay);
+		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
 		System.out.println(", prod with tools="+intproduction);
 		super.sellProductToMarket(prv, intproduction, durationInDay);
 

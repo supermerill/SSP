@@ -100,7 +100,7 @@ public class AnneauCarte implements MapFactory {
 				Province prv = provinces.get(i).get(j);
 				if(prv.surfaceSol>0){
 					Pop pop = new Pop(prv);
-					pop.addHabitants(20, Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
+					pop.addAdult(Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
 					prv.getPops().add(pop);
 //					System.out.println("create pop of " + prv.nombreHabitantsParAge[20]);
 				}

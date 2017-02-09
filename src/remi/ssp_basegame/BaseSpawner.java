@@ -11,7 +11,9 @@ import remi.ssp.CurrentGame;
 import remi.ssp.algorithmes.Spawner;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Job;
+import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceGoods;
+import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.ProvinceIndustry.ProvinceIndustryFactory;
 import remi.ssp.map.FlatCarteV3;
 import remi.ssp.politic.Civilisation;
@@ -19,8 +21,9 @@ import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 import remi.ssp_basegame.economy.AgricultureIndustry;
 import remi.ssp_basegame.economy.ElevageIndustry;
-import remi.ssp_basegame.economy.FoodNeed;
 import remi.ssp_basegame.economy.HuntingIndustry;
+import remi.ssp_basegame.economy.HuntingSportIndustry;
+import remi.ssp_basegame.economy.PersonalServiceIndustry;
 import remi.ssp_basegame.economy.WoodGoodsArtisanalIndustry;
 import remi.ssp_basegame.economy.WoodHouseIndustry;
 import remi.ssp_basegame.economy.WoodcutterIndustry;
@@ -56,19 +59,26 @@ public class BaseSpawner extends Spawner {
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(ElevageIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(AgricultureIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(HuntingIndustry.get()).setProvince(prv).create());
+					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(HuntingSportIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(WoodcutterIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(WoodGoodsArtisanalIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(WoodHouseIndustry.get()).setProvince(prv).create());
+					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(PersonalServiceIndustry.get()).setProvince(prv).create());
+					
+					for( ProvinceIndustry indus : prv.getIndustries()){
+						System.out.println("province has "+indus.getName());
+					}
+					
 					CurrentGame.civs.add(civ);
 					
 					//add all province goods possible
 					for(Good good : Good.GoodFactory.goodList.values()){
-						prv.getStock().put(good, new ProvinceGoods());
+						prv.getStock().put(good, new ProvinceGoods(good));
 					}
 					//place some food and houses
-					prv.getStock().get(Good.get("meat")).setStock(5000);
-					prv.getStock().get(Good.get("crop")).setStock(65000);
-					prv.getStock().get(Good.get("wood_house")).setStock(10);
+					prv.getStock().get(Good.get("meat")).setStock(50000);
+					prv.getStock().get(Good.get("crop")).setStock(650000);
+					prv.getStock().get(Good.get("wood_house")).setStock(10000);
 				}
 			}
 		}
@@ -84,18 +94,38 @@ public class BaseSpawner extends Spawner {
 			for(int j=0;j<CurrentGame.map.provinces.get(i).size();j++){
 				Province prv = CurrentGame.map.provinces.get(i).get(j);
 				if(prv.surfaceSol > 10){
+					//rich
 					Pop pop = new Pop(prv);
-//					pop.addHabitants(20, Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
-					pop.addHabitants(20, 136);
-					prv.getPops().add(pop);
-	//						System.out.println("create pop of " + prv.nombreHabitantsParAge[20]);
+					pop.addAdult(6);
+					pop.setPopType(Pop.popTypeName.indexOf("rich"));
+					prv.addPop(pop);
 					//set pop to chomage
-					pop.setNbMensChomage(pop.getNbMens());
+					pop.setNbMensChomage(pop.getNbAdult());
 					//create some money from "the previous time" (ie, fine air)
-					pop.setMoney(pop.getNbMens()*10000); //10 "coin" per men (can be /1000)
+					pop.addMoney(pop.getNbAdult()*1000000); // 1000/100/10 "coin" per men (can be /1000)
 					//add needs (TODO: get them from techs researched at startup)
-					pop.getPopNeeds().add(FoodNeed.create("food", pop));
-//					pop.getPopNeeds().add(FoodNeed.create("house", pop));
+					pop.getPopNeeds().add(PopNeed.create("food", pop));
+//					pop.getPopNeeds().add(HouseNeed.create("house", pop));
+					pop.getPopNeeds().add(PopNeed.create("rich_service", pop));
+					//middle
+					pop = new Pop(prv);
+					pop.addAdult(30);
+					pop.setPopType(Pop.popTypeName.indexOf("middle"));
+					prv.addPop(pop);
+					pop.setNbMensChomage(pop.getNbAdult());
+					pop.addMoney(pop.getNbAdult()*100000);
+					pop.getPopNeeds().add(PopNeed.create("food", pop));
+					pop.getPopNeeds().add(PopNeed.create("middle_service", pop));
+//					pop.getPopNeeds().add(HouseNeed.create("house", pop));
+					//poor
+					pop = new Pop(prv);
+					pop.addAdult(100);
+					pop.setPopType(Pop.popTypeName.indexOf("poor"));
+					prv.addPop(pop);
+					pop.setNbMensChomage(pop.getNbAdult());
+					pop.addMoney(pop.getNbAdult()*10000);
+					pop.getPopNeeds().add(PopNeed.create("food", pop));
+//					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 				}
 			}
 		
@@ -115,8 +145,8 @@ public class BaseSpawner extends Spawner {
 				for(Pop pop: prv.getPops()){
 					jobs.clear();
 					jobs.addAll(prv.getIndustries());
-					jobs.add(pop.getLandCommerce());
-					jobs.add(pop.getSeaCommerce());
+//					jobs.add(pop.getLandCommerce());
+//					jobs.add(pop.getSeaCommerce());
 					for(Entry<Job> job : pop.getNbMensEmployed().object2LongEntrySet()){
 						jobs.remove(job.getKey());
 					}

@@ -11,9 +11,6 @@ import javax.swing.JFrame;
 import remi.ssp.CurrentGame;
 import remi.ssp.PluginLoader;
 import remi.ssp.algorithmes.Economy;
-import remi.ssp.map.AnneauCarte;
-import remi.ssp.map.AnneauCarteV2;
-import remi.ssp.map.FlatCarteV3;
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Plot;
 import remi.ssp.politic.Province;
@@ -126,22 +123,22 @@ public class SimpleMapViewerV3 extends JComponent{
 				}
 				g.fillOval(((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))), (j*3*taille)/4, taille, taille);
 				maxX = Math.max(maxX, ((j%2==0)?(i*(taille-1)):(taille/2+i*(taille-1))) + taille*2);
-				if(prv.getNbMens()>0){
+				if(prv.getNbAdult()>0){
 					g.setColor(Color.RED);
 					int tailleRond = 1;
-					if(prv.getNbMens()>100000){
+					if(prv.getNbAdult()>100000){
 						tailleRond = 8;
-					}else if(prv.getNbMens()>25000){
+					}else if(prv.getNbAdult()>25000){
 						tailleRond = 7;
-					}else if(prv.getNbMens()>5000){
+					}else if(prv.getNbAdult()>5000){
 						tailleRond = 6;
-					}else if(prv.getNbMens()>1000){
+					}else if(prv.getNbAdult()>1000){
 						tailleRond = 5;
-					}else if(prv.getNbMens()>250){
+					}else if(prv.getNbAdult()>250){
 						tailleRond = 4;
-					}else if(prv.getNbMens()>50){
+					}else if(prv.getNbAdult()>50){
 						tailleRond = 3;
-					}else if(prv.getNbMens()>10){
+					}else if(prv.getNbAdult()>10){
 						tailleRond = 2;
 					}
 					g.setColor(Color.RED);

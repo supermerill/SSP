@@ -16,15 +16,15 @@ public class FisheryIndustry extends Industry {
 	public static void load(){ ptr = new FisheryIndustry(); }
 	public static FisheryIndustry get(){ return ptr; }
 
-	BasicIndustryNeeds myBasicNeeds;
-
 	private FisheryIndustry(){
-		myBasicNeeds = new BasicIndustryNeeds(this)
-				.addToolGood(Good.get("wood_goods"), 1);
 		createThis = Good.get("fish");
-		myNeeds = myBasicNeeds;
+		myNeedsFactory = pi -> new BasicIndustryNeeds(pi)
+				.addToolGood(Good.get("wood_goods"), 1);
 	}
 	
+	private BasicIndustryNeeds getNeed(ProvinceIndustry indus){
+		return (BasicIndustryNeeds)indus.getNeed();
+	}
 	
 	@Override
 	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
@@ -50,7 +50,7 @@ public class FisheryIndustry extends Industry {
 		//TODO set a rendement décroissant pour modeliser la surpeche
 		
 		// produce
-		long intproduction = myBasicNeeds.useGoodsAndTools(indus, (long)production * durationInDay, durationInDay);
+		long intproduction = getNeed(indus).useGoodsAndTools(indus, (long)production * durationInDay, durationInDay);
 		super.sellProductToMarket(prv, intproduction, durationInDay);
 
 		return intproduction;

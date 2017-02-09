@@ -13,7 +13,7 @@ public class WoodHouseIndustry extends Industry {
 
 	static protected WoodHouseIndustry ptr;
 	public static void load(){
-		good = Good.get("wood_goods");
+		tools = Good.get("wood_goods");
 		ptr = new WoodHouseIndustry();
 	}
 	public static WoodHouseIndustry get(){ return ptr; }
@@ -22,13 +22,16 @@ public class WoodHouseIndustry extends Industry {
 	
 	private WoodHouseIndustry(){
 		createThis = Good.get("wood_house");
-		myBasicNeeds = new BasicIndustryNeeds(this)
+		myNeedsFactory = pi -> new BasicIndustryNeeds(pi)
 				.addRawGood(Good.get("wood"), 2)
-				.addToolGood(Good.get("wood_goods"), 1);
-		myNeeds = myBasicNeeds;
+				.addToolGood(Good.get("wood_goods"), 1);;
 	}
 	
-	static protected Good good;
+	private BasicIndustryNeeds getNeed(ProvinceIndustry indus){
+		return (BasicIndustryNeeds)indus.getNeed();
+	}
+
+	static protected Good tools;
 	
 	@Override
 	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
@@ -43,12 +46,13 @@ public class WoodHouseIndustry extends Industry {
 
 		//a kilo of goods per worker per day with a kilo of tools
 		// the quarter if no tools
-		float production = nbMens * 0.25f;;
-		production += 0.75f * Math.max(prv.getIndustry(ptr).getStock().getLong(createThis), nbMens) * createThis.getIndustryToolEfficiency();
-		production *= durationInDay;
+		float production = nbMens * 0.25f;
+		production += 0.75f * Math.max(prv.getIndustry(ptr).getStock().getLong(tools), nbMens) * createThis.getIndustryToolEfficiency();
+		production *= durationInDay * 100;
+		
 
 		// produce
-		long intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)production, durationInDay);
+		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
 		super.sellProductToMarket(prv, intproduction, durationInDay);
 	
 		return intproduction;

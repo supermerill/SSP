@@ -55,7 +55,7 @@ public abstract class Needs implements Comparable<Needs>{
 	 * @param nbDays
 	 * @return
 	 */
-	public abstract NeedWish moneyNeeded(Province prv, long nb, Object2LongMap<Good> currentStock, long totalMoneyThisTurn, int nbDays);
+	public abstract NeedWish moneyNeeded(Province prv, long totalMoneyThisTurn, int nbDays);
 
 	/**
 	 * You should watch the BasicIndutryNeed or FoodNeed instead.
@@ -66,7 +66,7 @@ public abstract class Needs implements Comparable<Needs>{
 	 * @param nbDays
 	 * @return
 	 */
-	public abstract long spendMoney(Province prv, long nb, Object2LongMap<Good> currentStock, NeedWish maxMoneyToSpend, int nbDays);
+	public abstract long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays);
 	
 	
 	@Override

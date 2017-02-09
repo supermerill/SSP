@@ -15,15 +15,21 @@ public class ProvinceIndustry implements Job{
 	
 	public static class ProvinceIndustryFactory{
 		public static ProvinceIndustryFactory creator = new ProvinceIndustryFactory();
-		protected ProvinceIndustry prvIndus = new ProvinceIndustry();
+		protected ProvinceIndustry prvIndus;
+		public ProvinceIndustryFactory(){ create(); }
 		public ProvinceIndustry create(){ ProvinceIndustry ret = prvIndus; prvIndus =  new ProvinceIndustry(); return ret; }
 		public ProvinceIndustryFactory setProvince(Province prv){ prvIndus.setProvince(prv); return this; };
-		public ProvinceIndustryFactory setInustry(Industry prv){ prvIndus.setIndustry(prv); return this; };
+		public ProvinceIndustryFactory setInustry(Industry indus){ 
+			prvIndus.setIndustry(indus); 
+			prvIndus.need = indus.getMyNeedsFactory().apply(prvIndus); 
+			return this; };
 	}
 	
 	Province province;
 	Industry industry;
+	IndustryNeed need;
 	public String getName(){return industry.getName();}
+	public String toString(){return industry.toString();}
 	
 //	int needs;
 //	int offer;
@@ -35,14 +41,15 @@ public class ProvinceIndustry implements Job{
 	// used to run
 	Object2LongMap<Good> stock = new Object2LongOpenHashMap<Good>(); //raw goods + tools
 	long money=0;//bfr
-	long rawGoodsCost=1; // rawgoods + depreciation of owned stock
+	long rawGoodsCost=0; // rawgoods + depreciation of owned stock
 	long previousProduction=0;
-	long previousSalary=1;
+	double previousSalary=1;
 	
 	public Province getProvince() { return province; }
 	public void setProvince(Province province) { this.province = province; }
 	public Industry getIndustry() { return industry; }
 	public void setIndustry(Industry industry) { this.industry = industry; }
+	public IndustryNeed getNeed() { return need; }
 //	public int getNeeds() { return needs; }
 //	public void setNeeds(int needs) { this.needs = needs; }
 //	public int getOffer() { return offer; }
@@ -52,15 +59,15 @@ public class ProvinceIndustry implements Job{
 //	public int getEfficiency() { return efficiency; }
 //	public void setEfficiency(int efficiency) { this.efficiency = efficiency; }
 	public long getMoney() { return money; }
-	public void addMoney(long money) { this.money += money; }
-	public void setMoney(long money) { this.money = money; }
+	public void addMoney(long moneyAdd) { this.money += moneyAdd; }
+//	public void setMoney(long money) { this.money = money; }
 	public long getRawGoodsCost() { return rawGoodsCost; }
 	public void setRawGoodsCost(long rawGoodsCost) { this.rawGoodsCost = rawGoodsCost; }
 	public Object2LongMap<Good> getStock() { return stock; }
 	public long getPreviousProduction() { return previousProduction; }
 	public void setPreviousProduction(long previousProduction) { this.previousProduction = previousProduction; }
-	public long getPreviousSalary() { return previousSalary; }
-	public void setPreviousSalary(long previousSalary) { this.previousSalary = previousSalary; }
+	public double getPreviousSalary() { return previousSalary; }
+	public void setPreviousSalary(double previousSalary) { this.previousSalary = previousSalary; }
 	
 	
 	public void load(JsonObject jsonObj){

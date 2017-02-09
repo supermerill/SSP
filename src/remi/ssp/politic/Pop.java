@@ -22,14 +22,34 @@ import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceCommerce;
 
 public class Pop {
-	Culture culture; //TODO: save/load with index
 	Province prv; //weak?
+	Culture culture; //TODO: save/load with index
+	int popType;
+	public static List<String> popTypeName = new ArrayList<>();
+	static{
+		//note: the algorithm try to use the getRepartitionRevenu to keep track of ideal pop wealth distribution.
+		// each category (poor, middle and rich) should have the same wealth.
+		
+		// POOR : basic class
+		// some can be upped to middle if the global welth of this category is too high vs the middle one
+		popTypeName.add("poor");
+		// like poors one, but with two time more earnings, can be manager, traders because they have some earnings.
+		// some can be downgrade to poor if the wealth of middle+rish is too low.
+		// some can be upgraded to rich is wealth of poor+middle is too high.
+		popTypeName.add("middle");
+		// RICH : possess things inside the province (that can be possessed)
+		//		can be downdgraded to middle if not enough things to own, or not wealthy enough vs middle
+		popTypeName.add("rich"); 
+	}
 
 	public Pop(){}
 	public Pop(/*Culture culture,*/ Province prv){ this.prv = prv; }
 	
-	private long nbMensTotal=0;
-	private int[] nombreHabitantsParAge = new int[100]; // de 0 à 100ans
+
+	private long nbAdult=0;
+	private long nbChildren=0;
+	private long nbElder=0;
+	//private int[] nombreHabitantsParAge = new int[100]; // de 0 à 100ans
 	long nbMensInArmy=0; //cf job?
 	long nbMensChomage=0;
 //	int nbMensCommerce=0;//cf job // more = more imports & exports. A part is used as a baseline for shop = efficacity of stock retention (TODO)
@@ -64,8 +84,9 @@ public class Pop {
 	
 	public Culture getCulture() { return culture; }
 	public Province getProvince() { return prv; }
-	public int getNombreHabitantsParAge(int age) { if(age>=nombreHabitantsParAge.length) return 0; return nombreHabitantsParAge[age]; }
-	public void addHabitants(int age, int nb){ nombreHabitantsParAge[age] += nb; nbMensTotal += nb; }
+//	public int getNombreHabitantsParAge(int age) { if(age>=nombreHabitantsParAge.length) return 0; return nombreHabitantsParAge[age]; }
+//	public void addHabitants(int age, int nb){ nombreHabitantsParAge[age] += nb; nbMensTotal += nb; }
+//	public void addHabitants(int nb){ nbMensTotal += nb; }
 	public long getNbMensInArmy() { return nbMensInArmy; }
 	public long getNbMensChomage() { return nbMensChomage; }
 	public void setNbMensChomage(long nb) { nbMensChomage = nb; }
@@ -75,10 +96,9 @@ public class Pop {
 	public float getEducationMoy() { return educationMoy; }
 	public float getSante() { return sante; }
 //	public SocialStatus getStatus() { return status; }
-	public long getNbMens() { return nbMensTotal; }
 	public long getMoney() { return cash; }
-	public void addMoney(long money) { this.cash += money; }
-	public void setMoney(long money) { this.cash = money; }
+	public void addMoney(long moneyAdd) { this.cash += moneyAdd; }
+//	public void setMoney(long money) { this.cash = money; }
 	public Object2LongMap<Good> getStock() { return stock; }
 	public float getRepartitionRevenuMult() { return repartitionMult; }
 	public float getRepartitionRevenu(float i){ return 1-(1/(1+(i*repartitionMult))); }
@@ -86,62 +106,49 @@ public class Pop {
 	public ProvinceCommerce getSeaCommerce() { return commerceSea; }
 	
 
-	public int removeHabitants(final int age, final int nb){ 
-		long nbRemoved = Math.min(nb, nbMensTotal);
-		int removed = 0;
-		if(nbMensChomage >0){
-			long minus = Math.min(nbMensChomage, nbRemoved);
-			nbMensChomage -=minus;
-			nbRemoved -= minus;
-			removed += minus;
+	public long getNbAdult() { return nbAdult; }
+	public void addAdult(final int nb){ 
+		System.out.println("remove "+ (-nb)+" adults from "+nbAdult);
+		nbAdult += nb; 
+		if(nbAdult<0){ 
+			System.err.println("Error, too low number of mens in pop: "+nbAdult);
 		}
-		if(nbMensEmployed.size()>0 && nbRemoved>0){
-			boolean canContinue = false;
-			List<Job> jobs = new ArrayList<>(nbMensEmployed.keySet());
-			do{
-				canContinue = false;
-				Collections.shuffle(jobs);
-				for(Job job : jobs){
-					if(nbMensEmployed.getLong(job)>0 && nbRemoved>0){
-						nbMensEmployed.put(job, nbMensEmployed.getLong(job) -1);
-						nbRemoved --;
-						removed ++;
-						canContinue = true;
-					}
-				}
-			}while(canContinue);
-		}
-		if(nbMensInArmy>0 && nbRemoved>0){
-			//army ?
-			long minus = Math.min(nbMensInArmy, nbRemoved);
-			nbMensInArmy -=minus;
-			nbRemoved -= minus;
-			removed += minus;
-		}
-		if(nbRemoved>0){
-			//not possible
-			System.err.println("Error, can't find a pop men job. So he don't die");
-			nombreHabitantsParAge[age] -= nbRemoved; 
-			nbMensTotal -= nbRemoved; 
-		}
-		nombreHabitantsParAge[age] -= removed; 
-		nbMensTotal -= removed; 
-		return removed;
 	}
+	public long getNbChildren() { return nbChildren; }
+	public void addChildren(final int nb){ 
+		nbChildren += nb; 
+		if(nbChildren<0){
+			System.err.println("Error, too low number of children in pop: "+nbChildren);
+		}
+	}
+	public long getNbElder() { return nbElder; }
+	public void addElder(final int nb){ 
+		nbElder += nb; 
+		if(nbElder<0){
+			System.err.println("Error, too low number of nbElder in pop: "+nbElder);
+		}
+	}
+	public int getPopType() { return popType; }
+	public void setPopType(int popType) { this.popType = popType; }
+	//0 for poor, little for middle, many for rich
+	public int getCoeffInvestors(){ int type = getPopType(); return type*type*type; }
 	
 	//public float criminalite=0; //0=> auncun, 1=> anarchie
 
 	public void load(JsonObject jsonObj, Province prv){
 		this.prv = prv;
-		nbMensTotal = jsonObj.getJsonNumber("nb").longValue();
+		popType = jsonObj.getJsonNumber("type").intValue();
+		nbAdult = jsonObj.getJsonNumber("nbA").longValue();
+		nbChildren = jsonObj.getJsonNumber("nbC").longValue();
+		nbElder = jsonObj.getJsonNumber("nbE").longValue();
 		nbMensInArmy = jsonObj.getJsonNumber("nbArmy").longValue();
 		nbMensChomage = jsonObj.getJsonNumber("nbUE").longValue();
 //		nbMensCommerce = jsonObj.getLong("nbBI");
-		JsonArray array = jsonObj.getJsonArray("popD");
-		for(int i=0;i<array.size() && i< nombreHabitantsParAge.length;i++){
-			nombreHabitantsParAge[i] = array.getInt(i);
-		}
-		array = jsonObj.getJsonArray("nbE");
+//		JsonArray array = jsonObj.getJsonArray("popD");
+//		for(int i=0;i<array.size() && i< nombreHabitantsParAge.length;i++){
+//			nombreHabitantsParAge[i] = array.getInt(i);
+//		}
+		JsonArray array = jsonObj.getJsonArray("nbE");
 		nbMensEmployed.clear();
 		for(int i=0;i<array.size();i++){
 			JsonObject object = array.getJsonObject(i);
@@ -181,17 +188,20 @@ public class Pop {
 	}
 	
 	public void save(JsonObjectBuilder jsonOut){
-		jsonOut.add("nb", nbMensTotal);
+		jsonOut.add("type", popType);
+		jsonOut.add("nbA", nbAdult);
+		jsonOut.add("nbC", nbChildren);
+		jsonOut.add("nbE", nbElder);
 		jsonOut.add("nbArmy", nbMensInArmy);
 		jsonOut.add("nbUE", nbMensChomage);
 //		jsonOut.add("nbBI", nbMensCommerce);
 		
+//		JsonArrayBuilder array = Json.createArrayBuilder();
+//		for(int i=0; i< nombreHabitantsParAge.length;i++){
+//			array.add(nombreHabitantsParAge[i]);
+//		}
+//		jsonOut.add("popD", array);
 		JsonArrayBuilder array = Json.createArrayBuilder();
-		for(int i=0; i< nombreHabitantsParAge.length;i++){
-			array.add(nombreHabitantsParAge[i]);
-		}
-		jsonOut.add("popD", array);
-		array = Json.createArrayBuilder();
 		for(Entry<Job> good : nbMensEmployed.object2LongEntrySet()){
 			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
 			objectBuilder.add("name", good.getKey().getName());

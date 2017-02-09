@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Plot;
 import remi.ssp.politic.Province;
@@ -36,7 +37,7 @@ public class FlatCarteV3 implements MapFactory {
 	public List<List<Province>> provinces = new ArrayList<>();
 	public List<List<Plot>> plots = new ArrayList<>();
 	int nbLigne = 0, nbColonne = 0;
-	Random rand = new Random();
+	GlobalRandom rand = GlobalRandom.aleat;
 	Carte currentcarte;
 	
 	@Override

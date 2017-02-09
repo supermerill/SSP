@@ -16,7 +16,7 @@ public class EquipmentTemplate extends Good{
 			EquipmentTemplate good = new EquipmentTemplate();
 			good.name = name;
 			good.transportability = weight;
-			good.storageLossPerYear = storageLossPerYear;
+			good.storageKeepPerYear = storageLossPerYear;
 			good.desirability = desirability;
 			equipList.put(name, good);
 			return good;

@@ -2,6 +2,7 @@ package remi.ssp.economy;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.function.Function;
 
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
@@ -18,18 +19,18 @@ public abstract class Industry {
 	
 	
 	protected Good createThis = null; // we produce only one good for now, because it's easier to compute the profitability this way
-	protected Needs myNeeds = null; // ask for raw goods and tools.
+	protected Function<ProvinceIndustry,IndustryNeed> myNeedsFactory = o->null; // ask for raw goods and tools.
 	
 	public String getName(){return getClass().getName();}
 	@Override public String toString() { return getName(); }
 	
 	//produce goods, by consuming needed things ( people are payedd in economy plugin)
-	// !!! you muist update setRawGoodsCost
+	// !!! you must update setRawGoodsCost (to be able compute the marge, the salary and the savings)
 	public abstract long produce(ProvinceIndustry indus, Collection<Pop> pop, int durationInDay);
 
 
 	public Good getGood() { return createThis; }
-	public Needs getMyNeeds() { return myNeeds; }
+	public Function<ProvinceIndustry,IndustryNeed> getMyNeedsFactory() { return myNeedsFactory; }
 	
 	//one by economy
 	//	public abstract int setPrice(Province prv); // from offre/demande avec le stock disponible
@@ -43,11 +44,9 @@ public abstract class Industry {
 	
 	protected void sellProductToMarket(Province prv, long quantity, int nbDays){
 		long price = prv.getStock().get(createThis).getPriceSellToMarket(prv, nbDays);
-		
 		prv.addMoney(-price*quantity);
 		prv.getStock().get(createThis).addStock(quantity);
 		prv.getIndustry(this).addMoney(price*quantity);
-		
 	}
 	
 }

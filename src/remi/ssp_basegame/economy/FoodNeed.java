@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sun.org.apache.bcel.internal.generic.POP;
+
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
@@ -39,10 +41,15 @@ public class FoodNeed extends PopNeed {
 	}
 
 	@Override
-	public NeedWish moneyNeeded(Province prv, long nbMensInPop, Object2LongMap<Good> currentPopStock,
-			long totalMoneyThisTurn, int nbDays) {
+	public NeedWish moneyNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 
+		final long nbMensInPop = myPop.getNbAdult();
+		
+		if(totalMoneyThisTurn<=0){
+			System.out.println("ERROR no money for pop:"+totalMoneyThisTurn);
+		}
+		
 		NeedWish wish = new NeedWish(0, 0, 0);
 		
 		if(nbMensInPop==0){
@@ -147,19 +154,20 @@ public class FoodNeed extends PopNeed {
 	}
 
 	@Override
-	public long spendMoney(Province prv, long nbMensInPop, Object2LongMap<Good> currentPopStock, NeedWish maxMoneyToSpend,
-			int nbDays) {
+	public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		System.out.println("@" + myPop.getProvince().x + ":" + myPop.getProvince().y + ", to buy food, i have  "
 				+ maxMoneyToSpend.vitalNeed + " " + maxMoneyToSpend.normalNeed + " " + maxMoneyToSpend.luxuryNeed);
 
+		final long nbMensInPop = myPop.getNbAdult();
+		final Object2LongMap<Good> currentPopStock = myPop.getStock();
 		if(nbMensInPop==0){
 			return 0;
 		}
 		// get basic then switch them to more grateful dishs?
 		// kjoule need to consume
 		// long kJNeeded = nbMensInPop * 24000l * nbDays;
-		final int kgNeeded = (int) (nbMensInPop * 1.5f * nbDays);
+		int kgNeeded = (int) (nbMensInPop * 1.5f * nbDays);
 
 		// kjoules in stock, in case of?
 		// TODO
@@ -279,6 +287,28 @@ public class FoodNeed extends PopNeed {
 				+ (nbKiloVital + nbKiloNormal + nbKiloLuxe - kgNeeded));
 		if (nbCoins <= 0 || nbSurplus < 0) {
 
+			//try to eat the stock
+
+			//from the less degradable to the most one
+			allFood.sort( (food1, food2) -> - Float.compare(food1.getStorageKeepPerYear(), food2.getStorageKeepPerYear()));
+			for (Good food : allFood){
+				long currentStock = currentPopStock.getLong(food);
+				if(currentStock > 0){
+					if(currentStock > -nbSurplus){
+						currentPopStock.put(food, currentStock + nbSurplus);
+						kgNeeded += nbSurplus;
+						nbSurplus = 0;
+						System.out.println("Use stock of "+food+"to eat "+nbSurplus);
+					}else{
+						currentPopStock.put(food, 0);
+						nbSurplus -= currentStock;
+						kgNeeded -= currentStock;
+						System.out.println("Use all stock of "+food+" to eat ("+currentStock+")");
+					}
+				}
+			}
+			
+			
 			// int kgFoodNeeded = (int)(kJNeeded / (float) 16000);
 
 			// System.out.println("nbMens="+nbMensInPop+",
@@ -306,34 +336,16 @@ public class FoodNeed extends PopNeed {
 							+ "<=" + kgNeeded + " => " + prv.rationReserve + ")" + nbMensInPop + " => ");
 					// for (int i = 0; i < -prv.rationReserve / 2; i++) {
 					System.out.print(nbPopToDie + " can die / " + nbMensInPop + " (" + (int) (1 + nbPopNoFood * 0.5)
-							+ "/" + myPop.getNbMens() + ") @" + myPop.getProvince().x + ":" + myPop.getProvince().y);
-					while (nbPopToDie > 0 && nbMensInPop > 0) {
+							+ "/" + myPop.getNbAdult() + ") @" + myPop.getProvince().x + ":" + myPop.getProvince().y);
+//					while (nbPopToDie > 0 && nbMensInPop > 0) {
 						// la moitié des habitant non nouris meurent, les plus
 						// TODO: les esclave en premier
 						// jeunes d'abord (loi normale entre 0 et 14
 						// old or young?
-						if (GlobalRandom.aleat.getInt(2, nbPopToDie) == 0) {
-							// young
-							int age = (GlobalRandom.aleat.getInt(7, nbPopToDie)
-									+ GlobalRandom.aleat.getInt(7, nbPopToDie));
-							if (myPop.getNombreHabitantsParAge(age) > 0) {
-								myPop.removeHabitants(age, 1);
-								nbPopToDie--;
-								nbMensInPop--;
-							}
-						} else {
-							// random
-							int age = GlobalRandom.aleat.getInt(100, nbPopToDie);
-							if (myPop.getNombreHabitantsParAge(age) > 0) {
-								myPop.removeHabitants(age, 1);
-								nbPopToDie--;
-								nbMensInPop--;
-							}
-						}
-						// TODO: ne pas impacter les elites? => remonter leur
-						// %age
-					}
-					System.out.println(", now " + nbMensInPop + " (" + myPop.getNbMens() + ") mens");
+						// TODO: remove child first, elder second
+//					}
+					myPop.addAdult(-nbPopToDie);
+					System.out.println(", now " + nbMensInPop + " (" + myPop.getNbAdult() + ") mens");
 				}
 
 			} else {
@@ -476,18 +488,66 @@ public class FoodNeed extends PopNeed {
 			//it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Good> entry : nbGoods.object2IntEntrySet());
 			//Good food = entry.getKey();
 			long nbFood = Math.min(kiloToEatMax, nbGoods.getLong(food));
-			goodStock.get(food).addStock( -nbFood);
-			goodStock.get(food).addNbConsumePerDay(nbFood / (float)nbDays);
 			long cost = goodPrice.getLong(food) * nbFood;
-			moneyUsed += cost;
 			if(maxMoneyToSpend.getMoney() < moneyUsed){
 				cost = cost + maxMoneyToSpend.getMoney() - moneyUsed;
-				moneyUsed = maxMoneyToSpend.getMoney();
 				nbFood = cost / goodPrice.getLong(food);
 			}
-			prv.addMoney(cost);
+			moneyUsed += cost;
+//			goodStock.get(food).addStock( -nbFood);
+//			goodStock.get(food).addNbConsumePerDay(nbFood / (float)nbDays);
+//			prv.addMoney(cost);
+//			myPop.addMoney(-cost);
+			super.consumeProductFromMarket(food, nbFood, nbDays);
+			
 			kiloToEatMax -= nbFood;
 			System.out.println("i eat " + food.getName()+" @ "+goodPrice.getLong(food)+" for an amount of "+nbFood+" (total cost="+cost+")");
+		}
+		
+		
+		
+		//money left? maybe store some grain (1 year?)
+		if(moneyUsed < maxMoneyToSpend.getMoney()){
+			long leftover = maxMoneyToSpend.getMoney() - moneyUsed;
+
+
+			long reserveNeeded = (nbMensInPop * 365 * 3) / 2;
+			for (Good food : allFood){
+				reserveNeeded -= currentPopStock.getLong(food);
+			}
+			
+			if(reserveNeeded>0){
+				//from the less degradable to the most one (and do not pick all of it)
+				allFood.sort( (food1, food2) -> Float.compare(food1.getStorageKeepPerYear(), food2.getStorageKeepPerYear()));
+				for (Good food : allFood){
+					long totalPrice = goodStock.get(food).getStock() * goodPrice.getLong(food) / 5;
+					long quantityPicked = 0;
+					if (totalPrice == 0)
+						continue; // no food here
+					if (leftover <= totalPrice) {
+						quantityPicked = leftover / goodPrice.getLong(food);
+						System.out.println("i buy RESERVE good "+quantityPicked+" " + food.getName()+" @ "+goodPrice.getLong(food)+" for "+nbCoins);
+						break;
+					} else {
+						quantityPicked = goodStock.get(food).getStock() / 5;
+						System.out.println("i buy RESERVE good "+quantityPicked+" " + food.getName()+" @ "+goodPrice.getLong(food)+" for "+totalPrice);
+					}
+					super.storeProductFromMarket(food, quantityPicked, nbDays);
+//					goodStock.get(food).addStock( -quantityPicked);
+//					goodStock.get(food).addNbConsumePerDay(quantityPicked / (float)nbDays);
+//					long cost = goodPrice.getLong(food) * quantityPicked;
+//					moneyUsed += cost;
+//					leftover -= cost;
+//					prv.addMoney(cost);
+//					myPop.addMoney(-cost);
+//					currentPopStock.put(food, quantityPicked);
+				}
+			}
+			
+		}
+		
+		if(moneyUsed>maxMoneyToSpend.getMoney()){
+			System.err.println("error in food wish, i spend "+moneyUsed+" instead of "+maxMoneyToSpend.getMoney());
 		}
 
 		return moneyUsed;

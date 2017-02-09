@@ -2,7 +2,7 @@ package remi.ssp.economy;
 
 public interface Job {
 
-	public long getPreviousSalary();
+	public double getPreviousSalary();
 //	public int getNbWorkers(); //stored in pop
 //	public void addWorkers(int nb);
 

@@ -16,13 +16,14 @@ public class HuntingIndustry extends Industry {
 	public static void load(){ ptr = new HuntingIndustry(); }
 	public static HuntingIndustry get(){ return ptr; }
 
-	BasicIndustryNeeds myBasicNeeds;
-
 	protected HuntingIndustry() {
 		createThis = Good.get("meat");
-		myBasicNeeds = new BasicIndustryNeeds(this)
+		myNeedsFactory = pi -> new BasicIndustryNeeds(pi)
 				.addToolGood(Good.get("wood_goods"), 1);
-		myNeeds = myBasicNeeds;
+	}
+	
+	private BasicIndustryNeeds getNeed(ProvinceIndustry indus){
+		return (BasicIndustryNeeds)indus.getNeed();
 	}
 	
 	@Override
@@ -85,14 +86,14 @@ public class HuntingIndustry extends Industry {
 	
 
 	// produce
-	long intproduction = myBasicNeeds.useGoodsAndTools(indus, (int)nbRabbitToSell, durationInDay);
+	long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)nbRabbitToSell, durationInDay);
 	super.sellProductToMarket(prv, intproduction, durationInDay);
 	
-	//and rare_meat (note: industry is not designed to handle multi-products right now. be careful with these "bonus")
-	long price = prv.getStock().get(Good.GoodFactory.get("rare_meat")).getPriceSellToMarket(prv, durationInDay);
-	prv.addMoney(-price*nbRabbitToSell/10);
-	prv.getStock().get(Good.GoodFactory.get("rare_meat")).addStock(nbRabbitToSell/10);
-	prv.getIndustry(this).addMoney(price*nbRabbitToSell/10);
+//	//and rare_meat (note: industry is not designed to handle multi-products right now. be careful with these "bonus")
+//	long price = prv.getStock().get(Good.GoodFactory.get("rare_meat")).getPriceSellToMarket(prv, durationInDay);
+//	prv.addMoney(-price*nbRabbitToSell/10);
+//	prv.getStock().get(Good.GoodFactory.get("rare_meat")).addStock(nbRabbitToSell/10);
+//	prv.getIndustry(this).addMoney(price*nbRabbitToSell/10);
 
 	return intproduction;
 }

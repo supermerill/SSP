@@ -124,22 +124,22 @@ public class SimpleMapViewer extends JComponent{
 				}
 				g.fillOval((i*3*taille)/4, ((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))), taille, taille);
 				maxX = Math.max(maxX, (i*3*taille)/4 + taille*2);
-				if(prv.getNbMens()>0){
+				if(prv.getNbAdult()>0){
 					g.setColor(Color.RED);
 					int tailleRond = 1;
-					if(prv.getNbMens()>100000){
+					if(prv.getNbAdult()>100000){
 						tailleRond = 8;
-					}else if(prv.getNbMens()>25000){
+					}else if(prv.getNbAdult()>25000){
 						tailleRond = 7;
-					}else if(prv.getNbMens()>5000){
+					}else if(prv.getNbAdult()>5000){
 						tailleRond = 6;
-					}else if(prv.getNbMens()>1000){
+					}else if(prv.getNbAdult()>1000){
 						tailleRond = 5;
-					}else if(prv.getNbMens()>250){
+					}else if(prv.getNbAdult()>250){
 						tailleRond = 4;
-					}else if(prv.getNbMens()>50){
+					}else if(prv.getNbAdult()>50){
 						tailleRond = 3;
-					}else if(prv.getNbMens()>10){
+					}else if(prv.getNbAdult()>10){
 						tailleRond = 2;
 					}
 					g.setColor(Color.RED);
