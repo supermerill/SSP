@@ -43,7 +43,6 @@ public class WoodGoodsArtisanalIndustry extends Industry {
 			nbMens += pop.getNbMensEmployed().getLong(indus);
 			// take into account personal tools ?
 		}
-		System.out.println("Woods goods: i have "+prv.getIndustry(ptr).getStock().getLong(wood)+" "+wood);
 
 		//a kilo of goods per worker per day with a kilo of tools
 		// the quarter if no tools
@@ -53,7 +52,6 @@ public class WoodGoodsArtisanalIndustry extends Industry {
 		
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
-		super.sellProductToMarket(prv, intproduction, durationInDay);
 	
 		return intproduction;
 	}

@@ -3,6 +3,7 @@ package remi.ssp.politic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.json.Json;
@@ -14,7 +15,9 @@ import javax.json.JsonObjectBuilder;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import remi.ssp.CurrentGame;
+import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.Job;
@@ -88,6 +91,7 @@ public class Pop {
 //	public void addHabitants(int age, int nb){ nombreHabitantsParAge[age] += nb; nbMensTotal += nb; }
 //	public void addHabitants(int nb){ nbMensTotal += nb; }
 	public long getNbMensInArmy() { return nbMensInArmy; }
+	public void addNbMensInArmy(long nb) { nbMensInArmy+=nb; }
 	public long getNbMensChomage() { return nbMensChomage; }
 	public void setNbMensChomage(long nb) { nbMensChomage = nb; }
 	public void addNbMensChomage(long nb) { nbMensChomage += nb; }
@@ -97,7 +101,12 @@ public class Pop {
 	public float getSante() { return sante; }
 //	public SocialStatus getStatus() { return status; }
 	public long getMoney() { return cash; }
-	public void addMoney(long moneyAdd) { this.cash += moneyAdd; }
+	public void addMoney(long moneyAdd) { 
+		this.cash += moneyAdd; 
+		if(cash<0){
+			System.err.println("Error, now pop has no money");
+		}
+	}
 //	public void setMoney(long money) { this.cash = money; }
 	public Object2LongMap<Good> getStock() { return stock; }
 	public float getRepartitionRevenuMult() { return repartitionMult; }
@@ -112,6 +121,34 @@ public class Pop {
 		nbAdult += nb; 
 		if(nbAdult<0){ 
 			System.err.println("Error, too low number of mens in pop: "+nbAdult);
+		}
+		if(nb>0){
+			addNbMensChomage(nb);
+		}
+		if(nb<0){
+			//remove from chomage or job
+			long nbRemoved = Math.min(getNbMensChomage(), nb);
+			ArrayList<Job> jobs = new ArrayList<>(getNbMensEmployed().keySet());
+			for(Iterator<Job> it = jobs.iterator(); it.hasNext();){
+				Job job = it.next(); if(getNbMensEmployed().getLong(job) <= 0) it.remove();
+			}
+			while(nbRemoved<nb && jobs.size()>0){
+				int i= GlobalRandom.aleat.getInt(jobs.size(), nb);
+				long nbMensHere = getNbMensEmployed().getLong(jobs.get(i));
+				long removedHere = Math.min(nbMensHere, nb - nbRemoved);
+				nbRemoved += removedHere;
+				getNbMensEmployed().put(jobs.get(i), nbMensHere - nbRemoved);
+				if(nbMensHere - nbRemoved <= 0) jobs.remove(i);
+			}
+			//then try with army
+			if(nbRemoved<nb){
+				long removedHere = Math.min(getNbMensInArmy(), nb - nbRemoved);
+				addNbMensInArmy(-removedHere);
+				nbRemoved += removedHere;
+			}
+			if(nbRemoved<nb){
+				System.err.println("error, can't find the adult of "+(nb-nbRemoved)+" died adults.");
+			}
 		}
 	}
 	public long getNbChildren() { return nbChildren; }

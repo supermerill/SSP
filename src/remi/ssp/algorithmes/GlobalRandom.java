@@ -10,7 +10,7 @@ public class GlobalRandom {
 	static{
 		long time = System.currentTimeMillis();
 		aleat = new GlobalRandom();
-		aleat.rand = new Random(time);
+		aleat.rand = new Random(1486746923541l);
 		System.out.println("create Aleat with seed "+time);
 	}
 	

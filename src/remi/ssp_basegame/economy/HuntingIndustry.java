@@ -87,7 +87,6 @@ public class HuntingIndustry extends Industry {
 
 	// produce
 	long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)nbRabbitToSell, durationInDay);
-	super.sellProductToMarket(prv, intproduction, durationInDay);
 	
 //	//and rare_meat (note: industry is not designed to handle multi-products right now. be careful with these "bonus")
 //	long price = prv.getStock().get(Good.GoodFactory.get("rare_meat")).getPriceSellToMarket(prv, durationInDay);

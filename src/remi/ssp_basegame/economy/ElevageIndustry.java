@@ -189,7 +189,6 @@ public class ElevageIndustry extends Industry {
 		
 		//sell sheep to province market
 		long intproduction = getNeed(indus).basicIndustryNeeds.useGoodsAndTools(indus, (long)nbSheepToSell * 100, durationInDay);
-		super.sellProductToMarket(prv, intproduction, durationInDay);
 
 		return intproduction;
 	}

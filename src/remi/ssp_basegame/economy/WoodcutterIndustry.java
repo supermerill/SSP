@@ -75,7 +75,6 @@ public class WoodcutterIndustry extends Industry {
 
 	// produce
 	long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)nbWoodCut, durationInDay);
-	super.sellProductToMarket(prv, intproduction, durationInDay);
 
 	
 	return intproduction;

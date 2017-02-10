@@ -94,7 +94,9 @@ public abstract class PopNeed extends Needs {
 		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
 		prv.addMoney(price*quantity);
 		prv.getStock().get(good).addStock(-quantity);
+		System.out.print("POP BUY FOR "+(price*quantity)+" : "+myPop.getMoney());
 		myPop.addMoney(-price*quantity);
+		System.out.println(" => "+myPop.getMoney());
 		myPop.getStock().put(good, quantity + myPop.getStock().getLong(good));
 	}
 	

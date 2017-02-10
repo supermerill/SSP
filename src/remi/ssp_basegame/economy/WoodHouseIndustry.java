@@ -53,7 +53,6 @@ public class WoodHouseIndustry extends Industry {
 
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
-		super.sellProductToMarket(prv, intproduction, durationInDay);
 	
 		return intproduction;
 	}

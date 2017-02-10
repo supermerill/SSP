@@ -64,7 +64,7 @@ public class SimpleMapViewerV3 extends JComponent{
 //		Nourriture algoN = new Nourriture(){};
 		while(true){
 			System.out.println("================================== start turn =======================================");
-			Economy.ptr.doTurn(map, 30);
+			Economy.ptr.doTurn(map, 10);
 			System.out.println("================================= economy done ======================================");
 			this.repaint();
 			try {

@@ -59,7 +59,12 @@ public class ProvinceIndustry implements Job{
 //	public int getEfficiency() { return efficiency; }
 //	public void setEfficiency(int efficiency) { this.efficiency = efficiency; }
 	public long getMoney() { return money; }
-	public void addMoney(long moneyAdd) { this.money += moneyAdd; }
+	public void addMoney(long moneyAdd) { 
+		this.money += moneyAdd; 
+		if(money<0){
+			System.err.println("Error, now indus has no money");
+		}
+	}
 //	public void setMoney(long money) { this.money = money; }
 	public long getRawGoodsCost() { return rawGoodsCost; }
 	public void setRawGoodsCost(long rawGoodsCost) { this.rawGoodsCost = rawGoodsCost; }

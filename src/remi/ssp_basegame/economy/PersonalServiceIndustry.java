@@ -48,7 +48,6 @@ public class PersonalServiceIndustry  extends Industry {
 			nbMens += pop.getNbMensEmployed().getLong(indus);
 			// take into account personal tools ?
 		}
-		System.out.println("SERVICE nbMens="+nbMens);
 		long production = 0;
 		for(Pop pop : pops){
 			float educCoeff = (0.5f+pop.getEducationMoy()/2);
@@ -60,11 +59,8 @@ public class PersonalServiceIndustry  extends Industry {
 			}
 		}
 
-		System.out.print("SERVICE "+production);
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
-		super.sellProductToMarket(prv, intproduction, durationInDay);
-		System.out.println(" +> "+intproduction);
 		
 		return intproduction;
 	}

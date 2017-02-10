@@ -87,7 +87,7 @@ public class Good {
 	protected int desirability=0; //  +1 = 20% better, +5 = two time better!
 	
 	//nb days of stock is healthy for a marketplace
-	protected float optimalStockNbDays = 0.1f;
+	protected float optimalStockNbDays = 10f;
 	// coeff for the price increase and decrease algorithm
 	protected float volatility = 1f;
 	

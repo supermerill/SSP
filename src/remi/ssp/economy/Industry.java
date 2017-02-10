@@ -42,11 +42,13 @@ public abstract class Industry {
 	//	public abstract void consume(Province prv, Object2IntMap<Pop> alreadyUsed); // le habitants peuvent dépenser de l'argnet pour acheter ces biens (selon le fric qu'il leur reste
 
 	
-	protected void sellProductToMarket(Province prv, long quantity, int nbDays){
+	public long sellProductToMarket(Province prv, long quantity, int nbDays){
 		long price = prv.getStock().get(createThis).getPriceSellToMarket(prv, nbDays);
-		prv.addMoney(-price*quantity);
+		price *= quantity;
+		prv.addMoney(-price);
 		prv.getStock().get(createThis).addStock(quantity);
-		prv.getIndustry(this).addMoney(price*quantity);
+		prv.getIndustry(this).addMoney(price);
+		return price;
 	}
 	
 }

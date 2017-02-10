@@ -50,7 +50,9 @@ public class AgricultureIndustry extends Industry {
 		//produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
 		System.out.println(", prod with tools="+intproduction);
-		super.sellProductToMarket(prv, intproduction, durationInDay);
+	
+		//do not do that, economyplugin will call it after caling this
+		//super.sellProductToMarket(prv, intproduction, durationInDay);
 
 		return intproduction;
 	}

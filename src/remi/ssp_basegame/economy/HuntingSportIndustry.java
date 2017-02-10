@@ -87,7 +87,6 @@ public class HuntingSportIndustry extends Industry {
 
 	// produce
 	long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)nbRabbitToSell, durationInDay);
-	super.sellProductToMarket(prv, intproduction, durationInDay);
 
 	return intproduction;
 }

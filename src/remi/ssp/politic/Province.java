@@ -165,7 +165,13 @@ public class Province{
 	public long getMoney() { return money; }
 	public long getPreviousMoney() { return previousMoney; }
 //	public void setMoney(long money) { this.money = money; }
-	public void addMoney(long moneyAdd) { this.money += moneyAdd; moneyChangePerDay+=Math.abs(moneyAdd); }
+	public void addMoney(long moneyAdd) { 
+		this.money += moneyAdd; 
+		moneyChangePerDay+=Math.abs(moneyAdd); 
+		if(this.money<0){
+			//System.err.println("Error, now province has no money");
+		}
+	}
 	public long getMoneyChangePerDay() { return moneyChangePerDay; }
 	public long getMoneyChangePerDayConsolidated() { return moneyChangePerDayConsolidated; }
 	public List<TradeRoute> getTradeRoute() { return tradeRoutes; }

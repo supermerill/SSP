@@ -51,7 +51,6 @@ public class FisheryIndustry extends Industry {
 		
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (long)production * durationInDay, durationInDay);
-		super.sellProductToMarket(prv, intproduction, durationInDay);
 
 		return intproduction;
 	}
