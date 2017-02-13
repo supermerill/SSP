@@ -85,6 +85,11 @@ public class Pop {
 	float repartitionMult = 20; //20 => 80/20
 	
 	
+	@Override
+	public String toString() {
+		return popTypeName.get(popType)+"_"+culture+"@"+prv.x+":"+prv.y;
+	}
+	
 	public Culture getCulture() { return culture; }
 	public Province getProvince() { return prv; }
 //	public int getNombreHabitantsParAge(int age) { if(age>=nombreHabitantsParAge.length) return 0; return nombreHabitantsParAge[age]; }
@@ -96,13 +101,21 @@ public class Pop {
 	public void setNbMensChomage(long nb) { nbMensChomage = nb; }
 	public void addNbMensChomage(long nb) { nbMensChomage += nb; }
 //	public int getNbMensCommerce() { return nbMensCommerce; }
-	public Object2LongMap<Job> getNbMensEmployed() { return nbMensEmployed; }
+	@Deprecated public Object2LongMap<Job> getNbMensEmployed() { return nbMensEmployed; }
+	public long getNbMensEmployed(Job job) { return nbMensEmployed.getLong(job); }
+	public void addNbMensEmployed(Job job, long nbHire) { nbMensEmployed.put(job, nbMensEmployed.get(job) + nbHire); 
+		if(nbMensEmployed.get(job)<0){
+			System.err.println("Error, now indus "+job+" has "+nbMensEmployed.get(job)+" worker from "+this);
+		}
+	}
 	public float getEducationMoy() { return educationMoy; }
 	public float getSante() { return sante; }
 //	public SocialStatus getStatus() { return status; }
 	public long getMoney() { return cash; }
+	@Deprecated public long gain=0;
 	public void addMoney(long moneyAdd) { 
 		this.cash += moneyAdd; 
+		if(moneyAdd>0) gain += moneyAdd;
 		if(cash<0){
 			System.err.println("Error, now pop has no money");
 		}
@@ -117,39 +130,47 @@ public class Pop {
 
 	public long getNbAdult() { return nbAdult; }
 	public void addAdult(final int nb){ 
-		System.out.println("remove "+ (-nb)+" adults from "+nbAdult);
+		System.out.println("remove "+ (-nb)+" adults from "+nbAdult+", actually "+nbAdult+" = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
 		nbAdult += nb; 
 		if(nbAdult<0){ 
 			System.err.println("Error, too low number of mens in pop: "+nbAdult);
 		}
 		if(nb>0){
 			addNbMensChomage(nb);
+			System.out.println("add "+nb+" chomeurs");
 		}
 		if(nb<0){
 			//remove from chomage or job
-			long nbRemoved = Math.min(getNbMensChomage(), nb);
+			long nbRemoved = Math.min(getNbMensChomage(), -nb);
+			System.out.println("remove "+nbRemoved+" from chomage");
 			ArrayList<Job> jobs = new ArrayList<>(getNbMensEmployed().keySet());
 			for(Iterator<Job> it = jobs.iterator(); it.hasNext();){
-				Job job = it.next(); if(getNbMensEmployed().getLong(job) <= 0) it.remove();
+				Job job = it.next(); if(getNbMensEmployed(job) <= 0) it.remove();
 			}
-			while(nbRemoved<nb && jobs.size()>0){
-				int i= GlobalRandom.aleat.getInt(jobs.size(), nb);
-				long nbMensHere = getNbMensEmployed().getLong(jobs.get(i));
-				long removedHere = Math.min(nbMensHere, nb - nbRemoved);
+			System.out.println(nbRemoved+" <? "+(-nb)+", nbJobs="+jobs.size()+" == "+getNbMensEmployed().keySet().size());
+			while(nbRemoved<-nb && jobs.size()>0){
+				final int i= GlobalRandom.aleat.getInt(jobs.size(), -nb);
+				final long nbMensHere = getNbMensEmployed(jobs.get(i));
+				final long removedHere = Math.min(nbMensHere, Math.min(- (nb + nbRemoved), 2 -nb/10));
 				nbRemoved += removedHere;
-				getNbMensEmployed().put(jobs.get(i), nbMensHere - nbRemoved);
-				if(nbMensHere - nbRemoved <= 0) jobs.remove(i);
+//				getNbMensEmployed().put(jobs.get(i), nbMensHere - nbRemoved);
+				addNbMensEmployed(jobs.get(i), -removedHere);
+				System.out.println("remove "+removedHere+" from "+jobs.get(i)+" (now "+getNbMensEmployed(jobs.get(i))+" mens inside, from "+nbMensHere);
+				
+				if(nbMensHere - removedHere <= 0) jobs.remove(i);
 			}
 			//then try with army
-			if(nbRemoved<nb){
-				long removedHere = Math.min(getNbMensInArmy(), nb - nbRemoved);
+			if(nbRemoved<-nb){
+				final long removedHere = Math.min(getNbMensInArmy(), - (nb + nbRemoved));
 				addNbMensInArmy(-removedHere);
+				System.out.println("remove "+removedHere+" from army");
 				nbRemoved += removedHere;
 			}
-			if(nbRemoved<nb){
-				System.err.println("error, can't find the adult of "+(nb-nbRemoved)+" died adults.");
+			if(nbRemoved<-nb){
+				System.err.println("error, can't find the adult of "+(- (nb+nbRemoved))+" died adults.");
 			}
 		}
+		System.out.println("pop "+popType+" now has "+nbAdult+" adult = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
 	}
 	public long getNbChildren() { return nbChildren; }
 	public void addChildren(final int nb){ 

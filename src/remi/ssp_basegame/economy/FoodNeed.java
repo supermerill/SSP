@@ -358,8 +358,13 @@ public class FoodNeed extends PopNeed {
 
 			// TODO: add a bit of random
 			// TODO: give some from others to vital, if possible?
-
-			// TODO: kill children & old people because they are hungry
+			
+			//TODO: do not kill people before 1 turn, to let time to distribute urgent supplys from govrt stock.
+			// TODO: add "steal" (people which steal from market)
+			// TODO: add a factor from unnocupied landfarm to let people plant their own crop for their own food, whitout taxes because they are starving.
+			// maybe it should work with food industry to coordinate their things.
+			
+			// TODO: kill children & old people first because they are weaks
 			// famine! (old code, placeholder that can work, somehow (but
 			// it's not efficient)
 			// 1.5kg par personne par jour
@@ -536,7 +541,7 @@ public class FoodNeed extends PopNeed {
 			System.out.println(nbGoods.getLong(food));
 			long cost = goodPrice.getLong(food) * nbFood;
 			if (maxMoneyToSpend.getMoney() < moneyUsed) {
-				cost = cost + maxMoneyToSpend.getMoney() - moneyUsed;
+				cost = maxMoneyToSpend.getMoney() - moneyUsed;
 				nbFood = cost / goodPrice.getLong(food);
 			}
 			moneyUsed += cost;

@@ -40,7 +40,7 @@ public class WoodGoodsArtisanalIndustry extends Industry {
 		long nbMens = 0;
 		for(Pop pop : pops){
 			//TODO tools
-			nbMens += pop.getNbMensEmployed().getLong(indus);
+			nbMens += pop.getNbMensEmployed(indus);
 			// take into account personal tools ?
 		}
 

@@ -43,7 +43,7 @@ public class ElevageIndustry extends Industry {
 			Object2LongMap<Good> currentStock = myIndus.getStock();
 			long nb = 0;
 			for(Pop pop : prv.getPops()){
-				nb += pop.getNbMensEmployed().get(prv.getIndustry(ElevageIndustry.this));
+				nb += pop.getNbMensEmployed(prv.getIndustry(ElevageIndustry.this));
 			}
 			NeedWish wishes = basicIndustryNeeds.moneyNeeded(prv, totalMoneyThisTurn, nbDays);
 			long nbSheep = (currentStock.getLong(Good.GoodFactory.get("meat"))/100);
@@ -69,7 +69,7 @@ public class ElevageIndustry extends Industry {
 			long spent = 0;
 			long nb = 0;
 			for(Pop pop : prv.getPops()){
-				nb += pop.getNbMensEmployed().get(prv.getIndustry(ElevageIndustry.this));
+				nb += pop.getNbMensEmployed(prv.getIndustry(ElevageIndustry.this));
 			}
 			//first, buy sheeps
 			long nbSheep = (currentStock.getLong(Good.GoodFactory.get("meat"))/100);
@@ -82,7 +82,7 @@ public class ElevageIndustry extends Industry {
 				long price = prv.getStock().get(meat).getPriceBuyFromMarket(prv, nbDays);
 				
 				long vitalSpend = Math.min(maxMoneyToSpend.vitalNeed, nbNeedToBuy * price);
-				long quantityBuy = vitalSpend / (price*100);
+				long quantityBuy = Math.min(vitalSpend / (price*100), prv.getStock().get(meat).getStock()/100);
 				nbSheep += quantityBuy;
 				quantityBuy  *= 100;
 				maxMoneyToSpend.vitalNeed -= vitalSpend;
@@ -162,7 +162,7 @@ public class ElevageIndustry extends Industry {
 		int nbSheepToSell = 0;
 		int nbMens = 0;
 		for(Pop pop : pops){
-			nbMens += pop.getNbMensEmployed().getLong(indus);
+			nbMens += pop.getNbMensEmployed(indus);
 		}
 		if(nbSheep > 30 * nbMens){ //30 sheep per people: can sustain an other men
 			nbSheepToSell = 30 * nbMens;

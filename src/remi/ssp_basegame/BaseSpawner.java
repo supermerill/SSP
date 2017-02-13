@@ -74,11 +74,12 @@ public class BaseSpawner extends Spawner {
 					//add all province goods possible
 					for(Good good : Good.GoodFactory.goodList.values()){
 						prv.getStock().put(good, new ProvinceGoods(good));
+						prv.getStock().get(good).setPrice(100);
 					}
 					//place some food and houses
-					prv.getStock().get(Good.get("meat")).setStock(50000);
-					prv.getStock().get(Good.get("crop")).setStock(650000);
-					prv.getStock().get(Good.get("wood_house")).setStock(10000);
+					prv.getStock().get(Good.get("meat")).setStock(500);
+					prv.getStock().get(Good.get("crop")).setStock(3500);
+					prv.getStock().get(Good.get("wood_house")).setStock(10);
 				}
 			}
 		}
@@ -105,6 +106,7 @@ public class BaseSpawner extends Spawner {
 					pop.addMoney(pop.getNbAdult()*1000000); // 1000/100/10 "coin" per men (can be /1000)
 					//add needs (TODO: get them from techs researched at startup)
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
+					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*250); //~some day of food
 //					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 					pop.getPopNeeds().add(PopNeed.create("rich_service", pop));
 					//middle
@@ -115,6 +117,7 @@ public class BaseSpawner extends Spawner {
 					pop.setNbMensChomage(pop.getNbAdult());
 					pop.addMoney(pop.getNbAdult()*100000);
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
+					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*250); //~some day of food
 					pop.getPopNeeds().add(PopNeed.create("middle_service", pop));
 //					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 					//poor
@@ -125,6 +128,7 @@ public class BaseSpawner extends Spawner {
 					pop.setNbMensChomage(pop.getNbAdult());
 					pop.addMoney(pop.getNbAdult()*10000);
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
+					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*250); //~some day of food
 //					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 				}
 			}

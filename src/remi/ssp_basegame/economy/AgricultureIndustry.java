@@ -39,7 +39,7 @@ public class AgricultureIndustry extends Industry {
 		System.out.println("nbChamps="+nbChamps+" : "+prv.pourcentChamps);
 		for(Pop pop : pops){
 			//
-			long nbChampsUsed = Math.min(nbChamps, pop.getNbMensEmployed().getLong(indus));
+			long nbChampsUsed = Math.min(nbChamps, pop.getNbMensEmployed(indus));
 			production += prv.champsRendement * nbChampsUsed * 8 * durationInDay;
 			System.out.println("nbChampsUsed="+nbChampsUsed+", prod ="+production);
 			nbChamps -= nbChampsUsed;
@@ -48,7 +48,7 @@ public class AgricultureIndustry extends Industry {
 		
 
 		//produce
-		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
+		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production*2, durationInDay);
 		System.out.println(", prod with tools="+intproduction);
 	
 		//do not do that, economyplugin will call it after caling this

@@ -69,7 +69,7 @@ public class HuntingSportIndustry extends Industry {
 	long nbRabbitToSell = 0;
 	long nbMens = 0;
 	for(Pop pop : pops){
-		nbMens += pop.getNbMensEmployed().getLong(indus);
+		nbMens += pop.getNbMensEmployed(indus);
 	}
 
 

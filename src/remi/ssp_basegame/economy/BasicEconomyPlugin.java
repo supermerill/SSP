@@ -18,10 +18,10 @@ public class BasicEconomyPlugin extends Plugin {
 		super.loadGoods();
 		
 
-		FoodNeed.kJoules.put(create("crop",0.1f, 1).setOptimalNbDayStock(300).setVolatility(2f).get(), 2000);
-		FoodNeed.kJoules.put(create("fish",0.5f, 4).setOptimalNbDayStock(2).setVolatility(5f).get(), 2000);
+		FoodNeed.kJoules.put(create("crop",0.1f, 1).setOptimalNbDayStock(300).setVolatility(1f).get(), 2000);
+		FoodNeed.kJoules.put(create("fish",0.5f, 4).setOptimalNbDayStock(2).setVolatility(2f).get(), 2000);
 //		FoodNeed.kJoules.put(create("rare_fish",0.9f, 10).setOptimalNbDayStock(1).get(), 2000);
-		FoodNeed.kJoules.put(create("meat",0.5f, 3).setOptimalNbDayStock(2).setVolatility(10f).get(), 2000);
+		FoodNeed.kJoules.put(create("meat",0.5f, 3).setOptimalNbDayStock(2).setVolatility(2f).get(), 2000);
 		FoodNeed.kJoules.put(create("rare_meat",0.9f, 6).setOptimalNbDayStock(1).setVolatility(1f).get(), 2000);
 		//create("rawWood",0.9f, 1);
 		//create("plank",0.95f, 10);

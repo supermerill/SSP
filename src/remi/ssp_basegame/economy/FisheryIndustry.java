@@ -44,7 +44,7 @@ public class FisheryIndustry extends Industry {
 		long production = 0;
 		for(Pop pop : pops){
 			//1 tile : 1,66 men, 2 tiles: 2 mens, 3t: 2.33, 4t: 2.66, 5t: 3  (max) 6t: 3.33 mens
-			production += (int)( (2+seaTiles/2) * pop.getNbMensEmployed().getLong(indus) * 1);
+			production += (int)( (2+seaTiles/2) * pop.getNbMensEmployed(indus) * 1);
 		}
 		
 		//TODO set a rendement décroissant pour modeliser la surpeche

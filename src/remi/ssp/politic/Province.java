@@ -120,6 +120,7 @@ public class Province{
 	Map<Good, ProvinceGoods> stock = new HashMap<>(); //market : industry & pop & merchant buy goods from this. industry & merchant sell goods into this
 	long money; //BFR from the marketplace
 	long previousMoney;
+	long moneyConsolidated=0;
 	long moneyChangePerDay;
 	long moneyChangePerDayConsolidated=0;
 	List<TradeRoute> tradeRoutes = new ArrayList<>();
@@ -164,6 +165,7 @@ public class Province{
 	public void setOwner(Civilisation civ) { this.owner = civ; }
 	public long getMoney() { return money; }
 	public long getPreviousMoney() { return previousMoney; }
+	public long getMoneyConsolidated() { return moneyConsolidated; }
 //	public void setMoney(long money) { this.money = money; }
 	public void addMoney(long moneyAdd) { 
 		this.money += moneyAdd; 
@@ -188,6 +190,7 @@ public class Province{
 		moneyChangePerDayConsolidated = (moneyChangePerDayConsolidated*5+this.moneyChangePerDay)/6 ;
 		this.moneyChangePerDay = 0; 
 		previousMoney = money; 
+		moneyConsolidated = (moneyConsolidated*5+this.previousMoney)/6 ;
 	}
 
 	public void loadLinks(JsonObject jsonProvince, Carte carte){
@@ -258,6 +261,8 @@ public class Province{
 		rail = (float)jsonProvince.getJsonNumber("rail").doubleValue();
 		criminalite = (float)jsonProvince.getJsonNumber("criminalite").doubleValue();
 		money = jsonProvince.getJsonNumber("money").longValue();
+		previousMoney = jsonProvince.getJsonNumber("previousMoney").longValue();
+		moneyConsolidated = jsonProvince.getJsonNumber("moneyConsolidated").longValue();
 		moneyChangePerDay = jsonProvince.getJsonNumber("moneyChange").longValue();
 		moneyChangePerDayConsolidated = jsonProvince.getJsonNumber("moneyChangeConso").longValue();
 		rayonnementCulturel = (float)jsonProvince.getJsonNumber("rayonnementCulturel").doubleValue();
@@ -334,6 +339,8 @@ public class Province{
 		jsonOut.add("rail", rail);
 		jsonOut.add("criminalite", criminalite);
 		jsonOut.add("money", money);
+		jsonOut.add("previousMoney", previousMoney);
+		jsonOut.add("moneyConsolidated", moneyConsolidated);
 		jsonOut.add("moneyChange", moneyChangePerDay);
 		jsonOut.add("moneyChangeConso", moneyChangePerDayConsolidated);
 		jsonOut.add("rayonnementCulturel", rayonnementCulturel);

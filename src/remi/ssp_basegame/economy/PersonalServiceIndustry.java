@@ -45,17 +45,17 @@ public class PersonalServiceIndustry  extends Industry {
 		long nbMens = 0;
 		for(Pop pop : pops){
 			//TODO tools
-			nbMens += pop.getNbMensEmployed().getLong(indus);
+			nbMens += pop.getNbMensEmployed(indus);
 			// take into account personal tools ?
 		}
 		long production = 0;
 		for(Pop pop : pops){
 			float educCoeff = (0.5f+pop.getEducationMoy()/2);
 			if(prv.getIndustry(ptr).getStock().getLong(tools)>nbMens){
-				production += durationInDay * 10 * pop.getNbMensEmployed().getLong(indus) * educCoeff;
+				production += durationInDay * 10 * pop.getNbMensEmployed(indus) * educCoeff;
 			}else{
-				production += 0.25 * durationInDay * 10 * pop.getNbMensEmployed().getLong(indus) * educCoeff;
-				production += 0.75 * (durationInDay * 10 * pop.getNbMensEmployed().getLong(indus) * educCoeff * prv.getIndustry(ptr).getStock().getLong(tools)) / nbMens;
+				production += 0.25 * durationInDay * 10 * pop.getNbMensEmployed(indus) * educCoeff;
+				production += 0.75 * (durationInDay * 10 * pop.getNbMensEmployed(indus) * educCoeff * prv.getIndustry(ptr).getStock().getLong(tools)) / nbMens;
 			}
 		}
 
