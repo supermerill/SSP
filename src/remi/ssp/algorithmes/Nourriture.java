@@ -16,7 +16,7 @@
 //		int rationRecolte = culture.culture(prv) + peche.peche(prv)
 //				+ elevage.elevage(prv, 0);
 //		if (rationNecessaire - rationRecolte > prv.rationReserve) {
-//			System.out.println("pas asser de recolte: "+rationRecolte+", par chasser pour "+chasse.chasse(prv)+", humidite:"+prv.humidite+", faune="+prv.pourcentFaune);
+//			logln("pas asser de recolte: "+rationRecolte+", par chasser pour "+chasse.chasse(prv)+", humidite:"+prv.humidite+", faune="+prv.pourcentFaune);
 //			rationRecolte += chasse.chasse(prv) + elevage.elevage(prv, 0.5f);
 //		}
 //		if (rationNecessaire - rationRecolte > prv.rationReserve) {
@@ -25,7 +25,7 @@
 //		prv.rationReserve += rationRecolte - rationNecessaire;
 //		if (prv.rationReserve < 0) {
 //			// famine!
-//			System.out.print("famine! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbMens()+" => ");
+//			log("famine! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbMens()+" => ");
 ////			for (int i = 0; i < -prv.rationReserve / 2; i++) {
 //			while(prv.rationReserve<0 && prv.getNbMens() >0){
 //				// la moitié des habitant non nouris meurent, les plus
@@ -42,9 +42,9 @@
 //				
 //			}
 //			prv.rationReserve = 0;
-//			System.out.println(prv.getNbMens());
+//			logln(prv.getNbMens());
 //		}else{
-//			System.out.println("OK! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbMens());
+//			logln("OK! ("+rationNecessaire+">"+rationRecolte+" => "+prv.rationReserve+")"+prv.getNbMens());
 //		}
 //
 //	}

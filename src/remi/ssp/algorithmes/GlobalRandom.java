@@ -1,5 +1,5 @@
 package remi.ssp.algorithmes;
-
+import static remi.ssp.GlobalDefines.logln;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -11,7 +11,7 @@ public class GlobalRandom {
 		long time = System.currentTimeMillis();
 		aleat = new GlobalRandom();
 		aleat.rand = new Random(1486746923541l);
-		System.out.println("create Aleat with seed "+time);
+		logln(", \"create Aleat with seed\":"+time);
 	}
 	
 	private Random rand;

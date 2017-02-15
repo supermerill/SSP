@@ -1,4 +1,5 @@
 package remi.ssp;
+import static remi.ssp.GlobalDefines.logln;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class PluginLoader{
         Iterator<Plugin> apit = sl.iterator();
         while (apit.hasNext()){
         	Plugin plugin = apit.next();
-        	System.out.println("Load plugin "+plugin.getClass().getName());
+        	logln(", \"Load plugin "+plugin.getClass().getName()+"\":true");
         	availablePlugin.add(plugin);
         }
 	}
@@ -75,7 +76,7 @@ public class PluginLoader{
 					if(file.getName().contains(".")){
 						String[] splitName = file.getName().split("\\.");
 						if(splitName[splitName.length-1].equalsIgnoreCase("jar")){
-							System.out.println("find jar: "+file.getAbsolutePath());
+							logln(", \"find jar: "+file.getAbsolutePath()+"\":true");
 							jars.add(file);
 						}
 					}
@@ -89,7 +90,7 @@ public class PluginLoader{
 	public void loadStaticData(List<String> orderedNames){
 		
 		
-		forEachPlugin(orderedNames, plugin->System.out.println("Activate plugin "+plugin.getClass().getName()));
+		forEachPlugin(orderedNames, plugin->logln(", \"Activate plugin "+plugin.getClass().getName()+"\":true"));
 		
 		//1 goods
 		forEachPlugin(orderedNames, plugin->plugin.loadGoods());

@@ -37,10 +37,11 @@ public class ProvinceGoods {
 	public float getNbConsumePerDayConsolidated() { return nbConsumePerDayConsolidated; }
 	public float getStockConsolidated() { return stockConsolidated; }
 	public void updateNbConsumeConsolidated(int nbDays) { //should be called 1 time per tick
-		int nbTicks = Math.max(1, (int) good.getOptimalNbDayStock()*10);
+		int nbTicks = Math.max(1, (int) good.getOptimalNbDayStock()*2);
 		nbDays = Math.min(nbDays, nbTicks/2);
 		this.nbConsumePerDayConsolidated = (this.nbConsumePerDayConsolidated*(nbTicks-nbDays)/(float)(nbTicks)) + nbConsumePerDay/(float)(nbTicks); 
-		this.stockConsolidated = (this.stockConsolidated*(nbTicks-nbDays)/(float)(nbTicks)) + stock/(float)(nbTicks); 
+		//stock vary much more quickly, and is not dependent on "days", as it's an instant measure
+		this.stockConsolidated = (this.stockConsolidated*(5)/(float)(6)) + stock/(float)(6); 
 	}
 //	public void addPrice(int price) { this.price += price; }
 	public void addStock(long stock) { this.stock += stock;
@@ -70,21 +71,22 @@ public class ProvinceGoods {
 	public long getPriceSellToMarket(Province prv, int durationInDay){
 		double coeff = Math.max(0.1,prv.getMoneyConsolidated()) / ((1.0+prv.getMoneyChangePerDayConsolidated()*coeffMarketBFR));
 		coeff = ( 1f / (1+ coeff*coeff) );
-//		System.out.println("price to sell me :"+( price * (1-coeff) )+" / "+price);
+//		logln("price to sell me :"+( price * (1-coeff) )+" / "+price);
 		//if stock is high and i don't have money, lower this even more
 //		if(prv.getMoney()<0 && stock > 100*getMoneyChangePerDayConsolidated){
-//			System.out.println("too much stock for ??, stop buy it! "+(long)( price * (1-coeff) ) + " => " + (long)( price * (1-coeff) * (0.1+900/(1000-prv.getPreviousMoney())) ));
+//			logln("too much stock for ??, stop buy it! "+(long)( price * (1-coeff) ) + " => " + (long)( price * (1-coeff) * (0.1+900/(1000-prv.getPreviousMoney())) ));
 //			return (long)( price * (1-coeff) * (0.1+900/(1000-prv.getPreviousMoneyconsolidated())) );
 //		}else
 		long buyPrice = (long)( price * (1-coeff) );
 		//decrease even more the if the good has too many stock
 		if(this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays < this.stockConsolidated){
-			System.out.println("too much stock, reduce buy price more quickly to prevent banckrupcy of marketplace, and reduce offer");
+//			logln("too much stock, reduce buy price more quickly to prevent banckrupcy of marketplace, and reduce offer");
 			buyPrice = (long)( buyPrice * ((this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays) / this.stockConsolidated) );
 		}
 		
 		if(prv.getPreviousMoney()<0){
-			buyPrice = 0; //can't buy, faillite
+			//buyPrice = 0; //can't buy, faillite // can't do that, money can't circulate if true.
+			buyPrice *= 0.1;
 		}
 			
 		return buyPrice;
@@ -93,7 +95,7 @@ public class ProvinceGoods {
 	public long getPriceBuyFromMarket(Province prv, int durationInDay){
 		double coeff = prv.getMoneyConsolidated() / ((1.0+prv.getMoneyChangePerDayConsolidated()*coeffMarketBFR));
 		coeff = ( 1f / (1+ coeff*coeff) );
-//		System.out.println("price to buy me :"+( price * (1+coeff) )+" / "+price+"    ("+prv.getMoney()+"/"
+//		logln("price to buy me :"+( price * (1+coeff) )+" / "+price+"    ("+prv.getMoney()+"/"
 //		+(durationInDay*(1.0+prv.getMoneyChangePerDayConsolidated()))+" = "+(prv.getMoney() / (durationInDay*(1.0+prv.getMoneyChangePerDayConsolidated())))
 //				+" => "+coeff);
 		

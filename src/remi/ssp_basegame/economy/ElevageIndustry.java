@@ -1,5 +1,7 @@
 package remi.ssp_basegame.economy;
 
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.Collection;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
@@ -48,7 +50,7 @@ public class ElevageIndustry extends Industry {
 			NeedWish wishes = basicIndustryNeeds.moneyNeeded(prv, totalMoneyThisTurn, nbDays);
 			long nbSheep = (currentStock.getLong(Good.GoodFactory.get("meat"))/100);
 			
-			System.out.println("Need more sheeps? "+nbSheep+" ? "+nb*10);
+			logln(", \"Need more sheeps?\":\" "+nbSheep+" ? "+nb*10+"\"");
 			if(nbSheep<nb*10){
 				//try to buy some meat
 				long nbNeedToBuy = nb*10 - nbSheep;
@@ -64,7 +66,7 @@ public class ElevageIndustry extends Industry {
 		@Override
 		public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
 			Object2LongMap<Good> currentStock = myIndus.getStock();
-			System.out.println("before elevage has "+ currentStock);
+			logln(", \"elevageSpendMoney\":{\"before elevage has\":\""+ currentStock+"\"");
 //			long nbPrevProd = prv.getIndustry(ptr).getPreviousProduction();
 			long spent = 0;
 			long nb = 0;
@@ -74,7 +76,7 @@ public class ElevageIndustry extends Industry {
 			//first, buy sheeps
 			long nbSheep = (currentStock.getLong(Good.GoodFactory.get("meat"))/100);
 			if(nbSheep<nb*10){
-				System.out.println("not enough sheeps: "+nbSheep+" < "+nb*10+", to buy, i have "+maxMoneyToSpend.vitalNeed+" & "+maxMoneyToSpend.normalNeed);
+				logln(", \"not enough sheeps\":"+nbSheep+", \"<\":"+nb*10+", \"vitalmoney\":"+maxMoneyToSpend.vitalNeed+", \"normalmoney\":"+maxMoneyToSpend.normalNeed);
 				Good meat = Good.get("meat");
 				//try to buy some meat
 				long nbNeedToBuy = nb*10 - nbSheep;
@@ -94,7 +96,7 @@ public class ElevageIndustry extends Industry {
 				currentStock.put(meat,nbSheep*100);
 				prv.getStock().get(meat).addStock( -quantityBuy);
 				spent += quantityBuy * price;
-				System.out.println("buy "+quantityBuy+" vital sheeps for "+price+"€ each (tot "+(quantityBuy * price)+"€)");
+				logln(", \"buyvital_qt\":"+quantityBuy+",\"vital_price\":"+price+", \"vital_spent\":"+(quantityBuy * price)+"");
 				
 				long normalSpend = Math.min(maxMoneyToSpend.normalNeed, Math.max(0, nbNeedToBuy * price - vitalSpend));
 				quantityBuy = normalSpend / (price*100);
@@ -109,7 +111,7 @@ public class ElevageIndustry extends Industry {
 //				spent += quantityBuy * price;
 //				maxMoneyToSpend.normalNeed -= normalSpend;
 				super.storeProductFromMarket(meat, quantityBuy, nbDays);
-				System.out.println("buy "+quantityBuy+" normal sheeps");
+				logln(", \"buy_normal_nb\":"+quantityBuy+"");
 				
 			}
 			
@@ -117,7 +119,7 @@ public class ElevageIndustry extends Industry {
 			spent += basicIndustryNeeds.spendMoney(prv, maxMoneyToSpend, nbDays);
 
 			
-			System.out.println("now elevage has "+ currentStock);
+			logln(", \"now elevage has nbKiloSheep\":"+ currentStock.getLong(createThis)+"}");
 			return spent;
 		}
 		
@@ -132,14 +134,13 @@ public class ElevageIndustry extends Industry {
 		//TODO: evolution de la surface agricole prv.surfaceSol*prv.pourcentChamps*prv.champsRendement
 		//TODO evolution de la surface cultivable par personne
 		long nbFields = (int) ( (prv.pourcentPrairie * prv.surface * 100 )); // 1 hectare per sheep
-		long nbSheep = (indus.getStock().getLong(Good.GoodFactory.get("meat"))/100); //100kg per sheep
-		System.out.println("");
-		System.out.println("i have "+nbSheep+" sheeps");
+		long nbSheep = (indus.getStock().getLong(createThis)/100); //100kg per sheep
+		logln(", \"produceSheep\":{\"nbSheepsInit\":"+nbSheep);
 		//temp booststrap TODO replace by needs
 		if(nbSheep == 0){
-			indus.getStock().put(Good.GoodFactory.get("meat"), 100);
+			indus.getStock().put(createThis, 100);
 			nbSheep = 1;
-			System.out.println(" no sheep, now 1");
+			logln(", \"no sheepbefore, but now\":1");
 		}
 		
 		
@@ -152,7 +153,7 @@ public class ElevageIndustry extends Industry {
 			}
 		}
 		nbSheep += newSheeps;
-		System.out.println("i have now "+nbSheep+" sheeps with birth");
+		logln(", \"nbSheeps_after_birth\":"+nbSheep);
 		
 		//nb sheep to sell: because nbSheep can't go higher than:
 		// - X sheep per people * efficacity
@@ -172,17 +173,17 @@ public class ElevageIndustry extends Industry {
 			nbSheepToSell += (nbSheep - nbFields) * nbMens / (10+nbMens);
 			nbSheep -= nbSheepToSell;
 		}
-		System.out.println("i have to sell "+nbSheep+" nbSheep");
+		logln(", \"i have to sell\":"+nbSheep);
 
 		if(nbSheep > nbFields){ //fall into a canyon
-			System.out.println("sheeps lost: "+(nbSheep - nbFields));
+			logln(", \"sheeps lost\":"+(nbSheep - nbFields));
 			nbSheep -= nbSheep - nbFields;
 		}
 		
 		//set new livestock
-		System.out.println(" i have previously "+indus.getStock().getLong(Good.GoodFactory.get("meat"))+" sheep");
-		indus.getStock().put(Good.GoodFactory.get("meat"), nbSheep*100);
-		System.out.println(" i have now "+indus.getStock().getLong(Good.GoodFactory.get("meat"))+" sheep");
+		logln(", \"i have previously_kgSheeps\":"+indus.getStock().getLong(createThis));
+		indus.getStock().put(createThis, nbSheep*100);
+		logln(", \"i have now kgSheeps\":"+indus.getStock().getLong(createThis)+"}");
 		
 		
 		//TODO: sell more sheep if the price is high and famine is occurring.

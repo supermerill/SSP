@@ -35,6 +35,8 @@ public class Province{
 	public Plot centerPlot;
 	public Province[] proche = new Province[6];
 	public int x, y; //'cache'
+	
+	@Override public String toString() {return "prv"+x+":"+y;}
 
 	///meteo
 	float pluie; //0-1

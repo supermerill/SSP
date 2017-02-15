@@ -1,8 +1,8 @@
 package remi.ssp_basegame.economy;
 
-import java.util.Map;
+import static remi.ssp.GlobalDefines.f;
+import static remi.ssp.GlobalDefines.logln;
 
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceGoods;
@@ -27,7 +27,7 @@ public class MiddleNeedService extends PopNeed {
 		final long nbMensInPop = myPop.getNbAdult();
 
 		if(totalMoneyThisTurn<=0){
-			System.out.println("ERROR no money for pop:"+totalMoneyThisTurn);
+			System.err.println("ERROR no money for pop:"+totalMoneyThisTurn);
 		}
 		
 		NeedWish wish = new NeedWish(0, 0, 0);
@@ -40,24 +40,24 @@ public class MiddleNeedService extends PopNeed {
 		long stock = goodStock.getStock();
 		long price = goodStock.getPriceBuyFromMarket(prv, nbDays);
 		
-		wish.luxuryNeed += Math.min(stock, nbMensInPop * nbDays) * price;
+		wish.luxuryNeed += Math.min(stock, nbMensInPop * nbDays * (myPop.getPopType()+1)) * price;
 		
 		return wish;
 	}
 
 	@Override
 	public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
-		System.out.println("middle class is going to spend max "+maxMoneyToSpend.getMoney()+" to buy services");
+		logln(", \"spend_max_services\": "+f(maxMoneyToSpend.getMoney()/1000f));
 
 		final long nbMensInPop = myPop.getNbAdult();
-		final Object2LongMap<Good> currentPopStock = myPop.getStock();
+//		final Object2LongMap<Good> currentPopStock = myPop.getStock();
 		
 		if(nbMensInPop==0){
 			return 0;
 		}
 		
 		long moneySpent = super.simpleConsume(nbMensInPop*nbDays, serviceGood, maxMoneyToSpend.luxuryNeed, nbDays);
-		System.out.println("middle class haso spend " + moneySpent + " to buy services");
+		logln(", \"spend_services\": "+f(moneySpent/1000f));
 		return moneySpent;
 	}
 

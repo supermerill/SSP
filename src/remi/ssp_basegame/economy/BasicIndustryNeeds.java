@@ -61,7 +61,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			wish.normalNeed +=  nbItemCanBuy * price /2;
 			wish.luxuryNeed +=  nbItemCanBuy * price /4;
 		}
-		System.out.println("2indus "+myIndus.getName()+" need "+wish);
+//		logln("2indus "+myIndus.getName()+" need "+wish);
 		return wish;
 	}
 
@@ -83,25 +83,25 @@ public class BasicIndustryNeeds extends IndustryNeed {
 		long rawGoodCost = 0;
 		//TODO: better one.
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
-		System.out.println("0indus "+myIndus.getName()+" has "+myIndus.getMoney()+" : "+maxMoneyToSpend+", lastProd = "+maxLastProd);
+//		logln("0indus "+myIndus.getName()+" has "+myIndus.getMoney()+" : "+maxMoneyToSpend+", lastProd = "+maxLastProd);
 		final long maxMoney = maxMoneyToSpend.getMoney();
 		long moneyToSpend = maxMoney;
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
 			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
 			long quantityBuy = Math.max(0, Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber));
-			System.out.println("1indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
-					+"( "+maxLastProd+" * "+needed.getFloatValue()+" - "+currentStockNumber+")");
+//			logln("1indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
+//					+"( "+maxLastProd+" * "+needed.getFloatValue()+" - "+currentStockNumber+")");
 			long price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
-				System.out.println("1indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
+//				logln("1indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
 				quantityBuy = (long)(moneyToSpend / price);
 			}
 			//buy
 			moneyToSpend  -= super.storeProductFromMarket(needed.getKey(), quantityBuy, nbDays);
 //			moneyToSpend  -= quantityBuy * price;
 //			prv.addMoney(quantityBuy * price);
-			System.out.println("1indus "+myIndus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
+//			logln("1indus "+myIndus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
 //			market.addNbConsumePerDay(quantityBuy / (float)nbDays);
 //			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
 //			market.addStock( -quantityBuy);
@@ -114,11 +114,11 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
 			long quantityBuy = Math.max(0, Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber));
-			System.out.println("2indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
-					+"( "+maxLastProd+" * "+needed.getFloatValue()+" - "+currentStockNumber+")");
+//			logln("2indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
+//					+"( "+maxLastProd+" * "+needed.getFloatValue()+" - "+currentStockNumber+")");
 			long price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
-				System.out.println("2indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
+//				logln("2indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
 				quantityBuy = (moneyToSpend / price);
 			}
 			//buy
@@ -128,9 +128,9 @@ public class BasicIndustryNeeds extends IndustryNeed {
 //				System.err.println("error "+moneyToSpend+"<0");
 //			}
 //			prv.addMoney(quantityBuy * price);
-			System.out.println("2indus "+myIndus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
+//			logln("2indus "+myIndus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
 //			if(quantityBuy<0){
-//				System.out.println(moneyToSpend+" "+market.getStock()+" , "+( (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber));
+//				logln(moneyToSpend+" "+market.getStock()+" , "+( (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber));
 //			}
 //			market.addNbConsumePerDay(quantityBuy / (float)nbDays);
 //			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
@@ -141,18 +141,18 @@ public class BasicIndustryNeeds extends IndustryNeed {
 //			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
 			long quantityBuy = Math.max(0, Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue())));
-			System.out.println("3indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
-					+"( "+maxLastProd+" * "+needed.getFloatValue()+")");
+//			logln("3indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
+//					+"( "+maxLastProd+" * "+needed.getFloatValue()+")");
 			long price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
-				System.out.println("3indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
+//				logln("3indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
 				quantityBuy = (long)(moneyToSpend / price);
 			}
 			//buy
 			moneyToSpend  -= super.storeProductFromMarket(needed.getKey(), quantityBuy, nbDays);
 //			moneyToSpend  -= quantityBuy * price;
 //			prv.addMoney(quantityBuy * price);
-			System.out.println("3indus "+myIndus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
+//			logln("3indus "+myIndus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
 //			market.addNbConsumePerDay(quantityBuy / (float)nbDays);
 //			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
 //			market.addStock( -quantityBuy);
@@ -163,14 +163,14 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			long quantityBuy = Math.max(0, Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()*0.5)));
 			long price = market.getPriceBuyFromMarket(prv, nbDays);
 			if(quantityBuy * price > moneyToSpend){
-				System.out.println("4indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
+//				logln("4indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
 				quantityBuy = (long)(moneyToSpend / price);
 			}
 			//buy
 			moneyToSpend  -= super.storeProductFromMarket(needed.getKey(), quantityBuy, nbDays);
 //			moneyToSpend  -= quantityBuy * price;
 //			prv.addMoney(quantityBuy * price);
-			System.out.println("4indus "+myIndus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
+//			logln("4indus "+myIndus.getName()+" buy "+quantityBuy+" "+needed.getKey().getName());
 //			market.addNbConsumePerDay(quantityBuy / (float)nbDays);
 //			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
 //			market.addStock( -quantityBuy);

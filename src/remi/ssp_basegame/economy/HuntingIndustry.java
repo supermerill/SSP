@@ -1,5 +1,7 @@
 package remi.ssp_basegame.economy;
 
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.Collection;
 
 import remi.ssp.algorithmes.GlobalRandom;
@@ -78,7 +80,7 @@ public class HuntingIndustry extends Industry {
 	nbRabbitToSell = (int)(durationInDay * 6 * nbMens * (nbRabbit / (float)nbForest));
 	nbRabbit -= nbRabbitToSell;
 
-	System.out.println("nbRabbitToSell= "+nbRabbitToSell+"="+durationInDay+"*6*"+nbMens+(nbRabbit / (float)nbForest));
+	logln(",\"nbRabbitToSell\":"+nbRabbitToSell+",\"calculus:\":\"nbDay("+durationInDay+")*6*"+nbMens+(nbRabbit / (float)nbForest)+"\"");
 	//note: over-hunt can happen easily (no hunter limit), it's intended.
 		
 	//set new livestock

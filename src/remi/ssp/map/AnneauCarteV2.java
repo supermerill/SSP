@@ -1,5 +1,8 @@
 package remi.ssp.map;
 
+import static remi.ssp.GlobalDefines.log;
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -115,7 +118,7 @@ public class AnneauCarteV2 implements MapFactory {
 		int offsetPlotY = nbColonne - (nbColonne/4) - 1;
 		//init plots array to null
 		//upper left corner
-		System.out.println("nbColonnes: "+nbColonne+", nbLines: "+nbLigne);
+		logln("nbColonnes: "+nbColonne+", nbLines: "+nbLigne);
 		int minplotx = 0;
 		//check upper right corner
 		int minploty = 0;//offset + ((nbColonne-1)%2) - 2 * ((nbColonne-1)/2);
@@ -128,7 +131,7 @@ public class AnneauCarteV2 implements MapFactory {
 		//add offset (from province to plot)
 		maxploty += 2;
 		maxplotx += 2;
-		System.out.println("coloneplotfrom 0 to: "+currentcarte.nbPlotColonne+", lines from "+(-offsetPlotY)+" to "+(currentcarte.nbPlotLigne-offsetPlotY)+" ("+currentcarte.nbPlotLigne+")");
+		logln("coloneplotfrom 0 to: "+currentcarte.nbPlotColonne+", lines from "+(-offsetPlotY)+" to "+(currentcarte.nbPlotLigne-offsetPlotY)+" ("+currentcarte.nbPlotLigne+")");
 		//check lower left 
 		for (int i = 0; i < maxplotx; i++) {
 			List<Plot> colonne = new ArrayList<>();
@@ -147,8 +150,8 @@ public class AnneauCarteV2 implements MapFactory {
 			for (int j = 0; j < nbLigne; j++) {
 				//for each prv, we add  all plots
 				Province currentPrv = currentColonne.get(j);
-				System.out.println("create plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
-				System.out.println("offsetPlotY="+offsetPlotY+", -3*(i/4)="+(-3*(i/4))+", (i%2)*(((i/2)+1)%2)="+(i%2)*(((i/2)+1)%2)+", - ((i/2)%2)="+(- ((i/2)%2)));
+				logln("create plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
+				logln("offsetPlotY="+offsetPlotY+", -3*(i/4)="+(-3*(i/4))+", (i%2)*(((i/2)+1)%2)="+(i%2)*(((i/2)+1)%2)+", - ((i/2)%2)="+(- ((i/2)%2)));
 				currentPrv.centerPlot = new Plot((short)(plotx),(short)(ploty),currentPrv, (byte)-1);
 				plots.get(plotx).set(ploty, currentPrv.centerPlot);
 				if(plotx%2==1){
@@ -182,22 +185,22 @@ public class AnneauCarteV2 implements MapFactory {
 				plotx ++;
 				ploty += (2 + (j+1)%2 + (j%2)*(((i+1)/2)%2) - ((j+1)%2)*(((i+1)/2)%2));
 				
-				for (int j2 = 0; j2 < maxploty; j2++) {
-					System.out.println();
-					for (int i2 = 0; i2 < maxplotx; i2++) {
-						System.out.print(plots.get(i2).get(j2) == null?".":
-							((plots.get(i2).get(j2).getPositionInProvince())<0?"o":plots.get(i2).get(j2).getPositionInProvince()));
-						
-					}
-				}
-				for (int j2 = 0; j2 < maxploty; j2++) {
-					System.out.println();
-					for (int i2 = 0; i2 < maxplotx; i2++) {
-						System.out.print(plots.get(i2).get(j2) == null?"   ":
-							((plots.get(i2).get(j2).getProvince() ==null)?".:.":plots.get(i2).get(j2).getProvince().x+":"+plots.get(i2).get(j2).getProvince().y));
-						
-					}
-				}
+//				for (int j2 = 0; j2 < maxploty; j2++) {
+//					logln();
+//					for (int i2 = 0; i2 < maxplotx; i2++) {
+//						log(plots.get(i2).get(j2) == null?".":
+//							((plots.get(i2).get(j2).getPositionInProvince())<0?"o":plots.get(i2).get(j2).getPositionInProvince()));
+//						
+//					}
+//				}
+//				for (int j2 = 0; j2 < maxploty; j2++) {
+//					logln();
+//					for (int i2 = 0; i2 < maxplotx; i2++) {
+//						log(plots.get(i2).get(j2) == null?"   ":
+//							((plots.get(i2).get(j2).getProvince() ==null)?".:.":plots.get(i2).get(j2).getProvince().x+":"+plots.get(i2).get(j2).getProvince().y));
+//						
+//					}
+//				}
 			}
 		}
 		//create plots links
@@ -210,7 +213,7 @@ public class AnneauCarteV2 implements MapFactory {
 				//for each prv, we add  all plots
 				Province currentPrv = currentColonne.get(j);
 				currentPrv.centerPlot.around=currentPrv.myPLots;
-				System.out.println("set nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
+				logln("set nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
 				if(plotx%2==1){
 					setNearbyPlot(plotx, ploty-1);
 					setNearbyPlot(plotx-1, ploty);
@@ -263,8 +266,8 @@ public class AnneauCarteV2 implements MapFactory {
 		if(yp1>=currentcarte.nbPlotLigne){
 			yp1 -= currentcarte.nbPlotLigne;
 		}
-		System.out.println("setnearby plot "+x+":"+y+ " "+xm1+"->"+xp1+" : "+ym1+"->"+yp1);
-		System.out.println("plot.size="+plots.size()+", plot(x).size="+plots.get(x).size()
+		logln("setnearby plot "+x+":"+y+ " "+xm1+"->"+xp1+" : "+ym1+"->"+yp1);
+		logln("plot.size="+plots.size()+", plot(x).size="+plots.get(x).size()
 				+", plot(x-1).size="+plots.get(xm1).size()+", plot(x+1).size="+plots.get(xp1).size());
 		Object o = plots.get(x).get(ym1);
 		Object o2 = plots.get(x).get(y);
@@ -294,7 +297,7 @@ public class AnneauCarteV2 implements MapFactory {
 					Pop pop = new Pop(prv);
 					pop.addAdult(Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
 					prv.getPops().add(pop);
-//					System.out.println("create pop of " + prv.nombreHabitantsParAge[20]);
+//					logln("create pop of " + prv.nombreHabitantsParAge[20]);
 				}
 			}
 		}
@@ -354,9 +357,9 @@ public class AnneauCarteV2 implements MapFactory {
 				Dessiner dessineur = new Dessiner() {
 					@Override public void dessine(Province prv) {
 						prv.humidite = humidite;
-						System.out.println("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
+						logln("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
 						prv.pourcentForet = (0.5f-Math.abs(humidite-0.5f))/2;
-						System.out.println("pourcentForet: "+prv.pourcentForet);
+						logln("pourcentForet: "+prv.pourcentForet);
 						prv.pourcentFriche = prv.pourcentForet;
 						prv.pourcentChamps = prv.pourcentFriche/4;
 						prv.pourcentPrairie = prv.pourcentFriche/4;
@@ -400,13 +403,13 @@ public class AnneauCarteV2 implements MapFactory {
 
 		// on prend des points au pif
 		int ordreGrandeurInit = (int) Math.log1p(nbLigne * nbColonne);
-		// System.out.println("ordreGrandeurInit:" + ordreGrandeurInit);
+		// logln("ordreGrandeurInit:" + ordreGrandeurInit);
 		for (int ordreGrandeur = ordreGrandeurInit; ordreGrandeur > 0; ordreGrandeur--) {
 			int nbPatchs = 1 + (ordreGrandeurInit - ordreGrandeur) * 8;
-			// System.out.println("nbPatchs:" + nbPatchs+", "+nbLigne *
+			// logln("nbPatchs:" + nbPatchs+", "+nbLigne *
 			// nbColonne+" / "+(ordreGrandeur*ordreGrandeur));
 			int taillePatch = ordreGrandeur;
-			// System.out.println("taillePatch:" + taillePatch);
+			// logln("taillePatch:" + taillePatch);
 			// add some points
 			for (int numPatch = 0; numPatch < 2; numPatch++) {
 				// get random pos

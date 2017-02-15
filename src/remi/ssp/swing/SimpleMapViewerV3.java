@@ -1,14 +1,16 @@
 package remi.ssp.swing;
+import static remi.ssp.GlobalDefines.logln;
+import static remi.ssp.GlobalDefines.plogln;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import remi.ssp.CurrentGame;
+import remi.ssp.GlobalDefines;
 import remi.ssp.PluginLoader;
 import remi.ssp.algorithmes.Economy;
 import remi.ssp.politic.Carte;
@@ -29,10 +31,10 @@ public class SimpleMapViewerV3 extends JComponent{
 		JFrame fenetre = new JFrame();
 		SimpleMapViewerV3 view = new SimpleMapViewerV3();
 		
-
+		logln("{");
 		//load algos & static data
 		manager = new PluginLoader();
-		System.out.println(new File(".").getAbsolutePath());
+//		logln(new File(".").getAbsolutePath());
 		manager.loadJars("src");
 		List<String> pluginNames = manager.getPluginNames();
 		manager.loadStaticData(pluginNames);
@@ -62,16 +64,20 @@ public class SimpleMapViewerV3 extends JComponent{
 	
 	public void updateSimu(){
 //		Nourriture algoN = new Nourriture(){};
+		logln("}");
+		int turn=0;
 		while(true){
-			System.out.println("================================== start turn =======================================");
+			plogln(",\"Turn_"+turn+"\":{\"========================================================= start turn ==============================================================\":true");
 			Economy.ptr.doTurn(map, 10);
-			System.out.println("================================= economy done ======================================");
+			plogln(",\"======================================================== economy done =============================================================\":true}");
+			GlobalDefines.logFlush();
 			this.repaint();
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			turn++;
 		}
 	}
 	
@@ -106,9 +112,9 @@ public class SimpleMapViewerV3 extends JComponent{
 							altitudeColor, prv.relief);
 					
 
-//					System.out.println("coline:"+prv.relief+", humidite:"+prv.humidite
+//					logln("coline:"+prv.relief+", humidite:"+prv.humidite
 //							+" , "+Math.min(1, prv.humidite*2)+" : "+Math.max(0,1-prv.humidite*2));
-//					System.out.println(altitudeColor.getRed()+":"+altitudeColor.getGreen()+":"+altitudeColor.getBlue()
+//					logln(altitudeColor.getRed()+":"+altitudeColor.getGreen()+":"+altitudeColor.getBlue()
 //							+" :: "+mix.getRed()+":"+mix.getGreen()+":"+mix.getBlue());
 //					if(prv.relief>0.7){
 //						g.setColor(Color.GRAY);

@@ -1,7 +1,9 @@
 package remi.ssp.economy;
 
+import static remi.ssp.GlobalDefines.log;
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.HashMap;
-import java.util.function.Function;
 
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -38,7 +40,7 @@ public abstract class PopNeed extends Needs {
 		Province prv = myPop.getProvince();
 		Object2LongMap<Good> currentStock = myPop.getStock();
 		ProvinceGoods market = prv.getStock().get(good);
-		System.out.println("there are "+market.getStock()+" available, and i want buy "+(maxNb - currentStock.getLong(good)));
+		logln(", \"simplebuy_"+myPop+"_"+good+"\":{\"stock\":"+market.getStock()+",\"iwant\":"+(maxNb - currentStock.getLong(good))+"}");
 		long quantityBuy = Math.min(market.getStock(), maxNb - currentStock.getLong(good));
 		long price = market.getPriceBuyFromMarket(prv, nbDays);
 		if(quantityBuy * price > moneyToSpend){
@@ -61,7 +63,7 @@ public abstract class PopNeed extends Needs {
 		Province prv = myPop.getProvince();
 		Object2LongMap<Good> currentStock = myPop.getStock();
 		ProvinceGoods market = prv.getStock().get(good);
-		System.out.println("there are "+market.getStock()+" available, and i want buy "+(maxNb - currentStock.getLong(good)));
+		logln(", \"SC_"+myPop+"_"+good+"\":{\"stock\":"+market.getStock()+", \"want\":"+(maxNb - currentStock.getLong(good))+"}");
 		long quantityBuy = Math.min(market.getStock(), maxNb - currentStock.getLong(good));
 		long price = market.getPriceBuyFromMarket(prv, nbDays);
 		if(quantityBuy * price > moneyToSpend){
@@ -94,9 +96,9 @@ public abstract class PopNeed extends Needs {
 		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
 		prv.addMoney(price*quantity);
 		prv.getStock().get(good).addStock(-quantity);
-		System.out.print("POP BUY FOR "+(price*quantity)+" : "+myPop.getMoney());
+		log(",\""+myPop+"_buy_qtt\":"+(price*quantity)+",\""+myPop+"_buy_Mbefore\":"+myPop.getMoney());
 		myPop.addMoney(-price*quantity);
-		System.out.println(" => "+myPop.getMoney());
+		logln(",\""+myPop+"_buy_Mafter\":"+myPop.getMoney());
 		myPop.getStock().put(good, quantity + myPop.getStock().getLong(good));
 	}
 	

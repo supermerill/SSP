@@ -1,11 +1,11 @@
 package remi.ssp_basegame.economy;
 
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.Collection;
 
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
-import remi.ssp.economy.IndustryNeed;
-import remi.ssp.economy.IndustryNeed.IndustryNeedsFactoryStorage;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
@@ -36,20 +36,20 @@ public class AgricultureIndustry extends Industry {
 		//TODO evolution de la surface cultivable par personne
 		int production = 0;
 		int nbChamps = (int) ( (prv.pourcentChamps * prv.surface) * 10); // 10 hectare per argi
-		System.out.println("nbChamps="+nbChamps+" : "+prv.pourcentChamps);
+		logln(",\"agrinbChamps\":"+nbChamps+", \"pourcentChamps\":"+prv.pourcentChamps);
 		for(Pop pop : pops){
 			//
 			long nbChampsUsed = Math.min(nbChamps, pop.getNbMensEmployed(indus));
 			production += prv.champsRendement * nbChampsUsed * 8 * durationInDay;
-			System.out.println("nbChampsUsed="+nbChampsUsed+", prod ="+production);
+			logln(", \"nbChampsUsed_"+pop+"\":"+nbChampsUsed+", \"prod_"+pop+"\":"+production);
 			nbChamps -= nbChampsUsed;
 			if(nbChamps == 0) break;
 		}
 		
 
 		//produce
-		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production*2, durationInDay);
-		System.out.println(", prod with tools="+intproduction);
+		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
+		logln(", \"prod fianle with tools\":"+intproduction);
 	
 		//do not do that, economyplugin will call it after caling this
 		//super.sellProductToMarket(prv, intproduction, durationInDay);

@@ -1,5 +1,7 @@
 package remi.ssp.swing;
 
+import static remi.ssp.GlobalDefines.logln;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.io.File;
@@ -10,8 +12,6 @@ import javax.swing.JFrame;
 
 import remi.ssp.CurrentGame;
 import remi.ssp.PluginLoader;
-import remi.ssp.algorithmes.Economy;
-import remi.ssp.map.AnneauCarte;
 import remi.ssp.map.AnneauCarteV2;
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Plot;
@@ -33,7 +33,7 @@ public class SimpleMapViewer extends JComponent{
 
 		//load algos & static data
 		manager = new PluginLoader();
-		System.out.println(new File(".").getAbsolutePath());
+		logln(new File(".").getAbsolutePath());
 		manager.loadJars("src");
 		List<String> pluginNames = manager.getPluginNames();
 		manager.loadStaticData(pluginNames);
@@ -107,9 +107,9 @@ public class SimpleMapViewer extends JComponent{
 							altitudeColor, prv.relief);
 					
 
-//					System.out.println("coline:"+prv.relief+", humidite:"+prv.humidite
+//					logln("coline:"+prv.relief+", humidite:"+prv.humidite
 //							+" , "+Math.min(1, prv.humidite*2)+" : "+Math.max(0,1-prv.humidite*2));
-//					System.out.println(altitudeColor.getRed()+":"+altitudeColor.getGreen()+":"+altitudeColor.getBlue()
+//					logln(altitudeColor.getRed()+":"+altitudeColor.getGreen()+":"+altitudeColor.getBlue()
 //							+" :: "+mix.getRed()+":"+mix.getGreen()+":"+mix.getBlue());
 //					if(prv.relief>0.7){
 //						g.setColor(Color.GRAY);

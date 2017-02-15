@@ -1,5 +1,7 @@
 package remi.ssp.map;
 
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -102,7 +104,7 @@ public class AnneauCarte implements MapFactory {
 					Pop pop = new Pop(prv);
 					pop.addAdult(Math.abs((int)(rand.nextFloat() * Math.exp(rand.nextInt(10)))));
 					prv.getPops().add(pop);
-//					System.out.println("create pop of " + prv.nombreHabitantsParAge[20]);
+//					logln("create pop of " + prv.nombreHabitantsParAge[20]);
 				}
 			}
 		}
@@ -162,9 +164,9 @@ public class AnneauCarte implements MapFactory {
 				Dessiner dessineur = new Dessiner() {
 					@Override public void dessine(Province prv) {
 						prv.humidite = humidite;
-						System.out.println("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
+						logln("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
 						prv.pourcentForet = (0.5f-Math.abs(humidite-0.5f))/2;
-						System.out.println("pourcentForet: "+prv.pourcentForet);
+						logln("pourcentForet: "+prv.pourcentForet);
 						prv.pourcentFriche = prv.pourcentForet;
 						prv.pourcentPrairie = prv.pourcentFriche/2;
 						prv.pourcentFriche = prv.pourcentFriche/2;
@@ -207,13 +209,13 @@ public class AnneauCarte implements MapFactory {
 
 		// on prend des points au pif
 		int ordreGrandeurInit = (int) Math.log1p(nbLigne * nbColonne);
-		// System.out.println("ordreGrandeurInit:" + ordreGrandeurInit);
+		// logln("ordreGrandeurInit:" + ordreGrandeurInit);
 		for (int ordreGrandeur = ordreGrandeurInit; ordreGrandeur > 0; ordreGrandeur--) {
 			int nbPatchs = 1 + (ordreGrandeurInit - ordreGrandeur) * 8;
-			// System.out.println("nbPatchs:" + nbPatchs+", "+nbLigne *
+			// logln("nbPatchs:" + nbPatchs+", "+nbLigne *
 			// nbColonne+" / "+(ordreGrandeur*ordreGrandeur));
 			int taillePatch = ordreGrandeur;
-			// System.out.println("taillePatch:" + taillePatch);
+			// logln("taillePatch:" + taillePatch);
 			// add some points
 			for (int numPatch = 0; numPatch < 2; numPatch++) {
 				// get random pos

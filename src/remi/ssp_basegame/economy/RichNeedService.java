@@ -1,8 +1,8 @@
 package remi.ssp_basegame.economy;
 
-import java.util.Map;
+import static remi.ssp.GlobalDefines.f;
+import static remi.ssp.GlobalDefines.logln;
 
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceGoods;
@@ -25,7 +25,7 @@ public class RichNeedService extends PopNeed {
 		ProvinceGoods goodStock = prv.getStock().get(serviceGood);
 
 		if(totalMoneyThisTurn<=0){
-			System.out.println("ERROR no money for pop:"+totalMoneyThisTurn);
+			System.err.println("ERROR no money for pop:"+totalMoneyThisTurn);
 		}
 		
 		NeedWish wish = new NeedWish(0, 0, 0);
@@ -54,7 +54,7 @@ public class RichNeedService extends PopNeed {
 
 	@Override
 	public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
-		System.out.println("rich class is going to spend max "+maxMoneyToSpend.getMoney()+" to buy services");
+		logln(", \"rich_class_spend_max_services\": "+f(maxMoneyToSpend.getMoney()/1000f));
 
 		final long nbMensInPop = myPop.getNbAdult();
 		if(nbMensInPop==0){
@@ -62,7 +62,7 @@ public class RichNeedService extends PopNeed {
 		}
 		
 		long moneySpent = super.simpleConsume(nbMensInPop*50*nbDays, serviceGood, maxMoneyToSpend.getMoney(), nbDays);
-		System.out.println("rich class haso spend " + moneySpent + " to buy services");
+		logln(", \"rich_class_spend_services\": "+f(moneySpent/1000f));
 		return moneySpent;
 	}
 

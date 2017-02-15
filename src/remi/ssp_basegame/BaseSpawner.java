@@ -65,9 +65,9 @@ public class BaseSpawner extends Spawner {
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(WoodHouseIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(PersonalServiceIndustry.get()).setProvince(prv).create());
 					
-					for( ProvinceIndustry indus : prv.getIndustries()){
-						System.out.println("province has "+indus.getName());
-					}
+//					for( ProvinceIndustry indus : prv.getIndustries()){
+//						logln("province has "+indus.getName());
+//					}
 					
 					CurrentGame.civs.add(civ);
 					
@@ -78,7 +78,7 @@ public class BaseSpawner extends Spawner {
 					}
 					//place some food and houses
 					prv.getStock().get(Good.get("meat")).setStock(500);
-					prv.getStock().get(Good.get("crop")).setStock(3500);
+					prv.getStock().get(Good.get("crop")).setStock(13500);
 					prv.getStock().get(Good.get("wood_house")).setStock(10);
 				}
 			}
@@ -97,7 +97,7 @@ public class BaseSpawner extends Spawner {
 				if(prv.surfaceSol > 10){
 					//rich
 					Pop pop = new Pop(prv);
-					pop.addAdult(6);
+					pop.addAdult(60);
 					pop.setPopType(Pop.popTypeName.indexOf("rich"));
 					prv.addPop(pop);
 					//set pop to chomage
@@ -111,7 +111,7 @@ public class BaseSpawner extends Spawner {
 					pop.getPopNeeds().add(PopNeed.create("rich_service", pop));
 					//middle
 					pop = new Pop(prv);
-					pop.addAdult(30);
+					pop.addAdult(300);
 					pop.setPopType(Pop.popTypeName.indexOf("middle"));
 					prv.addPop(pop);
 					pop.setNbMensChomage(pop.getNbAdult());
@@ -122,13 +122,14 @@ public class BaseSpawner extends Spawner {
 //					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 					//poor
 					pop = new Pop(prv);
-					pop.addAdult(100);
+					pop.addAdult(1000);
 					pop.setPopType(Pop.popTypeName.indexOf("poor"));
 					prv.addPop(pop);
 					pop.setNbMensChomage(pop.getNbAdult());
 					pop.addMoney(pop.getNbAdult()*10000);
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
-					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*250); //~some day of food
+					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*750); //~some day of food
+					pop.getPopNeeds().add(PopNeed.create("middle_service", pop));
 //					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 				}
 			}

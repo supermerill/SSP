@@ -1,10 +1,11 @@
 package remi.ssp.map;
 
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.politic.Carte;
@@ -143,7 +144,7 @@ public class FlatCarteV3 implements MapFactory {
 		int offsetPlotY = nbColonne;
 		//init plots array to null
 		//upper left corner
-		System.out.println("nbColonnes: "+nbColonne+", nbLines: "+nbLigne);
+		logln(", \"nbColonnes\": "+nbColonne+", \"nbLines\": "+nbLigne);
 		int minplotx = 0;
 		//check upper right corner
 		int minploty = 0;//offset + ((nbColonne-1)%2) - 2 * ((nbColonne-1)/2);
@@ -158,7 +159,7 @@ public class FlatCarteV3 implements MapFactory {
 		//add offset (from province to plot)
 		maxplotx += 0;
 		maxploty -= 1;
-		System.out.println("coloneplotfrom 0 to: "+currentcarte.nbPlotColonne+", lines from "+(-offsetPlotY)+" to "+(currentcarte.nbPlotLigne-offsetPlotY)+" ("+currentcarte.nbPlotLigne+")");
+//		logln("coloneplotfrom 0 to: "+currentcarte.nbPlotColonne+", lines from "+(-offsetPlotY)+" to "+(currentcarte.nbPlotLigne-offsetPlotY)+" ("+currentcarte.nbPlotLigne+")");
 		//check lower left 
 		for (int i = 0; i < maxplotx; i++) {
 			List<Plot> colonne = new ArrayList<>();
@@ -181,11 +182,11 @@ public class FlatCarteV3 implements MapFactory {
 			for (int j = 0; j < nbLigne; j++) {
 				//for each prv, we add  all plots
 				Province currentPrv = currentColonne.get(j);
-//				System.out.println("create plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
-//				System.out.println("offsetPlotY="+offsetPlotY+", offsetX = "+initPlotX);
+//				logln("create plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
+//				logln("offsetPlotY="+offsetPlotY+", offsetX = "+initPlotX);
 				currentPrv.centerPlot = new Plot((short)(plotx),(short)(ploty),currentPrv, (byte)-1);
 				plots.get(plotx).set(ploty, currentPrv.centerPlot);
-//				System.out.println("Create nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
+//				logln("Create nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
 				if(ploty%2==0){
 					currentPrv.myPLots[0] = new Plot((short)(plotx-1),(short)(ploty-1),currentPrv, (byte)0);
 					plots.get(plotx-1).set(ploty-1, currentPrv.myPLots[0]);
@@ -220,7 +221,7 @@ public class FlatCarteV3 implements MapFactory {
 				if(i%2==0){
 					plotx += 2*((j+1)%2);
 				}else{
-//					System.out.println("special code: (((j)/2)%2)="+(((j)/2)%2)+", i:j="+i+":"+j);
+//					logln("special code: (((j)/2)%2)="+(((j)/2)%2)+", i:j="+i+":"+j);
 					if(j%2==1){
 						plotx ++;
 					}else{
@@ -235,16 +236,16 @@ public class FlatCarteV3 implements MapFactory {
 				
 //				for (int j2 = 0; j2 < maxploty; j2++) {
 //					for (int i2 = 0; i2 < maxplotx; i2++) {
-//						System.out.print(plots.get(i2).get(j2) == null?".":
+//						log(plots.get(i2).get(j2) == null?".":
 //							((plots.get(i2).get(j2).getPositionInProvince())<0?"o":plots.get(i2).get(j2).getPositionInProvince()));
 //						
 //					}
-//					System.out.println();
+//					logln();
 //				}
 //				for (int j2 = 0; j2 < maxploty; j2++) {
-//					System.out.println();
+//					logln();
 //					for (int i2 = 0; i2 < maxplotx; i2++) {
-//						System.out.print(plots.get(i2).get(j2) == null?"   ":
+//						log(plots.get(i2).get(j2) == null?"   ":
 //							((plots.get(i2).get(j2).getProvince() ==null)?".:.":plots.get(i2).get(j2).getProvince().x+":"+plots.get(i2).get(j2).getProvince().y));
 //						
 //					}
@@ -272,7 +273,7 @@ public class FlatCarteV3 implements MapFactory {
 				//for each prv, we add  all plots
 				Province currentPrv = currentColonne.get(j);
 				currentPrv.centerPlot.around=currentPrv.myPLots;
-//				System.out.println("set nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
+//				logln("set nearby plots for prv "+i+":"+j+" => "+plotx+":"+ploty);
 				if(ploty%2==0){
 					setNearbyPlot(plotx-1, ploty-1);
 					setNearbyPlot(plotx-1, ploty);
@@ -316,7 +317,7 @@ public class FlatCarteV3 implements MapFactory {
 		int xp1 = x+1;
 		int ym1 = y-1;
 		int yp1 = y+1;
-//		System.out.println("setnearby plot "+x+":"+y+ " "+xm1+"->"+xp1+" : "+ym1+"->"+yp1);
+//		logln("setnearby plot "+x+":"+y+ " "+xm1+"->"+xp1+" : "+ym1+"->"+yp1);
 		if(y%2==0){
 			if(xm1>=0 && ym1>=0)								plots.get(x).get(y).around[0] = plots.get(xm1).get(ym1);
 			if(xm1>=0)											plots.get(x).get(y).around[1] = plots.get(xm1).get(y);
@@ -373,12 +374,12 @@ public class FlatCarteV3 implements MapFactory {
 	
 
 	private void createDesert() {
-		System.out.println("createDesert?");
+//		logln("createDesert?");
 		int ordreGrandeurInit = (int) Math.log1p(nbLigne * nbColonne) - 2;
 
 		for (int tailleMontagne = 0; tailleMontagne < ordreGrandeurInit*2; tailleMontagne++) {
 			for (int i = 0; i < ordreGrandeurInit; i++) {
-				System.out.println("createDesert");
+//				logln("createDesert");
 				// on prend un point sur la terre au pif
 				int abscice = rand.nextInt(nbColonne);
 				int ordonnee = rand.nextInt(nbLigne);
@@ -391,9 +392,9 @@ public class FlatCarteV3 implements MapFactory {
 				Dessiner dessineur = new Dessiner() {
 					@Override public void dessine(Province prv) {
 						prv.humidite = humidite;
-//						System.out.println("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
+//						logln("humidite: "+humidite+", "+Math.abs(humidite-0.5f));
 						prv.pourcentForet = (0.5f-Math.abs(humidite-0.5f))/2;
-//						System.out.println("pourcentForet: "+prv.pourcentForet);
+//						logln("pourcentForet: "+prv.pourcentForet);
 						prv.pourcentFriche = prv.pourcentForet;
 						prv.pourcentChamps = prv.pourcentFriche/4;
 						prv.pourcentPrairie = prv.pourcentFriche/4;
@@ -422,7 +423,7 @@ public class FlatCarteV3 implements MapFactory {
 	}
 
 	private void createSol() {
-		System.out.println("createSol");
+//		logln("createSol");
 		for(List<Province> prvs : provinces){
 			for(Province prv : prvs){
 				prv.pourcentForet = 0.5f;
@@ -453,13 +454,13 @@ public class FlatCarteV3 implements MapFactory {
 
 		// on prend des points au pif
 		int ordreGrandeurInit = (int) Math.log1p(nbLigne * nbColonne);
-		// System.out.println("ordreGrandeurInit:" + ordreGrandeurInit);
+		// logln("ordreGrandeurInit:" + ordreGrandeurInit);
 		for (int ordreGrandeur = ordreGrandeurInit; ordreGrandeur > 0; ordreGrandeur--) {
 			int nbPatchs = 1 + (ordreGrandeurInit - ordreGrandeur) * 8;
-			// System.out.println("nbPatchs:" + nbPatchs+", "+nbLigne *
+			// logln("nbPatchs:" + nbPatchs+", "+nbLigne *
 			// nbColonne+" / "+(ordreGrandeur*ordreGrandeur));
 			int taillePatch = ordreGrandeur;
-			// System.out.println("taillePatch:" + taillePatch);
+			// logln("taillePatch:" + taillePatch);
 			// add some points
 			for (int numPatch = 0; numPatch < 2; numPatch++) {
 				// get random pos

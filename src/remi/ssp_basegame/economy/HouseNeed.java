@@ -1,12 +1,13 @@
 package remi.ssp_basegame.economy;
 
+import static remi.ssp.GlobalDefines.log;
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.algorithmes.GlobalRandom;
@@ -15,7 +16,6 @@ import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
-import remi.ssp.utils.ComparatorValueDesc;
 
 // it doesn't work with the pop split (for calculating the current stock)
 public class HouseNeed extends PopNeed{
@@ -41,7 +41,7 @@ public class HouseNeed extends PopNeed{
 			lowPriceHouse.add(house);
 			nbHousesNeeded -= myPop.getStock().getLong(house);
 			goodPrice.put(house, goodStock.get(house).getPriceBuyFromMarket(prv, nbDays));
-			System.out.println("price of "+house+" is "+goodPrice.getLong(house));
+			logln("price of "+house+" is "+goodPrice.getLong(house));
 		}
 		
 		//vital: at least the worst house for every clodo
@@ -50,7 +50,7 @@ public class HouseNeed extends PopNeed{
 			ListIterator<Good> it = lowPriceHouse.listIterator();
 			while(it.hasNext()){
 				Good house = it.next();
-				System.out.println("check "+house);
+				logln("check "+house);
 				if(nbHousesNeeded <= goodStock.get(house).getStock()){
 					wish.vitalNeed += nbHousesNeeded * goodPrice.getLong(house);
 					nbHousesNeeded = 0;
@@ -59,14 +59,14 @@ public class HouseNeed extends PopNeed{
 					wish.vitalNeed += goodStock.get(house).getStock() * goodPrice.getLong(house);
 					nbHousesNeeded -= goodStock.get(house).getStock();
 					it.remove();
-					System.out.println("i can buy "+goodStock.get(house).getStock());
+					logln("i can buy "+goodStock.get(house).getStock());
 				}
 			}
 			if(nbHousesNeeded > 0){
 				//manque => certain peuvent mourir de froid et/ou maladie
 				wish.normalNeed = 0;
 				wish.luxuryNeed = wish.vitalNeed;
-				System.out.println("--- house need? not enough ---- "+wish);
+				logln("--- house need? not enough ---- "+wish);
 				return wish;
 			}
 		}
@@ -82,7 +82,7 @@ public class HouseNeed extends PopNeed{
 		//luxury: upgrade some house (up to lux). Do not consume too much money
 		wish.luxuryNeed = (long) (moneyObj * 0.5);
 
-		System.out.println("--- house need? ---- "+wish);
+		logln("--- house need? ---- "+wish);
 		return wish;
 	}
 
@@ -125,7 +125,7 @@ public class HouseNeed extends PopNeed{
 				if(nbCoins <= totalPrice){
 					long quantityPicked = (long)(nbCoins / goodPrice.getLong(house));
 					nbGoods.put(house, quantityPicked);
-					System.out.println("HOUSE REALLY WANT "+quantityPicked+" "+house.getName());
+					logln("HOUSE REALLY WANT "+quantityPicked+" "+house.getName());
 					nbHousesNeeded -= quantityPicked;
 					nbCoins = 0 ;
 					moneyUsed += nbCoins;
@@ -136,7 +136,7 @@ public class HouseNeed extends PopNeed{
 					long quantityPicked = goodStock.get(house).getStock();
 					nbHousesNeeded -= quantityPicked;
 					nbGoods.put(house, quantityPicked);
-					System.out.println("HOUSE REALLY WANT "+quantityPicked+" "+house.getName());
+					logln("HOUSE REALLY WANT "+quantityPicked+" "+house.getName());
 				}
 			}
 			if(nbHousesNeeded > 0){
@@ -145,7 +145,7 @@ public class HouseNeed extends PopNeed{
 				int nbPopToDie = 1+ (int)(Math.min(Integer.MAX_VALUE, nbHousesNeeded * 0.0000001 * nbDays)); 
 				//TODO: random chance if >0 and < 1 instead of +1
 				//TODO also remove child & elder
-				System.out.print("homeless die! ( "+nbHousesNeeded+" houme needed => "+nbPopToDie+" victim");
+				log("homeless die! ( "+nbHousesNeeded+" houme needed => "+nbPopToDie+" victim");
 				myPop.addAdult(-nbPopToDie);
 			}
 		}
@@ -166,7 +166,7 @@ public class HouseNeed extends PopNeed{
 			if(nbCoins >= nbPicked * price){
 				nbCoins -= nbPicked * price;
 				moneyUsed += nbPicked * price;
-				System.out.println("HOUSE WANT "+nbPicked+" "+house.getName()+" / "+nbGoods.getLong(house)+" maxStock="+maxStock);
+				logln("HOUSE WANT "+nbPicked+" "+house.getName()+" / "+nbGoods.getLong(house)+" maxStock="+maxStock);
 				nbGoods.put(house, nbGoods.getLong(house) + nbPicked);
 				nbHousesNeeded -= nbPicked;
 			}
@@ -190,7 +190,7 @@ public class HouseNeed extends PopNeed{
 			if(nbCoins >= nbPicked * price){
 				nbCoins -= nbPicked * price;
 				moneyUsed += nbPicked * price;
-				System.out.println("HOUSE WANT MAYBE "+nbPicked+" "+house.getName()+" / "+nbGoods.getLong(house));
+				logln("HOUSE WANT MAYBE "+nbPicked+" "+house.getName()+" / "+nbGoods.getLong(house));
 				nbGoods.put(house, nbGoods.getLong(house) + nbPicked);
 				nbHousesNeeded -= nbPicked;
 			}
@@ -213,7 +213,7 @@ public class HouseNeed extends PopNeed{
 			//TODO create a renovation industry (sell house to renovation -> then sell house to market)
 			long price = goodStock.get(house).getPriceSellToMarket(prv, nbDays);
 			long nbInstock = myPop.getStock().getLong(house);
-			System.out.println("HOUSE DON4T WANT "+chunkHouses+" "+house.getName()+" / "+nbGoods.getLong(house));
+			logln("HOUSE DON4T WANT "+chunkHouses+" "+house.getName()+" / "+nbGoods.getLong(house));
 			nbGoods.put(house, nbGoods.getLong(house) - chunkHouses);
 			nbHousesNeeded += chunkHouses;
 			long totalCost = chunkHouses * price;
@@ -229,7 +229,7 @@ public class HouseNeed extends PopNeed{
 			goodStock.get(house).addStock( -nbBuy);
 			currentPopStock.put(house, currentPopStock.getLong(house)+nbBuy);
 			goodStock.get(house).addNbConsumePerDay(nbBuy / (float)nbDays);
-			System.out.println("HOUSE NEED buy "+nbBuy+" "+house.getName());
+			logln("HOUSE NEED buy "+nbBuy+" "+house.getName());
 		}
 
 		prv.addMoney(moneyUsed);

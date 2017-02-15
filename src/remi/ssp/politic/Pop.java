@@ -1,8 +1,9 @@
 package remi.ssp.politic;
 
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -15,8 +16,8 @@ import javax.json.JsonObjectBuilder;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import remi.ssp.CurrentGame;
+import remi.ssp.GlobalDefines;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
@@ -130,24 +131,26 @@ public class Pop {
 
 	public long getNbAdult() { return nbAdult; }
 	public void addAdult(final int nb){ 
-		System.out.println("remove "+ (-nb)+" adults from "+nbAdult+", actually "+nbAdult+" = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
+//		logln("remove "+ (-nb)+" adults from "+nbAdult+", actually "+nbAdult+" = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
 		nbAdult += nb; 
 		if(nbAdult<0){ 
 			System.err.println("Error, too low number of mens in pop: "+nbAdult);
 		}
 		if(nb>0){
 			addNbMensChomage(nb);
-			System.out.println("add "+nb+" chomeurs");
+//			logln("add "+nb+" chomeurs");
 		}
 		if(nb<0){
+			logln(", \"nbRemoved\":"+(-nb));
 			//remove from chomage or job
 			long nbRemoved = Math.min(getNbMensChomage(), -nb);
-			System.out.println("remove "+nbRemoved+" from chomage");
+			setNbMensChomage(getNbMensChomage() - nbRemoved );
+			logln(", \"nbRemoved chomage\":"+nbRemoved);
+//			logln("remove "+nbRemoved+" from chomage");
 			ArrayList<Job> jobs = new ArrayList<>(getNbMensEmployed().keySet());
 			for(Iterator<Job> it = jobs.iterator(); it.hasNext();){
 				Job job = it.next(); if(getNbMensEmployed(job) <= 0) it.remove();
 			}
-			System.out.println(nbRemoved+" <? "+(-nb)+", nbJobs="+jobs.size()+" == "+getNbMensEmployed().keySet().size());
 			while(nbRemoved<-nb && jobs.size()>0){
 				final int i= GlobalRandom.aleat.getInt(jobs.size(), -nb);
 				final long nbMensHere = getNbMensEmployed(jobs.get(i));
@@ -155,7 +158,8 @@ public class Pop {
 				nbRemoved += removedHere;
 //				getNbMensEmployed().put(jobs.get(i), nbMensHere - nbRemoved);
 				addNbMensEmployed(jobs.get(i), -removedHere);
-				System.out.println("remove "+removedHere+" from "+jobs.get(i)+" (now "+getNbMensEmployed(jobs.get(i))+" mens inside, from "+nbMensHere);
+				logln(", \"removefrom "+jobs.get(i)+"\":{ \"removed\": "+removedHere+",\"nowHas\":"+getNbMensEmployed(jobs.get(i))
+					+",\"previously\":"+nbMensHere+"}");
 				
 				if(nbMensHere - removedHere <= 0) jobs.remove(i);
 			}
@@ -163,14 +167,23 @@ public class Pop {
 			if(nbRemoved<-nb){
 				final long removedHere = Math.min(getNbMensInArmy(), - (nb + nbRemoved));
 				addNbMensInArmy(-removedHere);
-				System.out.println("remove "+removedHere+" from army");
+				logln(", \"removed from army\": "+removedHere);
 				nbRemoved += removedHere;
 			}
 			if(nbRemoved<-nb){
+				GlobalDefines.logFlush();
 				System.err.println("error, can't find the adult of "+(- (nb+nbRemoved))+" died adults.");
 			}
 		}
-		System.out.println("pop "+popType+" now has "+nbAdult+" adult = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
+		//check
+		long nbPopInJobs = getNbMensChomage() + getNbMensInArmy();
+		for(Entry<Job> entry : getNbMensEmployed().object2LongEntrySet()){
+			nbPopInJobs+=entry.getLongValue();
+		}
+		if(nbPopInJobs != getNbAdult()){
+			System.err.println("Error: nbAdults="+getNbAdult()+", but i have "+nbPopInJobs+" in jobs");
+		}
+//		logln("pop "+popType+" now has "+nbAdult+" adult = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
 	}
 	public long getNbChildren() { return nbChildren; }
 	public void addChildren(final int nb){ 
