@@ -291,7 +291,7 @@ public class Province{
 		for(int i=0;i<array.size();i++){
 			object = array.getJsonObject(i);
 			Good good = Good.get(object.getString("name"));
-			ProvinceGoods prvgood = new ProvinceGoods(good);
+			ProvinceGoods prvgood = new ProvinceGoods(good, this);
 			prvgood.load(object);
 			stock.put(good, prvgood);
 		}

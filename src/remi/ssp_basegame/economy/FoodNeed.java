@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import remi.ssp.GlobalDefines;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.PopNeed;
@@ -33,6 +34,10 @@ public class FoodNeed extends PopNeed {
 	 * 
 	 * 1hour of gardening ~= 1500 kJ 1 men need 8000 kJ to live without moving
 	 * So 1 average worker need to eat 24000 kJ per day (1,5kg of food)
+	 * 
+	 * <500g/people => die!
+	 * <1.5kg => reduce productivity
+	 * <2kg => unhappy
 	 */
 	public static Object2IntMap<Good> kJoules = new Object2IntOpenHashMap<>();
 
@@ -65,6 +70,7 @@ public class FoodNeed extends PopNeed {
 		long kgNeeded = maxKgNeeded;
 		log(", \"consume_food_wish\":{ \"maxmoney\":" + totalMoneyThisTurn + ", \"KG_needed\":" + kgNeeded
 				+ ", \"to feed nbpop\":" + nbMensInPop);
+//		final long maxKgWished = (maxKgNeeded * 4)/3;
 
 		// kjoules in stock, in case of?
 		// TODO
@@ -81,9 +87,9 @@ public class FoodNeed extends PopNeed {
 			if (kJoules.containsKey(good) && entry.getValue().getStock() > 0) {
 				lowPriceFood.add(good);
 //				logln(", \"i can buy " + entry.getValue().getStock() + " " + good.getName() + " at "
-//						+ entry.getValue().getPrice() + "->" + entry.getValue().getPriceBuyFromMarket(prv, nbDays)
+//						+ entry.getValue().getPrice() + "->" + entry.getValue().getPriceBuyFromMarket(nbDays)
 //						+ "€");
-				goodPrice.put(good, entry.getValue().getPriceBuyFromMarket(prv, nbDays));
+				goodPrice.put(good, entry.getValue().getPriceBuyFromMarket(nbDays));
 				if (good.getDesirability() > 2) {
 					normalFood.add(good);
 				}
@@ -162,8 +168,11 @@ public class FoodNeed extends PopNeed {
 	@Override
 	public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
-		logln(", \"spend_food\":{\"dispo\": "+maxMoneyToSpend);
+		logln(", \"spend_food\":{\"dispo\": \""+maxMoneyToSpend+"\"");
 
+		//is reduced later if no food are buyed.
+		myPop.setFoodEffectiveness(1);
+		
 		final long nbMensInPop = myPop.getNbAdult();
 		final Object2LongMap<Good> currentPopStock = myPop.getStock();
 		if (nbMensInPop == 0) {
@@ -172,7 +181,8 @@ public class FoodNeed extends PopNeed {
 		// get basic then switch them to more grateful dishs?
 		// kjoule need to consume
 		// long kJNeeded = nbMensInPop * 24000l * nbDays;
-		final long maxKgNeeded = (int) (nbMensInPop * 1.5f * nbDays);
+		final long maxKgNeeded = (long) (nbMensInPop * 1.5d * nbDays);
+		final long maxKgWish = (long) (nbMensInPop * 2d * nbDays);
 		long kgNeeded = maxKgNeeded;
 
 		// kjoules in stock, in case of?
@@ -188,7 +198,7 @@ public class FoodNeed extends PopNeed {
 		for (Entry<Good, ProvinceGoods> entry : goodStock.entrySet()) {
 			Good good = entry.getKey();
 			if (kJoules.containsKey(good) && entry.getValue().getStock() > 0) {
-				goodPrice.put(good, entry.getValue().getPriceBuyFromMarket(prv, nbDays));
+				goodPrice.put(good, entry.getValue().getPriceBuyFromMarket(nbDays));
 				if (good.getDesirability() > 5) {
 					luxuryBuyableFood.add(good);
 				} else if (good.getDesirability() > 2) {
@@ -352,37 +362,57 @@ public class FoodNeed extends PopNeed {
 				}
 			}
 
-			// TODO: add a bit of random
-			// TODO: give some from others to vital, if possible?
-			
-			//TODO: do not kill people before 1 turn, to let time to distribute urgent supplys from govrt stock.
-			// TODO: add "steal" (people which steal from market)
-			// TODO: add a factor from unnocupied landfarm to let people plant their own crop for their own food, whitout taxes because they are starving.
-			// maybe it should work with food industry to coordinate their things.
-			
-			// TODO: kill children & old people first because they are weaks
-			// famine! (old code, placeholder that can work, somehow (but
-			// it's not efficient)
-			// 1.5kg par personne par jour
-			int nbPopNoFood = (int) (nbSurplus / (-1.5f * nbDays)); 
-			int nbPopToDie = (int) Math.min(Integer.MAX_VALUE, Math.min(nbMensInPop, (int) (nbPopNoFood * 0.5)));
-			if (nbPopToDie > 0) {
-				logln(", \"famine!\":\" (" + nbPopNoFood + "+" + (nbKiloVital + nbKiloNormal + nbKiloLuxe) + "<="
-						+ kgNeeded + " => " + prv.rationReserve + ")" + nbMensInPop + " , we need "+(-nbSurplus)+ " kg of food");
-				// for (int i = 0; i < -prv.rationReserve / 2; i++) {
-				log(nbPopToDie + " can die / " + nbMensInPop + " (" + (int) (1 + nbPopNoFood * 0.5) + "/"
-						+ myPop.getNbAdult() + ") @" + myPop.getProvince().x + ":" + myPop.getProvince().y);
-				// while (nbPopToDie > 0 && nbMensInPop > 0) {
-				// la moitié des habitant non nouris meurent, les plus
-				// TODO: les esclave en premier
-				// jeunes d'abord (loi normale entre 0 et 14
-				// old or young?
-				// TODO: remove child first, elder second
-				// }
-				myPop.addAdult(-nbPopToDie);
-				logln(", now " + nbMensInPop + " (" + myPop.getNbAdult() + ") mens\"");
-			}
+			if(nbSurplus<0){
+					
+				// TODO: add a bit of random
+				// TODO: give some from others to vital, if possible?
+				
+				//TODO: do not kill people before 1 turn, to let time to distribute urgent supplys from govrt stock.
+				// TODO: add "steal" (people which steal from market)
+				// TODO: add a factor from unnocupied landfarm to let people plant their own crop for their own food, whitout taxes because they are starving.
+				// maybe it should work with food industry to coordinate their things.
+				
+				// TODO: kill children & old people first because they are weaks
+				// famine! (old code, placeholder that can work, somehow (but it's not efficient)
+				// 1.5kg par personne par jour is optimal, less than 0.5 and people began to die.
+				final double kiloPerDayPerMen = (kgNeeded + nbSurplus) / (double)(nbMensInPop * nbDays);
+//				int nbPopNoFood = (int) (nbSurplus / (-0.5f * nbDays));
+//				int nbPopToDie = (int) Math.min(Integer.MAX_VALUE, Math.min(nbMensInPop, (int) (nbPopNoFood * 0.5)));
+				if (kiloPerDayPerMen < 0.5) {
+					long nbPopNoFood = nbMensInPop - (long)(kiloPerDayPerMen * nbMensInPop /0.5);
+					logln(", \"famine!\":\" (" + nbPopNoFood + "+" + (nbKiloVital + nbKiloNormal + nbKiloLuxe) + "<="
+							+ kgNeeded + " => " + prv.rationReserve + ")" + nbMensInPop + " , we need "+(-nbSurplus)+ " kg of food\"");
+					
+					//utilisation loi de poisson avec 30 days half-life.
+					long nbPopToDie = (long)(nbPopNoFood * Math.exp(-0.69*nbDays/30d));
+					log(", \"poisson\":"+GlobalDefines.f(Math.exp(-0.69*nbDays/30d)));
+					log(", \"nbPopToDie(esp)\":"+nbPopToDie);
 
+					//create some variance from my ass
+					nbPopToDie = nbPopToDie/2 + GlobalRandom.aleat.getInt((int)(nbPopToDie), (int)(nbSurplus));
+					
+					nbPopToDie = (long) Math.min(Integer.MAX_VALUE, Math.min(nbMensInPop, nbPopToDie));
+					log(", \"nbPopToDie(with some rand)\":"+nbPopToDie);
+					
+					// for (int i = 0; i < -prv.rationReserve / 2; i++) {
+					// while (nbPopToDie > 0 && nbMensInPop > 0) {
+					// la moitié des habitant non nouris meurent, les plus
+					// TODO: les esclave en premier
+					// jeunes d'abord (loi normale entre 0 et 14
+					// old or young?
+					// TODO: remove child first, elder second
+					// }
+					myPop.addAdult(-nbPopToDie);
+					logln(", \"now\": \"" + nbMensInPop + " (" + myPop.getNbAdult() + ") mens\"");
+					myPop.setFoodEffectiveness(0);
+				}else{
+					//reduce effectiveness
+					logln(", \"can eat kg/menday\": " + kiloPerDayPerMen );
+					myPop.setFoodEffectiveness(Math.min(1,(float)(kiloPerDayPerMen -0.5)));
+					logln(", \"changeFoodEffectiveness\": "+myPop.getFoodEffectiveness());
+				}
+
+			}
 		} else {
 			// TODO: add a bit of random
 			// TODO: this algo is WRONG
@@ -598,6 +628,9 @@ public class FoodNeed extends PopNeed {
 			}
 
 		}
+		
+		//TODO: reduce happiness if less than 2kg per people /day.
+		
 
 		//note: this has already triggered, cf the logs down here
 		if (moneyUsed > maxMoneyToSpend.getMoney()) {

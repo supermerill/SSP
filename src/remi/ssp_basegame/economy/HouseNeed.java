@@ -17,7 +17,8 @@ import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 
-// it doesn't work with the pop split (for calculating the current stock)
+//TODO: redo it, with a different one for each pop type, for better clarity.
+// and up the need
 public class HouseNeed extends PopNeed{
 
 	public static List<Good> houses = new ArrayList<>();
@@ -33,18 +34,18 @@ public class HouseNeed extends PopNeed{
 		
 		long moneyObj = (long) (totalMoneyThisTurn * 0.25);
 		
-		//get the prices (1 house = 4 hab, per default)
+		//get the prices (1 house = 4 hab, per default), 1 tonne
 		long nbHousesNeeded = 1000*nbMensInPop/4;
 		List<Good> lowPriceHouse = new ArrayList<>();
 		Object2LongMap<Good> goodPrice = new Object2LongOpenHashMap<>();
 		for(Good house : houses){
 			lowPriceHouse.add(house);
 			nbHousesNeeded -= myPop.getStock().getLong(house);
-			goodPrice.put(house, goodStock.get(house).getPriceBuyFromMarket(prv, nbDays));
+			goodPrice.put(house, goodStock.get(house).getPriceBuyFromMarket(nbDays));
 			logln("price of "+house+" is "+goodPrice.getLong(house));
 		}
 		
-		//vital: at least the worst house for every clodo
+		//vital: at least the worst house for every houseless
 		if(nbHousesNeeded > 0){
 			lowPriceHouse.sort((o0,o1) -> Long.compare(goodPrice.getLong(o0), goodPrice.getLong(o1)));
 			ListIterator<Good> it = lowPriceHouse.listIterator();
@@ -103,7 +104,7 @@ public class HouseNeed extends PopNeed{
 		for(Good house : houses){
 			
 			nbHousesNeeded -= myPop.getStock().getLong(house);
-			goodPrice.put(house, goodStock.get(house).getPriceBuyFromMarket(prv, nbDays));
+			goodPrice.put(house, goodStock.get(house).getPriceBuyFromMarket(nbDays));
 			
 			lowPriceHouse.add(house);
 			if(house.getDesirability()<20){
@@ -211,7 +212,7 @@ public class HouseNeed extends PopNeed{
 			Good house = lowPriceHouse.get(idx);
 			//sell it
 			//TODO create a renovation industry (sell house to renovation -> then sell house to market)
-			long price = goodStock.get(house).getPriceSellToMarket(prv, nbDays);
+			long price = goodStock.get(house).getPriceSellToMarket(nbDays);
 			long nbInstock = myPop.getStock().getLong(house);
 			logln("HOUSE DON4T WANT "+chunkHouses+" "+house.getName()+" / "+nbGoods.getLong(house));
 			nbGoods.put(house, nbGoods.getLong(house) - chunkHouses);
@@ -226,9 +227,9 @@ public class HouseNeed extends PopNeed{
 		for(it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<Good> entry : nbGoods.object2LongEntrySet()){
 			Good house = entry.getKey();
 			long nbBuy = entry.getLongValue();
-			goodStock.get(house).addStock( -nbBuy);
 			currentPopStock.put(house, currentPopStock.getLong(house)+nbBuy);
-			goodStock.get(house).addNbConsumePerDay(nbBuy / (float)nbDays);
+//			goodStock.get(house).addNbConsumePerDay(nbBuy / (float)nbDays);
+			goodStock.get(house).addStock( -nbBuy);
 			logln("HOUSE NEED buy "+nbBuy+" "+house.getName());
 		}
 

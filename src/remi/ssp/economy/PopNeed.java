@@ -42,7 +42,7 @@ public abstract class PopNeed extends Needs {
 		ProvinceGoods market = prv.getStock().get(good);
 		logln(", \"simplebuy_"+myPop+"_"+good+"\":{\"stock\":"+market.getStock()+",\"iwant\":"+(maxNb - currentStock.getLong(good))+"}");
 		long quantityBuy = Math.min(market.getStock(), maxNb - currentStock.getLong(good));
-		long price = market.getPriceBuyFromMarket(prv, nbDays);
+		long price = market.getPriceBuyFromMarket(nbDays);
 		if(quantityBuy * price > moneyToSpend){
 			quantityBuy = (moneyToSpend / price);
 		}
@@ -52,8 +52,8 @@ public abstract class PopNeed extends Needs {
 		}
 		prv.addMoney(quantityBuy * price);
 		myPop.addMoney(- price * quantityBuy);
-		market.addNbConsumePerDay(quantityBuy / (float)nbDays);
 		currentStock.put(good, currentStock.getLong(good) + quantityBuy);
+//		market.addNbConsumePerDay(quantityBuy / (float)nbDays);
 		market.addStock( -quantityBuy);
 		
 		return quantityBuy * price;
@@ -65,7 +65,7 @@ public abstract class PopNeed extends Needs {
 		ProvinceGoods market = prv.getStock().get(good);
 		logln(", \"SC_"+myPop+"_"+good+"\":{\"stock\":"+market.getStock()+", \"want\":"+(maxNb - currentStock.getLong(good))+"}");
 		long quantityBuy = Math.min(market.getStock(), maxNb - currentStock.getLong(good));
-		long price = market.getPriceBuyFromMarket(prv, nbDays);
+		long price = market.getPriceBuyFromMarket(nbDays);
 		if(quantityBuy * price > moneyToSpend){
 			quantityBuy = (moneyToSpend / price);
 		}
@@ -75,7 +75,7 @@ public abstract class PopNeed extends Needs {
 		}
 		prv.addMoney(quantityBuy * price);
 		myPop.addMoney(- price * quantityBuy);
-		market.addNbConsumePerDay(quantityBuy / (float)nbDays);
+//		market.addNbConsumePerDay(quantityBuy / (float)nbDays);
 		market.addStock( -quantityBuy);
 		
 		return quantityBuy * price;
@@ -83,17 +83,17 @@ public abstract class PopNeed extends Needs {
 	
 	protected void consumeProductFromMarket(Good good, long quantity, int nbDays){
 		Province prv = myPop.getProvince();
-		long price = prv.getStock().get(good).getPriceBuyFromMarket(prv, nbDays);
-		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
+		long price = prv.getStock().get(good).getPriceBuyFromMarket(nbDays);
 		prv.addMoney(price*quantity);
+//		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
 		prv.getStock().get(good).addStock(-quantity);
 		myPop.addMoney(-price*quantity);
 	}
 	
 	protected void storeProductFromMarket(Good good, long quantity, int nbDays){
 		Province prv = myPop.getProvince();
-		long price = prv.getStock().get(good).getPriceBuyFromMarket(prv, nbDays);
-		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
+		long price = prv.getStock().get(good).getPriceBuyFromMarket(nbDays);
+//		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
 		prv.addMoney(price*quantity);
 		prv.getStock().get(good).addStock(-quantity);
 		log(",\""+myPop+"_buy_qtt\":"+(price*quantity)+",\""+myPop+"_buy_Mbefore\":"+myPop.getMoney());

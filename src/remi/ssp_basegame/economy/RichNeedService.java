@@ -39,7 +39,7 @@ public class RichNeedService extends PopNeed {
 		
 		//i wish i have the money for at least one man-hour of personal service each day
 		long stock = goodStock.getStock();
-		long price = goodStock.getPriceBuyFromMarket(prv, nbDays);
+		long price = goodStock.getPriceBuyFromMarket(nbDays);
 		
 		wish.normalNeed += Math.min(stock, nbMensInPop * 10 * nbDays) * price;
 		

@@ -55,7 +55,7 @@ public class ElevageIndustry extends Industry {
 				//try to buy some meat
 				long nbNeedToBuy = nb*10 - nbSheep;
 				nbNeedToBuy *= 100;
-				long price = prv.getStock().get(Good.get("meat")).getPriceBuyFromMarket(prv, nbDays);
+				long price = prv.getStock().get(Good.get("meat")).getPriceBuyFromMarket(nbDays);
 				wishes.vitalNeed += nbNeedToBuy * price*5;
 				wishes.normalNeed += nbNeedToBuy * price*5;
 			}
@@ -81,7 +81,7 @@ public class ElevageIndustry extends Industry {
 				//try to buy some meat
 				long nbNeedToBuy = nb*10 - nbSheep;
 				nbNeedToBuy *= 100;
-				long price = prv.getStock().get(meat).getPriceBuyFromMarket(prv, nbDays);
+				long price = prv.getStock().get(meat).getPriceBuyFromMarket(nbDays);
 				
 				long vitalSpend = Math.min(maxMoneyToSpend.vitalNeed, nbNeedToBuy * price);
 				long quantityBuy = Math.min(vitalSpend / (price*100), prv.getStock().get(meat).getStock()/100);
@@ -92,14 +92,16 @@ public class ElevageIndustry extends Industry {
 				//buy
 				prv.addMoney(quantityBuy * price);
 				myIndus.addMoney(-quantityBuy * price);
-				prv.getStock().get(meat).addNbConsumePerDay(quantityBuy / (float)nbDays);
 				currentStock.put(meat,nbSheep*100);
+//				prv.getStock().get(meat).addNbConsumePerDay(quantityBuy / (float)nbDays);
 				prv.getStock().get(meat).addStock( -quantityBuy);
 				spent += quantityBuy * price;
 				logln(", \"buyvital_qt\":"+quantityBuy+",\"vital_price\":"+price+", \"vital_spent\":"+(quantityBuy * price)+"");
 				
+				
+				//second round
 				long normalSpend = Math.min(maxMoneyToSpend.normalNeed, Math.max(0, nbNeedToBuy * price - vitalSpend));
-				quantityBuy = normalSpend / (price*100);
+				quantityBuy = Math.min(normalSpend / (price*100), prv.getStock().get(meat).getStock()/100);
 				nbSheep += quantityBuy;
 				quantityBuy  *= 100;
 

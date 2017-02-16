@@ -38,7 +38,7 @@ public class MiddleNeedService extends PopNeed {
 		
 		//i wish i have the money for at least one man-hour of personal service each day
 		long stock = goodStock.getStock();
-		long price = goodStock.getPriceBuyFromMarket(prv, nbDays);
+		long price = goodStock.getPriceBuyFromMarket(nbDays);
 		
 		wish.luxuryNeed += Math.min(stock, nbMensInPop * nbDays * (myPop.getPopType()+1)) * price;
 		

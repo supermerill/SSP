@@ -73,7 +73,7 @@ public class BaseSpawner extends Spawner {
 					
 					//add all province goods possible
 					for(Good good : Good.GoodFactory.goodList.values()){
-						prv.getStock().put(good, new ProvinceGoods(good));
+						prv.getStock().put(good, new ProvinceGoods(good, prv));
 						prv.getStock().get(good).setPrice(100);
 					}
 					//place some food and houses

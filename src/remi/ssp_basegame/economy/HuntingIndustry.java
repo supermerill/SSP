@@ -77,7 +77,7 @@ public class HuntingIndustry extends Industry {
 
 	// reduce efficacity of hunting per rabbit density.
 	//at full livestock, it can hunt 6 rabbit per day (food for 4 mens)
-	nbRabbitToSell = (int)(durationInDay * 6 * nbMens * (nbRabbit / (float)nbForest));
+	nbRabbitToSell = (int)(durationInDay * 3 * nbMens * (nbRabbit / (float)nbForest));
 	nbRabbit -= nbRabbitToSell;
 
 	logln(",\"nbRabbitToSell\":"+nbRabbitToSell+",\"calculus:\":\"nbDay("+durationInDay+")*6*"+nbMens+(nbRabbit / (float)nbForest)+"\"");

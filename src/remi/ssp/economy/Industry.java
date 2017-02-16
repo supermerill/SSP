@@ -27,6 +27,12 @@ public abstract class Industry {
 	//produce goods, by consuming needed things ( people are payedd in economy plugin)
 	// !!! you must update setRawGoodsCost (to be able compute the marge, the salary and the savings)
 	public abstract long produce(ProvinceIndustry indus, Collection<Pop> pop, int durationInDay);
+	
+	/**
+	 * Rediine this method to limit the number of people that can be hire here.
+	 * @return number of maximum new workers this industry can accept this period
+	 */
+	public long needNewWorkers(int nbDays){ return Long.MAX_VALUE; }
 
 	//TODO: canHire? canFire?
 	//TODO: enhance produce to put here the process of thinking to "should i produce, with the current price?" ?
@@ -34,16 +40,10 @@ public abstract class Industry {
 
 	public Good getGood() { return createThis; }
 	public Function<ProvinceIndustry,IndustryNeed> getMyNeedsFactory() { return myNeedsFactory; }
-	
-	//one by economy
-	//	public abstract int setPrice(Province prv); // from offre/demande avec le stock disponible
-
-	//done by needs
-	//	public abstract void consume(Province prv, Object2IntMap<Pop> alreadyUsed); // le habitants peuvent dépenser de l'argnet pour acheter ces biens (selon le fric qu'il leur reste
 
 	
 	public long sellProductToMarket(Province prv, long quantity, int nbDays){
-		long price = prv.getStock().get(createThis).getPriceSellToMarket(prv, nbDays);
+		long price = prv.getStock().get(createThis).getPriceSellToMarket(nbDays);
 		price *= quantity;
 		prv.addMoney(-price);
 		prv.getStock().get(createThis).addStock(quantity);

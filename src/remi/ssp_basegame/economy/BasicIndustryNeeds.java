@@ -45,7 +45,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 		//normal: tools (and a bit more raw)
 		//luxury : a bit more tools & raw
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
-			long price = prv.getStock().get(needed.getKey()).getPriceBuyFromMarket(prv, nbDays);
+			long price = prv.getStock().get(needed.getKey()).getPriceBuyFromMarket(nbDays);
 			long nbItemCanBuy = Math.max(0, Math.min(prv.getStock().get(needed.getKey()).getStock(), 
 					(long)(2 * maxLastProd * needed.getFloatValue()) - currentStock.getLong(needed.getKey())));
 			if(nbItemCanBuy<0) nbItemCanBuy = 0;
@@ -54,7 +54,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			wish.luxuryNeed +=  nbItemCanBuy * price /4;
 		}
 		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
-			long price = prv.getStock().get(needed.getKey()).getPriceBuyFromMarket(prv, nbDays);
+			long price = prv.getStock().get(needed.getKey()).getPriceBuyFromMarket(nbDays);
 			long nbItemCanBuy = Math.max(0, Math.min(prv.getStock().get(needed.getKey()).getStock(), 
 					(long)(2*maxLastProd * needed.getFloatValue()*0.9f) - currentStock.getLong(needed.getKey())));
 			if(nbItemCanBuy<0) nbItemCanBuy = 0;
@@ -92,7 +92,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			long quantityBuy = Math.max(0, Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber));
 //			logln("1indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
 //					+"( "+maxLastProd+" * "+needed.getFloatValue()+" - "+currentStockNumber+")");
-			long price = market.getPriceBuyFromMarket(prv, nbDays);
+			long price = market.getPriceBuyFromMarket(nbDays);
 			if(quantityBuy * price > moneyToSpend){
 //				logln("1indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
 				quantityBuy = (long)(moneyToSpend / price);
@@ -116,7 +116,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			long quantityBuy = Math.max(0, Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()) - currentStockNumber));
 //			logln("2indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
 //					+"( "+maxLastProd+" * "+needed.getFloatValue()+" - "+currentStockNumber+")");
-			long price = market.getPriceBuyFromMarket(prv, nbDays);
+			long price = market.getPriceBuyFromMarket(nbDays);
 			if(quantityBuy * price > moneyToSpend){
 //				logln("2indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
 				quantityBuy = (moneyToSpend / price);
@@ -143,7 +143,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			long quantityBuy = Math.max(0, Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue())));
 //			logln("3indus "+myIndus.getName()+" want to buy "+quantityBuy+" "+needed.getKey().getName()
 //					+"( "+maxLastProd+" * "+needed.getFloatValue()+")");
-			long price = market.getPriceBuyFromMarket(prv, nbDays);
+			long price = market.getPriceBuyFromMarket(nbDays);
 			if(quantityBuy * price > moneyToSpend){
 //				logln("3indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
 				quantityBuy = (long)(moneyToSpend / price);
@@ -161,7 +161,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 //			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
 			long quantityBuy = Math.max(0, Math.min(market.getStock(), (int)(maxLastProd * needed.getFloatValue()*0.5)));
-			long price = market.getPriceBuyFromMarket(prv, nbDays);
+			long price = market.getPriceBuyFromMarket(nbDays);
 			if(quantityBuy * price > moneyToSpend){
 //				logln("4indus "+myIndus.getName()+" can't buy more than "+(moneyToSpend/price)+" "+needed.getKey().getName()+" @"+price+"€ ("+moneyToSpend+")");
 				quantityBuy = (long)(moneyToSpend / price);

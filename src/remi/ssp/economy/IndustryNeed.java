@@ -53,10 +53,10 @@ public abstract class IndustryNeed extends Needs{
 	 */
 	protected long storeProductFromMarket(Good good, long quantity, int nbDays){
 		Province prv = myIndus.getProvince();
-		long price = prv.getStock().get(good).getPriceBuyFromMarket(prv, nbDays);
+		long price = prv.getStock().get(good).getPriceBuyFromMarket(nbDays);
 		long moneyExch = price*quantity;
 		prv.addMoney(moneyExch);
-		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
+//		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
 		prv.getStock().get(good).addStock(-quantity);
 		myIndus.addMoney(-moneyExch);
 		myIndus.getStock().put(good, quantity + myIndus.getStock().getLong(good));

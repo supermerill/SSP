@@ -25,7 +25,7 @@ public class GlobalRandom {
     }
 
 	public int nextInt(int modulo) {
-		return rand.nextInt();
+		return rand.nextInt(modulo);
 	}
 	
 }

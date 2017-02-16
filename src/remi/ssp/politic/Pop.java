@@ -72,6 +72,7 @@ public class Pop {
 	
 	public float educationMoy=0; //0 ignare, 1 érudit
 	public float sante=0.5f;//0 épidémie foudroyante, 1 santé parfaite.
+	public float foodEffectiveness = 1; // 0->1 : 0 if almost no food, 1 if full food needs is ok.
 	
 	//pas d'eslave en v1 (et c'est dommage)
 //	public SocialStatus status;
@@ -113,7 +114,9 @@ public class Pop {
 	public float getSante() { return sante; }
 //	public SocialStatus getStatus() { return status; }
 	public long getMoney() { return cash; }
-	@Deprecated public long gain=0;
+	protected long gain=0;
+	public long getGain() { return gain; }
+	public void resetGain() { this.gain = 0; }
 	public void addMoney(long moneyAdd) { 
 		this.cash += moneyAdd; 
 		if(moneyAdd>0) gain += moneyAdd;
@@ -130,7 +133,7 @@ public class Pop {
 	
 
 	public long getNbAdult() { return nbAdult; }
-	public void addAdult(final int nb){ 
+	public void addAdult(final long nb){ 
 //		logln("remove "+ (-nb)+" adults from "+nbAdult+", actually "+nbAdult+" = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
 		nbAdult += nb; 
 		if(nbAdult<0){ 
@@ -152,7 +155,7 @@ public class Pop {
 				Job job = it.next(); if(getNbMensEmployed(job) <= 0) it.remove();
 			}
 			while(nbRemoved<-nb && jobs.size()>0){
-				final int i= GlobalRandom.aleat.getInt(jobs.size(), -nb);
+				final int i= GlobalRandom.aleat.getInt(jobs.size(), (int)-nb);
 				final long nbMensHere = getNbMensEmployed(jobs.get(i));
 				final long removedHere = Math.min(nbMensHere, Math.min(- (nb + nbRemoved), 2 -nb/10));
 				nbRemoved += removedHere;
@@ -203,6 +206,8 @@ public class Pop {
 	public void setPopType(int popType) { this.popType = popType; }
 	//0 for poor, little for middle, many for rich
 	public int getCoeffInvestors(){ int type = getPopType(); return type*type*type; }
+	public float getFoodEffectiveness() { return foodEffectiveness; }
+	public void setFoodEffectiveness(float ratio) { this.foodEffectiveness = ratio; }
 	
 	//public float criminalite=0; //0=> auncun, 1=> anarchie
 
@@ -235,8 +240,9 @@ public class Pop {
 				commerceSea.load(jsonObj.getJsonObject("trs"), prv);
 			}
 		}
-		
+
 		cash = jsonObj.getJsonNumber("cash").longValue();
+		gain = jsonObj.getJsonNumber("gain").longValue();
 		
 		array = jsonObj.getJsonArray("stock");
 		stock.clear();
@@ -253,6 +259,7 @@ public class Pop {
 		}
 		educationMoy = (float) jsonObj.getJsonNumber("edu").doubleValue();
 		sante = (float) jsonObj.getJsonNumber("pv").doubleValue();
+		foodEffectiveness = (float) jsonObj.getJsonNumber("foodEff").doubleValue();
 		
 		culture = CurrentGame.cultures.get(jsonObj.get("cultName"));
 		
@@ -288,6 +295,7 @@ public class Pop {
 		commerceSea.save(jsonObj);
 		jsonOut.add("trs", jsonObj);
 		jsonOut.add("cash", cash);
+		jsonOut.add("gain", gain);
 
 		array = Json.createArrayBuilder();
 		for(Entry<Good> good : stock.object2LongEntrySet()){
@@ -307,6 +315,7 @@ public class Pop {
 		}
 		jsonOut.add("edu", educationMoy);
 		jsonOut.add("pv", sante);
+		jsonOut.add("foodEff", foodEffectiveness);
 
 		jsonOut.add("cultName", culture.getName());
 	}
