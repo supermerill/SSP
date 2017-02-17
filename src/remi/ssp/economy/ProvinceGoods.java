@@ -15,6 +15,7 @@ public class ProvinceGoods {
 	protected long stockPrice=10;
 	protected float nbConsumeThisPeriod=0; // BFR, we need to keep this as stock, so choose the price accordingly
 	protected float nbConsumePerDayConsolidated=0;
+	protected float nbProduceThisPeriod=0;
 	protected float stockConsolidated=0;
 	
 	protected long previousPrice=0;
@@ -22,13 +23,12 @@ public class ProvinceGoods {
 	//TODO "demande" pour permettre aux pop et à l'etat de demander aux marchants d'apporter des trucs
 	
 	
-	
-	
 	public ProvinceGoods(Good good, Province prv) { super(); this.good = good; this.prv = prv; price = 10; stock = 0;}
 	public long getStock() { return stock; }
 	public long getPrice() { return price; }
 	public long getStockPrice() { return stockPrice; }
 	public float getNbConsumeThisPeriod() { return nbConsumeThisPeriod; }
+	public float getNbProduceThisPeriod() { return nbProduceThisPeriod; }
 	public void setPrice(long price) { this.price = price; }
 	public void setStock(long stock) { this.stock = stock; 
 	if(stock<0){
@@ -52,6 +52,7 @@ public class ProvinceGoods {
 		if(stock>0){
 			long price = getPriceSellToMarket(1);
 			this.stockPrice = (1+ this.stockPrice * this.stock + stock*price) / (1+this.stock + stock);
+			nbProduceThisPeriod += stock;
 		}else{
 			addNbConsumeThisPeriod(-stock);
 		}
@@ -63,7 +64,7 @@ public class ProvinceGoods {
 	private void addNbConsumeThisPeriod(float nbConsume) { this.nbConsumeThisPeriod += nbConsume; }
 	
 	
-	static float coeffMarketBFR = 1f;
+	static float coeffMarketBFR = 0.5f;
 	
 	public long getPriceSellToMarket(int durationInDay){
 		double coeff = Math.max(0.1,prv.getMoneyConsolidated()) / ((1.0+prv.getMoneyChangePerDayConsolidated()*coeffMarketBFR));
@@ -83,7 +84,7 @@ public class ProvinceGoods {
 		
 		if(prv.getPreviousMoney()<0){
 			//buyPrice = 0; //can't buy, faillite // can't do that, money can't circulate if true.
-			buyPrice *= 0.1;
+			buyPrice *= 0.3;
 		}
 			
 		return buyPrice;
@@ -119,16 +120,24 @@ public class ProvinceGoods {
 		}
 		return buyPrice;
 	}
-	
+
 	public void load(JsonObject jsonObj){
-		stock = jsonObj.getInt("stock");
+		stock = jsonObj.getJsonNumber("stock").longValue();
 		price = jsonObj.getJsonNumber("price").longValue();
-		nbConsumeThisPeriod = jsonObj.getInt("nb");
+		stockPrice = jsonObj.getJsonNumber("stockPrice").longValue();
+		nbConsumeThisPeriod = (float) jsonObj.getJsonNumber("nbConso").doubleValue();
+		nbConsumePerDayConsolidated = (float) jsonObj.getJsonNumber("nbConsoPeriod").doubleValue();
+		nbProduceThisPeriod = (float) jsonObj.getJsonNumber("nbProd").doubleValue();
+		stockConsolidated = (float) jsonObj.getJsonNumber("stockPeriod").doubleValue();
 	}
 	public void save(JsonObjectBuilder jsonOut){
 		jsonOut.add("stock", stock);
 		jsonOut.add("price", price);
-		jsonOut.add("nb", nbConsumeThisPeriod);
+		jsonOut.add("stockPrice", stockPrice);
+		jsonOut.add("nbConso", nbConsumeThisPeriod);
+		jsonOut.add("nbConsoPeriod", nbConsumePerDayConsolidated);
+		jsonOut.add("nbProd", nbProduceThisPeriod);
+		jsonOut.add("stockPeriod", stockConsolidated);
 	}
 	
 }

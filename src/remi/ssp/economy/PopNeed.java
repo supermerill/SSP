@@ -81,16 +81,17 @@ public abstract class PopNeed extends Needs {
 		return quantityBuy * price;
 	}
 	
-	protected void consumeProductFromMarket(Good good, long quantity, int nbDays){
+	protected long consumeProductFromMarket(Good good, long quantity, int nbDays){
 		Province prv = myPop.getProvince();
 		long price = prv.getStock().get(good).getPriceBuyFromMarket(nbDays);
 		prv.addMoney(price*quantity);
 //		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
 		prv.getStock().get(good).addStock(-quantity);
 		myPop.addMoney(-price*quantity);
+		return price*quantity;
 	}
 	
-	protected void storeProductFromMarket(Good good, long quantity, int nbDays){
+	protected long storeProductFromMarket(Good good, long quantity, int nbDays){
 		Province prv = myPop.getProvince();
 		long price = prv.getStock().get(good).getPriceBuyFromMarket(nbDays);
 //		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
@@ -100,6 +101,7 @@ public abstract class PopNeed extends Needs {
 		myPop.addMoney(-price*quantity);
 		logln(",\""+myPop+"_buy_Mafter\":"+myPop.getMoney());
 		myPop.getStock().put(good, quantity + myPop.getStock().getLong(good));
+		return price*quantity;
 	}
 	
 }

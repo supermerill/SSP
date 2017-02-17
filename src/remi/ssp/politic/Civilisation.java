@@ -44,6 +44,11 @@ public class Civilisation {
 	
 	
 	Culture mainCulture;
+	
+	//TODO put this into a "edict class"
+	public int getMinAgeWork(){ return 10; }
+	public int getAgeRetraite(){ return 60;}
+	
 
 	public List<Province> getProvinces() { return provinces; }
 	public List<DivisionUnit> getDivisions() { return divisions; }

@@ -189,14 +189,14 @@ public class Pop {
 //		logln("pop "+popType+" now has "+nbAdult+" adult = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
 	}
 	public long getNbChildren() { return nbChildren; }
-	public void addChildren(final int nb){ 
+	public void addChildren(final long nb){ 
 		nbChildren += nb; 
 		if(nbChildren<0){
 			System.err.println("Error, too low number of children in pop: "+nbChildren);
 		}
 	}
 	public long getNbElder() { return nbElder; }
-	public void addElder(final int nb){ 
+	public void addElder(final long nb){ 
 		nbElder += nb; 
 		if(nbElder<0){
 			System.err.println("Error, too low number of nbElder in pop: "+nbElder);

@@ -16,6 +16,7 @@ import javax.json.JsonObjectBuilder;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import remi.ssp.GlobalDefines;
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
@@ -173,7 +174,8 @@ public class Province{
 		this.money += moneyAdd; 
 		moneyChangePerDay+=Math.abs(moneyAdd); 
 		if(this.money<0){
-			//System.err.println("Error, now province has no money");
+			GlobalDefines.logFlush();
+			System.err.println("Error, now province has no money");
 		}
 	}
 	public long getMoneyChangePerDay() { return moneyChangePerDay; }

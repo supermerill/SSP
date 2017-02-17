@@ -35,9 +35,7 @@ public class FoodNeed extends PopNeed {
 	 * 1hour of gardening ~= 1500 kJ 1 men need 8000 kJ to live without moving
 	 * So 1 average worker need to eat 24000 kJ per day (1,5kg of food)
 	 * 
-	 * <500g/people => die!
-	 * <1.5kg => reduce productivity
-	 * <2kg => unhappy
+	 * <500g/people => die! <1.5kg => reduce productivity <2kg => unhappy
 	 */
 	public static Object2IntMap<Good> kJoules = new Object2IntOpenHashMap<>();
 
@@ -51,7 +49,7 @@ public class FoodNeed extends PopNeed {
 	public NeedWish moneyNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 
-		final long nbMensInPop = myPop.getNbAdult();
+		final long nbMensInPop = myPop.getNbAdult() + myPop.getNbChildren() + myPop.getNbElder();
 
 		if (totalMoneyThisTurn <= 0) {
 			System.err.println("ERROR no money for pop:" + totalMoneyThisTurn);
@@ -68,9 +66,8 @@ public class FoodNeed extends PopNeed {
 		// kjoule need to consume
 		final long maxKgNeeded = (int) (nbMensInPop * 1.5f * nbDays);
 		long kgNeeded = maxKgNeeded;
-		log(", \"consume_food_wish\":{ \"maxmoney\":" + totalMoneyThisTurn + ", \"KG_needed\":" + kgNeeded
-				+ ", \"to feed nbpop\":" + nbMensInPop);
-//		final long maxKgWished = (maxKgNeeded * 4)/3;
+		log(", \"consume_food_wish\":{ \"maxmoney\":" + totalMoneyThisTurn + ", \"KG_needed\":" + kgNeeded + ", \"to feed nbpop\":" + nbMensInPop);
+		// final long maxKgWished = (maxKgNeeded * 4)/3;
 
 		// kjoules in stock, in case of?
 		// TODO
@@ -86,9 +83,11 @@ public class FoodNeed extends PopNeed {
 			Good good = entry.getKey();
 			if (kJoules.containsKey(good) && entry.getValue().getStock() > 0) {
 				lowPriceFood.add(good);
-//				logln(", \"i can buy " + entry.getValue().getStock() + " " + good.getName() + " at "
-//						+ entry.getValue().getPrice() + "->" + entry.getValue().getPriceBuyFromMarket(nbDays)
-//						+ "€");
+				// logln(", \"i can buy " + entry.getValue().getStock() + " " +
+				// good.getName() + " at "
+				// + entry.getValue().getPrice() + "->" +
+				// entry.getValue().getPriceBuyFromMarket(nbDays)
+				// + "€");
 				goodPrice.put(good, entry.getValue().getPriceBuyFromMarket(nbDays));
 				if (good.getDesirability() > 2) {
 					normalFood.add(good);
@@ -104,7 +103,8 @@ public class FoodNeed extends PopNeed {
 		lowPriceFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
 		kgNeeded = maxKgNeeded;
 		for (Good food : lowPriceFood) {
-//			logln("i try buy " + food.getName() + " @ " + goodPrice.getLong(food));
+			// logln("i try buy " + food.getName() + " @ " +
+			// goodPrice.getLong(food));
 			if (kgNeeded <= goodStock.get(food).getStock()) {
 				// logln("enough " + food.getName() + " : " +
 				// kgNeeded + "/" + goodStock.get(food).getStock());
@@ -123,8 +123,10 @@ public class FoodNeed extends PopNeed {
 			// famine
 			wish.normalNeed = 0;
 			wish.luxuryNeed = wish.vitalNeed;
-//			logln("@" + myPop.getProvince().x + ":" + myPop.getProvince().y + ", food wish: "
-//					+ wish.vitalNeed + " " + wish.normalNeed + " " + wish.luxuryNeed);
+			// logln("@" + myPop.getProvince().x + ":" + myPop.getProvince().y +
+			// ", food wish: "
+			// + wish.vitalNeed + " " + wish.normalNeed + " " +
+			// wish.luxuryNeed);
 			return wish;
 		}
 
@@ -160,20 +162,20 @@ public class FoodNeed extends PopNeed {
 		wish.normalNeed = Math.max(wish.normalNeed - wish.vitalNeed, 0);
 		wish.luxuryNeed = Math.max(wish.luxuryNeed - (wish.vitalNeed + wish.normalNeed), wish.vitalNeed / 2);
 
-		logln(", \"food wish\":\"" + wish+"\"}");
-		
+		logln(", \"food wish\":\"" + wish + "\"}");
+
 		return wish;
 	}
 
 	@Override
 	public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
-		logln(", \"spend_food\":{\"dispo\": \""+maxMoneyToSpend+"\"");
+		logln(", \"spend_food\":{\"dispo\": \"" + maxMoneyToSpend + "\"");
 
-		//is reduced later if no food are buyed.
+		// is reduced later if no food are buyed.
 		myPop.setFoodEffectiveness(1);
-		
-		final long nbMensInPop = myPop.getNbAdult();
+
+		final long nbMensInPop = myPop.getNbAdult() + (long)(myPop.getNbChildren()*0.7) + myPop.getNbElder();
 		final Object2LongMap<Good> currentPopStock = myPop.getStock();
 		if (nbMensInPop == 0) {
 			return 0;
@@ -183,7 +185,7 @@ public class FoodNeed extends PopNeed {
 		// long kJNeeded = nbMensInPop * 24000l * nbDays;
 		final long maxKgNeeded = (long) (nbMensInPop * 1.5d * nbDays);
 		final long maxKgWish = (long) (nbMensInPop * 2d * nbDays);
-		long kgNeeded = maxKgNeeded;
+		long kgNeeded = maxKgNeeded; // changé si rationnemeent
 
 		// kjoules in stock, in case of?
 		// TODO
@@ -216,8 +218,7 @@ public class FoodNeed extends PopNeed {
 		// sort by price (lower first)
 		lowPriceFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
 		normalBuyableFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
-		luxuryBuyableFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1) / o1.getDesirability(),
-				goodPrice.getLong(o2) / o2.getDesirability()));
+		luxuryBuyableFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1) / o1.getDesirability(), goodPrice.getLong(o2) / o2.getDesirability()));
 		allBuyableFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
 
 		nbGoods.defaultReturnValue(-1);
@@ -228,7 +229,11 @@ public class FoodNeed extends PopNeed {
 		long nbCoinsVital = maxMoneyToSpend.vitalNeed;
 		long nbCoins = nbCoinsVital;
 		for (Good food : allBuyableFood) {
+			if(kgNeeded <= nbKiloVital) break;
 			long quantityWanted = Math.min(goodStock.get(food).getStock(), kgNeeded - nbKiloVital);
+			log(", \"goodStock.get(food).getStock()\":" + goodStock.get(food).getStock());
+			log(", \"kgNeeded\":" + kgNeeded);
+			logln(", \"nbKiloVital\":" + nbKiloVital);
 			long totalPrice = quantityWanted * goodPrice.getLong(food);
 			logln(", \"try_buy_" + food.getName() + "_price\":" + goodPrice.getLong(food));
 			if (totalPrice == 0)
@@ -237,8 +242,8 @@ public class FoodNeed extends PopNeed {
 				long quantityPicked = nbCoins / goodPrice.getLong(food);
 				nbKiloVital += quantityPicked;
 				nbGoods.put(food, quantityPicked);
-				logln(", \"choose_crap_"+ food.getName()+"\":{\"qt\":" + quantityPicked + ", \"price(c)\":"
-						+ goodPrice.getLong(food) + ", \"ipay(c)\": " + nbCoins+"}");
+				logln(", \"choose_crap_" + food.getName() + "\":{\"qt\":" + quantityPicked + ", \"price(c)\":" + goodPrice.getLong(food) + ", \"ipay(c)\": "
+						+ nbCoins + "}");
 				nbCoins = 0;
 				break;
 			} else {
@@ -246,8 +251,8 @@ public class FoodNeed extends PopNeed {
 				long quantityPicked = quantityWanted;
 				nbKiloVital += goodStock.get(food).getStock();
 				nbGoods.put(food, quantityPicked);
-				logln(", \"choose_crap_"+ food.getName()+"\":{\"qt\":" + quantityPicked + ", \"price(c)\":"
-						+ goodPrice.getLong(food) + ", \"ipay(c)\": " + nbCoins+"}");
+				logln(", \"chooseAll_crap_" + food.getName() + "\":{\"qt\":" + quantityPicked + ", \"price(c)\":" + goodPrice.getLong(food) + ", \"ipay(c)\": "
+						+ nbCoins + "}");
 			}
 		}
 
@@ -255,31 +260,39 @@ public class FoodNeed extends PopNeed {
 		long nbCoinsNormal = maxMoneyToSpend.normalNeed + nbCoins;
 		nbCoins = nbCoinsNormal;
 		for (Good food : normalBuyableFood) {
-			long quantityWanted = Math.min(goodStock.get(food).getStock() - nbGoods.getLong(food),
-					(3 * kgNeeded / 2) - (nbKiloVital + nbKiloNormal));
+			if((3 * kgNeeded / 2) <= (nbKiloVital + nbKiloNormal)) break;
+			long quantityWanted = Math.min(goodStock.get(food).getStock() - nbGoods.getLong(food), (3 * kgNeeded / 2) - (nbKiloVital + nbKiloNormal));
+			log(", \"goodStock.get(food).getStock()\":" + goodStock.get(food).getStock());
+			log(", \"(3 * kgNeeded / 2)\":" + (3 * kgNeeded / 2));
+			logln(", \" (nbKiloVital + nbKiloNormal)\":" +  (nbKiloVital + nbKiloNormal));
 			long totalPrice = quantityWanted * goodPrice.getLong(food);
 			if (totalPrice == 0)
 				continue; // no food here
 			if (nbCoins <= totalPrice) {
 				long quantityPicked = nbCoins / goodPrice.getLong(food);
 				nbKiloNormal += quantityPicked;
-				nbGoods.put(food, quantityPicked+nbGoods.getLong(food));
-//				logln("i am going to buy " + quantityPicked + " / "+quantityWanted+ " " + food.getName() + " @ "
-//						+ goodPrice.getLong(food) + " for " + nbCoins + " (q=" + (nbCoins / goodPrice.getLong(food))
-//						+ "=" + (nbCoins / (double) goodPrice.getLong(food))+" , inmap:"+nbGoods.getLong(food));
-				logln(", \"choose_"+ food.getName()+"\":{\"qt\":" + quantityPicked + ", \"price(c)\":"
-						+ goodPrice.getLong(food) + ", \"ipay(c)\": " + nbCoins+"}");
+				nbGoods.put(food, quantityPicked + nbGoods.getLong(food));
+				// logln("i am going to buy " + quantityPicked + " /
+				// "+quantityWanted+ " " + food.getName() + " @ "
+				// + goodPrice.getLong(food) + " for " + nbCoins + " (q=" +
+				// (nbCoins / goodPrice.getLong(food))
+				// + "=" + (nbCoins / (double) goodPrice.getLong(food))+" ,
+				// inmap:"+nbGoods.getLong(food));
+				logln(", \"choose_" + food.getName() + "\":{\"qt\":" + quantityPicked + ", \"price(c)\":" + goodPrice.getLong(food) + ", \"ipay(c)\": "
+						+ nbCoins + "}");
 				nbCoins = 0;
 				break;
 			} else {
 				long quantityPicked = quantityWanted;
 				nbCoins -= totalPrice;
 				nbKiloNormal += quantityPicked;
-				nbGoods.put(food, quantityPicked+nbGoods.getLong(food));
-//				logln("i am going to buy " + quantityPicked  + " / "+quantityWanted + " " + food.getName() + " @ "
-//						+ goodPrice.getLong(food) + " for " + totalPrice + " (now i hav " + nbCoins + ")"+" , inmap:"+nbGoods.getLong(food));
-				logln(", \"choose_"+ food.getName()+"\":{\"qt\":" + quantityPicked + ", \"price(c)\":"
-						+ goodPrice.getLong(food) + ", \"ipay(c)\": " + nbCoins+"}");
+				nbGoods.put(food, quantityPicked + nbGoods.getLong(food));
+				// logln("i am going to buy " + quantityPicked + " /
+				// "+quantityWanted + " " + food.getName() + " @ "
+				// + goodPrice.getLong(food) + " for " + totalPrice + " (now i
+				// hav " + nbCoins + ")"+" , inmap:"+nbGoods.getLong(food));
+				logln(", \"chooseAll_" + food.getName() + "\":{\"qt\":" + quantityPicked + ", \"price(c)\":" + goodPrice.getLong(food) + ", \"ipay(c)\": "
+						+ nbCoins + "}");
 			}
 		}
 
@@ -297,36 +310,40 @@ public class FoodNeed extends PopNeed {
 
 		nbCoins = nbCoinsluxe;
 		for (Good food : luxuryBuyableFood) {
-			long totalPrice = (goodStock.get(food).getStock()-nbGoods.getLong(food)) * goodPrice.getLong(food);
+			long totalPrice = (goodStock.get(food).getStock() - nbGoods.getLong(food)) * goodPrice.getLong(food);
 			if (totalPrice == 0)
 				continue; // no food here
 			if (nbCoins <= totalPrice) {
 				long quantityPicked = nbCoins / goodPrice.getLong(food);
 				nbKiloLuxe += quantityPicked;
-				nbGoods.put(food, quantityPicked+nbGoods.getLong(food));
-//				logln("i am going to buy good " + quantityPicked + " " + food.getName() + " @ "
-//						+ goodPrice.getLong(food) + " for " + nbCoins+" , inmap:"+nbGoods.getLong(food));
-				logln(", \"choose_good_"+ food.getName()+"\":{\"qt\":" + quantityPicked + ", \"price(c)\":"
-						+ goodPrice.getLong(food) + ", \"ipay(c)\": " + nbCoins+"}");
+				nbGoods.put(food, quantityPicked + nbGoods.getLong(food));
+				// logln("i am going to buy good " + quantityPicked + " " +
+				// food.getName() + " @ "
+				// + goodPrice.getLong(food) + " for " + nbCoins+" ,
+				// inmap:"+nbGoods.getLong(food));
+				logln(", \"choose_good_" + food.getName() + "\":{\"qt\":" + quantityPicked + ", \"price(c)\":" + goodPrice.getLong(food) + ", \"ipay(c)\": "
+						+ nbCoins + "}");
 				nbCoins = 0;
 				break;
 			} else {
 				long quantityPicked = goodStock.get(food).getStock();
 				nbCoins -= totalPrice;
 				nbKiloLuxe += quantityPicked;
-				nbGoods.put(food, quantityPicked+nbGoods.getLong(food));
-//				logln("i am going to buy good " + quantityPicked + " " + food.getName() + " @ "
-//						+ goodPrice.getLong(food) + " for " + totalPrice+" , inmap:"+nbGoods.getLong(food));
-				logln(", \"choose_good_"+ food.getName()+"\":{\"qt\":" + quantityPicked + ", \"price(c)\":"
-						+ goodPrice.getLong(food) + ", \"ipay(c)\": " + nbCoins+"}");
+				nbGoods.put(food, quantityPicked + nbGoods.getLong(food));
+				// logln("i am going to buy good " + quantityPicked + " " +
+				// food.getName() + " @ "
+				// + goodPrice.getLong(food) + " for " + totalPrice+" ,
+				// inmap:"+nbGoods.getLong(food));
+				logln(", \"chooseAll_good_" + food.getName() + "\":{\"qt\":" + quantityPicked + ", \"price(c)\":" + goodPrice.getLong(food) + ", \"ipay(c)\": "
+						+ nbCoins + "}");
 			}
 		}
+//		logResume(nbGoods,"afterinit");
 
 		// if theere are not a global shortage, sort out the possibilities.
 		long nbSurplus = (nbKiloVital + nbKiloNormal + nbKiloLuxe) - kgNeeded;
-		logln(", \"nbMens\":" + nbMensInPop + ", \"nbKgVital\":" + nbKiloVital + ", \"nbKiloNormal\":" + nbKiloNormal
-				+ ", \"nbKiloLuxe\":" + nbKiloLuxe + ", \"kgFoodNeeded\":" + kgNeeded + ", \"nbSurplus\":"
-				+ (nbKiloVital + nbKiloNormal + nbKiloLuxe - kgNeeded));
+		logln(", \"nbMens\":" + nbMensInPop + ", \"nbKgVital\":" + nbKiloVital + ", \"nbKiloNormal\":" + nbKiloNormal + ", \"nbKiloLuxe\":" + nbKiloLuxe
+				+ ", \"kgFoodNeeded\":" + kgNeeded + ", \"nbSurplus\":" + (nbKiloVital + nbKiloNormal + nbKiloLuxe - kgNeeded));
 		// int kgFoodNeeded = (int)(kJNeeded / (float) 16000);
 
 		// logln("nbMens="+nbMensInPop+",
@@ -335,17 +352,38 @@ public class FoodNeed extends PopNeed {
 		// nbSurplus="+nbSurplus);
 		int newMoney = 0;
 
-		logln(", \"food: i have a surplus of\": "+nbSurplus);
+		logln(", \"food: i have a surplus of\": " + nbSurplus);
+		
+
+		//if stock is low, rationnement
+		if (nbSurplus < 0) {
+			int nbKiloStock = 0;
+			for (it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<Good> entry : currentPopStock.object2LongEntrySet()) {
+				nbKiloStock+=entry.getLongValue();
+			}
+			if(nbKiloStock < nbMensInPop * 1.5 * 200){
+				float ratio = 0.7f * nbKiloStock / ( nbMensInPop * 1.5f * 200);
+				//reduce ration from 1.5kg to 1kg
+				kgNeeded = (long) (nbMensInPop * nbDays * (0.8f + ratio)); 
+				nbSurplus = (nbKiloVital + nbKiloNormal + nbKiloLuxe) - kgNeeded;
+				log(", \"rationnement\": true" );
+				myPop.setFoodEffectiveness((float)0.3f + ratio);
+				logln(", \"changeFoodEffectiveness\": " + myPop.getFoodEffectiveness());
+			}
+		}
+//		logResume(nbGoods,"afterrat");
+		
+		
 		if (nbSurplus < 0) {
 
 			// try to eat the stock
+			
 
 			// from the less degradable to the most one
-			allBuyableFood.sort(
-					(food1, food2) -> -Float.compare(food1.getStorageKeepPerYear(), food2.getStorageKeepPerYear()));
-			for (Entry<Good, Long> entry : currentPopStock.entrySet()) {
+//			allBuyableFood.sort((food1, food2) -> -Float.compare(food1.getStorageKeepPerYear(), food2.getStorageKeepPerYear()));
+			for (it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<Good> entry : currentPopStock.object2LongEntrySet()) {
 				Good food = entry.getKey();
-				long currentStock = entry.getValue();
+				long currentStock = entry.getLongValue();
 				log(", \"Stock of " + food + "\" : " + currentStock);
 				if (currentStock > 0) {
 					if (currentStock > -nbSurplus) {
@@ -357,43 +395,51 @@ public class FoodNeed extends PopNeed {
 						currentPopStock.put(food, 0);
 						nbSurplus += currentStock;
 						kgNeeded -= currentStock;
-						logln(", \"Use All stock of " + food + "\" : " +currentStock);
+						logln(", \"Use All stock of " + food + "\" : " + currentStock);
 					}
 				}
 			}
+			
 
-			if(nbSurplus<0){
-					
+			if (nbSurplus < 0) {
+
 				// TODO: add a bit of random
 				// TODO: give some from others to vital, if possible?
-				
-				//TODO: do not kill people before 1 turn, to let time to distribute urgent supplys from govrt stock.
-				// TODO: add "steal" (people which steal from market)
-				// TODO: add a factor from unnocupied landfarm to let people plant their own crop for their own food, whitout taxes because they are starving.
-				// maybe it should work with food industry to coordinate their things.
-				
-				// TODO: kill children & old people first because they are weaks
-				// famine! (old code, placeholder that can work, somehow (but it's not efficient)
-				// 1.5kg par personne par jour is optimal, less than 0.5 and people began to die.
-				final double kiloPerDayPerMen = (kgNeeded + nbSurplus) / (double)(nbMensInPop * nbDays);
-//				int nbPopNoFood = (int) (nbSurplus / (-0.5f * nbDays));
-//				int nbPopToDie = (int) Math.min(Integer.MAX_VALUE, Math.min(nbMensInPop, (int) (nbPopNoFood * 0.5)));
-				if (kiloPerDayPerMen < 0.5) {
-					long nbPopNoFood = nbMensInPop - (long)(kiloPerDayPerMen * nbMensInPop /0.5);
-					logln(", \"famine!\":\" (" + nbPopNoFood + "+" + (nbKiloVital + nbKiloNormal + nbKiloLuxe) + "<="
-							+ kgNeeded + " => " + prv.rationReserve + ")" + nbMensInPop + " , we need "+(-nbSurplus)+ " kg of food\"");
-					
-					//utilisation loi de poisson avec 30 days half-life.
-					long nbPopToDie = (long)(nbPopNoFood * Math.exp(-0.69*nbDays/30d));
-					log(", \"poisson\":"+GlobalDefines.f(Math.exp(-0.69*nbDays/30d)));
-					log(", \"nbPopToDie(esp)\":"+nbPopToDie);
 
-					//create some variance from my ass
-					nbPopToDie = nbPopToDie/2 + GlobalRandom.aleat.getInt((int)(nbPopToDie), (int)(nbSurplus));
-					
+				// TODO: do not kill people before 1 turn, to let time to
+				// distribute urgent supplys from govrt stock.
+				// TODO: add "steal" (people which steal from market)
+				// TODO: add a factor from unnocupied landfarm to let people
+				// plant their own crop for their own food, whitout taxes
+				// because they are starving.
+				// maybe it should work with food industry to coordinate their
+				// things.
+
+				// TODO: kill children & old people first because they are weaks
+				// famine! (old code, placeholder that can work, somehow (but
+				// it's not efficient)
+				// 1.5kg par personne par jour is optimal, less than 0.5 and
+				// people began to die.
+				final double kiloPerDayPerMen = (kgNeeded + nbSurplus) / (double) (nbMensInPop * nbDays);
+				// int nbPopNoFood = (int) (nbSurplus / (-0.5f * nbDays));
+				// int nbPopToDie = (int) Math.min(Integer.MAX_VALUE,
+				// Math.min(nbMensInPop, (int) (nbPopNoFood * 0.5)));
+				if (kiloPerDayPerMen < 0.5) {
+					long nbPopNoFood = nbMensInPop - (long) (kiloPerDayPerMen * nbMensInPop / 0.5);
+					logln(", \"famine!\":\" (" + nbPopNoFood + "+" + (nbKiloVital + nbKiloNormal + nbKiloLuxe) + "<=" + kgNeeded + " => " + prv.rationReserve
+							+ ")" + nbMensInPop + " , we need " + (-nbSurplus) + " kg of food\"");
+
+					// utilisation loi de poisson avec 30 days half-life.
+					long nbPopToDie = (long) (nbPopNoFood * Math.exp(-0.69 * nbDays / 30d));
+					log(", \"poisson\":" + GlobalDefines.f(Math.exp(-0.69 * nbDays / 30d)));
+					log(", \"nbPopToDie(esp)\":" + nbPopToDie);
+
+					// create some variance from my ass
+					nbPopToDie = nbPopToDie / 2 + GlobalRandom.aleat.getInt((int) (nbPopToDie), (int) (nbSurplus));
+
 					nbPopToDie = (long) Math.min(Integer.MAX_VALUE, Math.min(nbMensInPop, nbPopToDie));
-					log(", \"nbPopToDie(with some rand)\":"+nbPopToDie);
-					
+					log(", \"nbPopToDie(with some rand)\":" + nbPopToDie);
+
 					// for (int i = 0; i < -prv.rationReserve / 2; i++) {
 					// while (nbPopToDie > 0 && nbMensInPop > 0) {
 					// la moitié des habitant non nouris meurent, les plus
@@ -402,14 +448,34 @@ public class FoodNeed extends PopNeed {
 					// old or young?
 					// TODO: remove child first, elder second
 					// }
-					myPop.addAdult(-nbPopToDie);
+
+					long nbElderDie = myPop.getNbElder()/2;
+					nbElderDie = Math.min(myPop.getNbElder(), GlobalRandom.aleat.normalLaw(Math.min(nbElderDie, nbPopToDie/3)));
+					long nbChildDie = myPop.getNbChildren()/2;
+					nbChildDie = Math.min(myPop.getNbChildren(), GlobalRandom.aleat.normalLaw(Math.min(nbChildDie, (nbPopToDie-nbElderDie)/2)));
+					long nbAdultDie = nbPopToDie - nbElderDie - nbChildDie;
+					if(nbAdultDie>myPop.getNbAdult()){
+						//too much dies, be extrem!
+						nbElderDie = myPop.getNbElder();
+						nbChildDie = Math.min(myPop.getNbChildren(), nbPopToDie-nbElderDie);
+						nbAdultDie = nbPopToDie - nbElderDie - nbChildDie;
+						if(nbAdultDie>myPop.getNbAdult()){
+							System.err.println("Error, food straving more people than present!");
+						}
+					}
+					
+
+					myPop.addChildren(-nbChildDie);
+					myPop.addAdult(-nbAdultDie);
+					myPop.addElder(-nbElderDie);
+					log(",\"nbChildDie\":"+nbChildDie+",\"nbAdultDie\":"+nbAdultDie+",\"nbElderDie\":"+nbElderDie);
 					logln(", \"now\": \"" + nbMensInPop + " (" + myPop.getNbAdult() + ") mens\"");
 					myPop.setFoodEffectiveness(0);
-				}else{
-					//reduce effectiveness
-					logln(", \"can eat kg/menday\": " + kiloPerDayPerMen );
-					myPop.setFoodEffectiveness(Math.min(1,(float)(kiloPerDayPerMen -0.5)));
-					logln(", \"changeFoodEffectiveness\": "+myPop.getFoodEffectiveness());
+				} else {
+					// reduce effectiveness
+					logln(", \"can eat kg/menday\": " + kiloPerDayPerMen);
+					myPop.setFoodEffectiveness(Math.min(1, (float) (kiloPerDayPerMen - 0.5)));
+					logln(", \"changeFoodEffectiveness\": " + myPop.getFoodEffectiveness());
 				}
 
 			}
@@ -417,6 +483,7 @@ public class FoodNeed extends PopNeed {
 			// TODO: add a bit of random
 			// TODO: this algo is WRONG
 			logln(", \"TRY TO BUY EXTRA SPICEY MEAT\":true");
+//			logResume(nbGoods,"spicey");
 
 			// grab the money back
 			if (nbSurplus >= nbKiloVital) {
@@ -432,6 +499,7 @@ public class FoodNeed extends PopNeed {
 					// nbCoinsNormal = 0;
 
 					for (Good food : luxuryBuyableFood) {
+//						logResume(nbGoods,"luxf");
 						long nb = nbGoods.getLong(food);
 						if (nb == -1)
 							System.err.println("Error in food needs");
@@ -445,16 +513,17 @@ public class FoodNeed extends PopNeed {
 							newMoney += nbSurplus * goodPrice.getLong(food);
 							nbGoods.put(food, nb - nbSurplus);
 							nbSurplus = 0;
-							logln(", \"finally, iwon't going to buy more than "+(nb-nbSurplus)+" of "+food+"\":true ");
+							logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
 							break;
 						} else {
 							newMoney += nb * goodPrice.getLong(food);
 							nbGoods.put(food, 0);
 							nbSurplus -= nb;
-							logln(", \"finally, iwon't going to buy "+food+"\":true");
+							logln(", \"finally, iwon't going to buy " + food + "\":true");
 						}
 					}
 				} else {
+//					logResume(nbGoods,"normalf");
 					for (Good food : normalBuyableFood) {
 						long nb = nbGoods.getLong(food);
 						if (nb == -1)
@@ -469,18 +538,19 @@ public class FoodNeed extends PopNeed {
 							newMoney += nbSurplus * goodPrice.getLong(food);
 							nbGoods.put(food, nb - nbSurplus);
 							nbSurplus = 0;
-							logln(", \"finally, iwon't going to buy more than "+(nb-nbSurplus)+" of "+food+"\":true ");
+							logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
 							break;
 						} else {
 							newMoney += nb * goodPrice.getLong(food);
 							nbGoods.put(food, 0);
 							nbSurplus -= nb;
-							logln(", \"finally, iwon't going to buy "+food+"\":true ");
+							logln(", \"finally, iwon't going to buy " + food + "\":true ");
 						}
 					}
 				}
 
 			} else {
+//				logResume(nbGoods,"lowp");
 				for (Good food : lowPriceFood) {
 					long nb = nbGoods.getLong(food);
 					if (nb == -1)
@@ -495,13 +565,13 @@ public class FoodNeed extends PopNeed {
 						newMoney += nbSurplus * goodPrice.getLong(food);
 						nbGoods.put(food, nb - nbSurplus);
 						nbSurplus = 0;
-						logln(", \"finally, iwon't going to buy "+food+"\":true");
+						logln(", \"finally, iwon't going to buy " + food + "\":true");
 						break;
 					} else {
 						newMoney += nb * goodPrice.getLong(food);
 						nbGoods.put(food, 0);
 						nbSurplus -= nb;
-						logln(", \"finally, iwon't going to buy more than "+(nb-nbSurplus)+" of "+food+"\":true ");
+						logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
 					}
 				}
 				//
@@ -529,13 +599,13 @@ public class FoodNeed extends PopNeed {
 				// }
 				// }
 			}
+//			logResume(nbGoods,"befSpend");
 
 			// Use this money to buy 10 chunk of random food.
 			long moneyToSpend = newMoney / 10;
 			if (!allBuyableFood.isEmpty()) {
 				for (int i = 0; i < 10; i++) {
-					Good food = allBuyableFood
-							.get(GlobalRandom.aleat.getInt(allBuyableFood.size(), (int) (nbMensInPop % Integer.MAX_VALUE)));
+					Good food = allBuyableFood.get(GlobalRandom.aleat.getInt(allBuyableFood.size(), (int) (nbMensInPop % Integer.MAX_VALUE)));
 					long maxStock = goodStock.get(food).getStock() - nbGoods.getLong(food);
 					long price = goodPrice.getLong(food);
 					if (maxStock == 0)
@@ -544,27 +614,31 @@ public class FoodNeed extends PopNeed {
 						System.err.println("Error in food needs: no price for " + food.getName());
 						continue;
 					}
-					long nbPicked = Math.min(moneyToSpend / price, maxStock);
+					long nbPicked = Math.min(Math.max(moneyToSpend,0) / price, maxStock);
 					newMoney -= nbPicked * price;
 					nbGoods.put(food, nbGoods.get(food) + nbPicked);
+					logln(", \"instead i will eat "+food+"\":{\"nb\":"+nbPicked+", \"price\":" + price + ",\"tot\":"+nbPicked * price
+							+", \"money_reste\":"+newMoney+"}");
 				}
 			}
+			
+//			logResume(nbGoods,"end");
 		}
 
 		// now eat these items (from the more tasty to the least one)
 		allBuyableFood.sort((food1, food2) -> -Integer.compare(food1.getDesirability(), food2.getDesirability()));
 		long kiloToEat = kgNeeded * 2; // max eating: 2 time more Kj than needed
-		logln(", \"kgNeedToEat\":"+kgNeeded+",\"maxKgNeeded\":"+maxKgNeeded);
+		logln(", \"kgNeedToEat\":" + kgNeeded + ",\"maxKgNeeded\":" + maxKgNeeded);
 		long moneyUsed = 0;
 		for (Good food : allBuyableFood) {
 			// it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Good> entry :
 			// nbGoods.object2IntEntrySet());
 			// Good food = entry.getKey();
 			long nbFood = Math.min(kiloToEat, nbGoods.getLong(food));
-//			logln(nbGoods.getLong(food));
+			// logln(nbGoods.getLong(food));
 			long cost = goodPrice.getLong(food) * nbFood;
 			if (maxMoneyToSpend.getMoney() < moneyUsed) {
-				cost = maxMoneyToSpend.getMoney() - moneyUsed;
+				cost = Math.max(0, maxMoneyToSpend.getMoney() - 1 - moneyUsed);
 				nbFood = cost / goodPrice.getLong(food);
 			}
 			moneyUsed += cost;
@@ -572,16 +646,16 @@ public class FoodNeed extends PopNeed {
 			// goodStock.get(food).addNbConsumePerDay(nbFood / (float)nbDays);
 			// prv.addMoney(cost);
 			// myPop.addMoney(-cost);
+			logln(", \"i buy & eat " + food.getName() + "\":{\"price\": " + goodPrice.getLong(food) + ", \"qtt\":" + nbFood + "\"needKg:\":" + kiloToEat
+					+ ", \"total_cost\":" + cost + ", \"now i have spent\":" + moneyUsed + " }");
 			super.consumeProductFromMarket(food, nbFood, nbDays);
-			logln(", \"i buy & eat " + food.getName() + "\":{\"price\": " + goodPrice.getLong(food) + ", \"qtt\":"
-					+ nbFood + "\"needKg:\":"+kiloToEat+", \"total_cost\":" + cost + ", \"now i have spent\":" + moneyUsed + " }");
 			kiloToEat -= nbFood;
 		}
 
 		// money left? maybe store some grain (1 year?)
 		if (moneyUsed < maxMoneyToSpend.getMoney()) {
 			long leftover = maxMoneyToSpend.getMoney() - moneyUsed;
-			logln(", \"i have some leftover to build some reserves: \":"+leftover);
+			logln(", \"i have some leftover to build some reserves: \":" + leftover);
 
 			long reserveNeeded = (nbMensInPop * 365 * 3) / 2;
 			for (Good food : allBuyableFood) {
@@ -591,8 +665,7 @@ public class FoodNeed extends PopNeed {
 			if (reserveNeeded > 0) {
 				// from the less degradable to the most one (and do not pick all
 				// of it)
-				allBuyableFood.sort(
-						(food1, food2) -> Float.compare(food1.getStorageKeepPerYear(), food2.getStorageKeepPerYear()));
+				allBuyableFood.sort((food1, food2) -> Float.compare(food1.getStorageKeepPerYear(), food2.getStorageKeepPerYear()));
 				for (Good food : allBuyableFood) {
 					long totalPrice = goodStock.get(food).getStock() * goodPrice.getLong(food) / 5;
 					long quantityPicked = 0;
@@ -601,16 +674,14 @@ public class FoodNeed extends PopNeed {
 					if (leftover <= totalPrice) {
 						moneyUsed += leftover;
 						quantityPicked = leftover / goodPrice.getLong(food);
-						logln(", \"i am going to buy RESERVE good \":{\"qtt\":" + quantityPicked + ",\"name\":\"" + food.getName()
-								+ "\", \"price\":" + goodPrice.getLong(food) + ", \"totPrice\":" + nbCoins + ", \"now i have spent\":"
-								+ moneyUsed+"}");
+						logln(", \"i am going to buy RESERVE good \":{\"qtt\":" + quantityPicked + ",\"name\":\"" + food.getName() + "\", \"price\":"
+								+ goodPrice.getLong(food) + ", \"totPrice\":" + nbCoins + ", \"now i have spent\":" + moneyUsed + "}");
 						leftover = 0;
 					} else {
 						moneyUsed += totalPrice;
 						quantityPicked = goodStock.get(food).getStock() / 5;
-						logln(", \"i am going to buy ALL RESERVE good \":{\"qtt\":" + quantityPicked + ",\"name\":\"" + food.getName()
-								+ "\", \"price\":" + goodPrice.getLong(food) + ", \"totPrice\":" + totalPrice + ", \"now i have spent\":"
-								+ moneyUsed+"}");
+						logln(", \"i am going to buy ALL RESERVE good \":{\"qtt\":" + quantityPicked + ",\"name\":\"" + food.getName() + "\", \"price\":"
+								+ goodPrice.getLong(food) + ", \"totPrice\":" + totalPrice + ", \"now i have spent\":" + moneyUsed + "}");
 						leftover -= totalPrice;
 					}
 					super.storeProductFromMarket(food, quantityPicked, nbDays);
@@ -623,37 +694,49 @@ public class FoodNeed extends PopNeed {
 					// prv.addMoney(cost);
 					// myPop.addMoney(-cost);
 					// currentPopStock.put(food, quantityPicked);
-					if(leftover <= 0) break;
+					if (leftover <= 0)
+						break;
 				}
 			}
 
 		}
-		
-		//TODO: reduce happiness if less than 2kg per people /day.
-		
 
-		//note: this has already triggered, cf the logs down here
+		// TODO: reduce happiness if less than 2kg per people /day.
+
+		// note: this has already triggered, cf the logs down here
 		if (moneyUsed > maxMoneyToSpend.getMoney()) {
 			System.err.println("error in food wish, i spend " + moneyUsed + " instead of " + maxMoneyToSpend.getMoney());
 		}
-		/* RICH
-		 			"spend_food": {
-				"dispo": 36450: 0: 18225, "try_buy_rare_meat_price": 405,
-				"choose_crap_rare_meat": { "qt": 90, "price(c)": 405, "ipay(c)": 36450},
-				"choose_meat": { "qt": 0, "price(c)": 623, "ipay(c)": 0},
-				"choose_good_rare_meat": { "qt": 92, "price(c)": 405, "ipay(c)": 1445},
-				"nbMens": 6, "nbKgVital": 90, "nbKiloNormal": 0, "nbKiloLuxe": 92, "kgFoodNeeded": 90, "nbSurplus": 92, "food: i have a surplus of": 92, "TRY TO BUY EXTRA SPICEY MEAT": true, "finally, iwon't going to buy more than 182 of rare_meat": true,
-				"kgNeedToEat": 90, "maxKgNeeded": 90,
-				"i buy & eat rare_meat": { "price": 405, "qtt": 92 "needKg:": 180, "total_cost": 37260, "now i have spent": 37260},
-				"i buy & eat meat": { "price": 623, "qtt": 10 "needKg:": 88, "total_cost": 6230, "now i have spent": 43490},
-				"i buy & eat crop": { "price": 428, "qtt": 32 "needKg:": 78, "total_cost": 13696, "now i have spent": 57186}
-				
-				error in food wish, i spend 57186 instead of 54675
-			},
+		/*
+		 * RICH "spend_food": { "dispo": 36450: 0: 18225,
+		 * "try_buy_rare_meat_price": 405, "choose_crap_rare_meat": { "qt": 90,
+		 * "price(c)": 405, "ipay(c)": 36450}, "choose_meat": { "qt": 0,
+		 * "price(c)": 623, "ipay(c)": 0}, "choose_good_rare_meat": { "qt": 92,
+		 * "price(c)": 405, "ipay(c)": 1445}, "nbMens": 6, "nbKgVital": 90,
+		 * "nbKiloNormal": 0, "nbKiloLuxe": 92, "kgFoodNeeded": 90, "nbSurplus":
+		 * 92, "food: i have a surplus of": 92, "TRY TO BUY EXTRA SPICEY MEAT":
+		 * true, "finally, iwon't going to buy more than 182 of rare_meat":
+		 * true, "kgNeedToEat": 90, "maxKgNeeded": 90, "i buy & eat rare_meat":
+		 * { "price": 405, "qtt": 92 "needKg:": 180, "total_cost": 37260,
+		 * "now i have spent": 37260}, "i buy & eat meat": { "price": 623,
+		 * "qtt": 10 "needKg:": 88, "total_cost": 6230, "now i have spent":
+		 * 43490}, "i buy & eat crop": { "price": 428, "qtt": 32 "needKg:": 78,
+		 * "total_cost": 13696, "now i have spent": 57186}
+		 * 
+		 * error in food wish, i spend 57186 instead of 54675 },
 		 */
 
 		logln("}");
 		return moneyUsed;
+	}
+	
+	private void logResume(Object2LongMap<?> nbGoods, String id){
+		GlobalDefines.plog(",\""+id+" resume\":{");boolean tempcoma = false;;
+		for(it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<?> toeat : nbGoods.object2LongEntrySet()){
+			GlobalDefines.plog((tempcoma?",":"")+" \""+toeat.getKey()+"\":"+toeat.getLongValue());
+			tempcoma= true;
+		}
+		GlobalDefines.plogln("}");
 	}
 
 }

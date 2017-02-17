@@ -97,7 +97,9 @@ public class BaseSpawner extends Spawner {
 				if(prv.surfaceSol > 10){
 					//rich
 					Pop pop = new Pop(prv);
+					pop.addChildren(20);
 					pop.addAdult(60);
+					pop.addElder(20);
 					pop.setPopType(Pop.popTypeName.indexOf("rich"));
 					prv.addPop(pop);
 					//set pop to chomage
@@ -111,7 +113,9 @@ public class BaseSpawner extends Spawner {
 					pop.getPopNeeds().add(PopNeed.create("rich_service", pop));
 					//middle
 					pop = new Pop(prv);
+					pop.addChildren(50);
 					pop.addAdult(300);
+					pop.addElder(50);
 					pop.setPopType(Pop.popTypeName.indexOf("middle"));
 					prv.addPop(pop);
 					pop.setNbMensChomage(pop.getNbAdult());
@@ -122,13 +126,15 @@ public class BaseSpawner extends Spawner {
 //					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 					//poor
 					pop = new Pop(prv);
+					pop.addChildren(300);
 					pop.addAdult(1000);
+					pop.addElder(400);
 					pop.setPopType(Pop.popTypeName.indexOf("poor"));
 					prv.addPop(pop);
 					pop.setNbMensChomage(pop.getNbAdult());
 					pop.addMoney(pop.getNbAdult()*10000);
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
-					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*750); //~some day of food
+					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*950); //~some day of food
 					pop.getPopNeeds().add(PopNeed.create("middle_service", pop));
 //					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 				}

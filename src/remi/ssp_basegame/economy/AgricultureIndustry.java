@@ -40,7 +40,7 @@ public class AgricultureIndustry extends Industry {
 		for(Pop pop : pops){
 			//
 			long nbChampsUsed = Math.min(nbChamps, pop.getNbMensEmployed(indus));
-			production += prv.champsRendement * nbChampsUsed * 4 * durationInDay;
+			production += prv.champsRendement * nbChampsUsed * 8 * durationInDay;
 			logln(", \"nbChampsUsed_"+pop+"\":"+nbChampsUsed+", \"prod_"+pop+"\":"+(prv.champsRendement * nbChampsUsed * 4 * durationInDay));
 			nbChamps -= nbChampsUsed;
 			if(nbChamps == 0) break;
