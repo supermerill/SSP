@@ -93,5 +93,10 @@ public class ProvinceCommerce implements Job{
 		}
 		jsonOut.add("stock", array);
 	}
+	@Override
+	public float wantToFire(Province prv, long nbEmployed, int nbDays) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 }

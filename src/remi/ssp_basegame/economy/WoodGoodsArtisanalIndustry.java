@@ -3,6 +3,7 @@ package remi.ssp_basegame.economy;
 import java.util.Collection;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import remi.ssp.GlobalDefines;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceIndustry;
@@ -43,6 +44,7 @@ public class WoodGoodsArtisanalIndustry extends Industry {
 			nbMens += pop.getNbMensEmployed(indus);
 			// take into account personal tools ?
 		}
+		GlobalDefines.log(", \"nbWoods\":"+indus.getStock().getLong(wood));
 
 		//a kilo of goods per worker per day with a kilo of tools
 		// the quarter if no tools

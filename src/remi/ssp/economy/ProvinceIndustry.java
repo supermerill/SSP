@@ -9,6 +9,7 @@ import javax.json.JsonObjectBuilder;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import remi.ssp.GlobalDefines;
 import remi.ssp.politic.Province;
 
 public class ProvinceIndustry implements Job{
@@ -73,6 +74,25 @@ public class ProvinceIndustry implements Job{
 	public void setPreviousProduction(long previousProduction) { this.previousProduction = previousProduction; }
 	public double getPreviousSalary() { return previousSalary; }
 	public void setPreviousSalary(double previousSalary) { this.previousSalary = previousSalary; }
+	
+
+	@Override
+	public float wantToFire(Province prv, long nbEmployed, int nbDays) {
+		ProvinceGoods prvGood = prv.getStock().get(industry.createThis);
+		
+		//if too much stock and overproduction
+		if(prvGood.getStockConsolidated() > prvGood.nbProducePerDayConsolidated * industry.createThis.getOptimalNbDayStock()
+				&& prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays < prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays){
+			//then fire enough to remove overproduction *2 (max 10%)
+			double ratioFire = 1 - (double)(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays) / (double)(prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays);
+			long nbFire = (long) (nbEmployed * ratioFire);
+			nbFire = 1 + nbFire*2;
+			nbFire = Math.min(nbFire, Math.max(1, nbEmployed/10));
+			GlobalDefines.plogln(", \"fireOverproduction_"+industry.createThis+"_"+nbEmployed+"\":"+nbFire);
+			return nbFire;
+		}
+		return 0;
+	}
 	
 	
 	public void load(JsonObject jsonObj){

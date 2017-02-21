@@ -3,6 +3,7 @@ package remi.ssp.economy;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import remi.ssp.GlobalDefines;
 import remi.ssp.politic.Province;
 
 public class ProvinceGoods {
@@ -16,6 +17,7 @@ public class ProvinceGoods {
 	protected float nbConsumeThisPeriod=0; // BFR, we need to keep this as stock, so choose the price accordingly
 	protected float nbConsumePerDayConsolidated=0;
 	protected float nbProduceThisPeriod=0;
+	protected float nbProducePerDayConsolidated=0;
 	protected float stockConsolidated=0;
 	
 	protected long previousPrice=0;
@@ -29,14 +31,20 @@ public class ProvinceGoods {
 	public long getStockPrice() { return stockPrice; }
 	public float getNbConsumeThisPeriod() { return nbConsumeThisPeriod; }
 	public float getNbProduceThisPeriod() { return nbProduceThisPeriod; }
-	public void setPrice(long price) { this.price = price; }
+	public void setPrice(long price) { this.price = price; 
+		if(price < 0){
+			System.err.println("Error, price is <0 !!");
+		}
+	}
 	public void setStock(long stock) { this.stock = stock; 
 	if(stock<0){
 		System.err.println("error, you set a too low amount for stock of "+good);
 	}
 	}
-	public void setNbConsumeThisPeriod(float nbConsumePerDay) { this.nbConsumeThisPeriod = nbConsumePerDay; }
+	public void setNbConsumeThisPeriod(float nbConsume) { this.nbConsumeThisPeriod = nbConsume; }
 	public float getNbConsumePerDayConsolidated() { return nbConsumePerDayConsolidated; }
+	public void setNbProduceThisPeriod(float nbProduce) { this.nbProduceThisPeriod = nbProduce; }
+	public float getNbProducePerDayConsolidated() { return nbProducePerDayConsolidated; }
 	public float getStockConsolidated() { return stockConsolidated; }
 	public void updateNbConsumeConsolidated(int nbDays) { //should be called 1 time per tick
 		int nbTicks = Math.max(1, (int) good.getOptimalNbDayStock()*2);
@@ -44,6 +52,9 @@ public class ProvinceGoods {
 		this.nbConsumePerDayConsolidated = 
 				(this.nbConsumePerDayConsolidated*(nbTicks-nbDays)/(float)(nbTicks)) 
 				+ (nbConsumeThisPeriod/(float)(nbTicks+nbDays)); 
+		this.nbProducePerDayConsolidated = 
+				(this.nbProducePerDayConsolidated*(nbTicks-nbDays)/(float)(nbTicks)) 
+				+ (nbProduceThisPeriod/(float)(nbTicks+nbDays));
 		//stock vary much more quickly, and is not dependent on "days", as it's an instant measure
 		this.stockConsolidated = (this.stockConsolidated*(5)/(float)(6)) + stock/(float)(6); 
 	}
@@ -75,18 +86,40 @@ public class ProvinceGoods {
 //			logln("too much stock for ??, stop buy it! "+(long)( price * (1-coeff) ) + " => " + (long)( price * (1-coeff) * (0.1+900/(1000-prv.getPreviousMoney())) ));
 //			return (long)( price * (1-coeff) * (0.1+900/(1000-prv.getPreviousMoneyconsolidated())) );
 //		}else
-		long buyPrice = (long)( price * (1-coeff) );
+		long buyPrice = (long)( price * (1-coeff/2) );
+		
+		
 		//decrease even more the if the good has too many stock
 		if(this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays < this.stockConsolidated){
 //			logln("too much stock, reduce buy price more quickly to prevent banckrupcy of marketplace, and reduce offer");
-			buyPrice = (long)( buyPrice * Math.sqrt((this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays) / this.stockConsolidated) );
+			
+			if((this.nbConsumePerDayConsolidated - this.nbProducePerDayConsolidated) > 0){
+				//TODO: take into consideration the trend of consume - produced with a real algorithm and not this crap of wtf algo
+//				buyPrice = (long)( price * (0.5 - (coeff/2) 
+//						+ (1/((1/Math.sqrt((this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays) / this.stockConsolidated))
+//						*(1+this.nbProducePerDayConsolidated)/(1+this.nbConsumePerDayConsolidated)))/2 ) );
+//				GlobalDefines.plogln(", \"ratioStock\": "+(Math.sqrt((this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays) / this.stockConsolidated)));
+//				GlobalDefines.plogln(", \"ratioProd\": "+((1+this.nbProducePerDayConsolidated)/(1+this.nbConsumePerDayConsolidated)));
+//				GlobalDefines.plogln(", \"ratioFusion\": "+((1/((1/Math.sqrt((this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays) / this.stockConsolidated))
+//						*(1+this.nbProducePerDayConsolidated)/(1+this.nbConsumePerDayConsolidated)))));
+				// reduce the reduction if the big stock is shrinking
+				buyPrice *= (1/((((1/Math.sqrt((this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays) / this.stockConsolidated))-1)
+						*(1+this.nbProducePerDayConsolidated)/(1+this.nbConsumePerDayConsolidated))+1)) ;
+			}else
+				buyPrice *= Math.sqrt((this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays) / this.stockConsolidated);
+//				buyPrice = (long)( price * (0.5 - (coeff/2) + Math.sqrt((this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays) / this.stockConsolidated)/2 ) );
 		}
+		
 		
 		if(prv.getPreviousMoney()<0){
 			//buyPrice = 0; //can't buy, faillite // can't do that, money can't circulate if true.
 			buyPrice *= 0.3;
 		}
 			
+		
+		if(buyPrice> price){
+			System.err.println("error in price sell calculation");
+		}
 		return buyPrice;
 	}
 
@@ -108,6 +141,7 @@ public class ProvinceGoods {
 //			//TODO more linear one
 //			buyPrice = (long)( buyPrice * 2 );
 //			if(coeff>0.9) buyPrice = (long)( buyPrice * 2 );
+//			if(coeff>0.9) buyPrice = (long)( buyPrice * 2 );
 			buyPrice = (long)( price * (1+coeff) );
 		}
 		if(buyPrice<stockPrice){
@@ -117,6 +151,9 @@ public class ProvinceGoods {
 			}else{
 				buyPrice = (buyPrice+stockPrice*9)/10;
 			}
+		}
+		if(price <0){
+			System.err.println("Error in compute buyfrommarket price: coeff:"+coeff+", price:"+price);
 		}
 		return buyPrice;
 	}
@@ -128,6 +165,7 @@ public class ProvinceGoods {
 		nbConsumeThisPeriod = (float) jsonObj.getJsonNumber("nbConso").doubleValue();
 		nbConsumePerDayConsolidated = (float) jsonObj.getJsonNumber("nbConsoPeriod").doubleValue();
 		nbProduceThisPeriod = (float) jsonObj.getJsonNumber("nbProd").doubleValue();
+		nbProducePerDayConsolidated = (float) jsonObj.getJsonNumber("nbProdPeriod").doubleValue();
 		stockConsolidated = (float) jsonObj.getJsonNumber("stockPeriod").doubleValue();
 	}
 	public void save(JsonObjectBuilder jsonOut){
@@ -137,6 +175,7 @@ public class ProvinceGoods {
 		jsonOut.add("nbConso", nbConsumeThisPeriod);
 		jsonOut.add("nbConsoPeriod", nbConsumePerDayConsolidated);
 		jsonOut.add("nbProd", nbProduceThisPeriod);
+		jsonOut.add("nbProdPeriod", nbProducePerDayConsolidated);
 		jsonOut.add("stockPeriod", stockConsolidated);
 	}
 	

@@ -1,5 +1,7 @@
 package remi.ssp.economy;
 
+import remi.ssp.politic.Province;
+
 public interface Job {
 
 	public double getPreviousSalary();
@@ -9,4 +11,6 @@ public interface Job {
 	public String getName(); //industry name, for serialization purpose
 
 	public void addMoney(long investment);
+
+	public float wantToFire(Province prv, long nbEmployed, int nbDays);
 }

@@ -13,6 +13,7 @@ import remi.ssp.economy.Needs.NeedWish;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.politic.Province;
+import static remi.ssp.GlobalDefines.logln;
 
 //TODO: a more complex one: raw from the map, and tools from goods available in market & their tools efficiency (and an upgrade of stock tools)
 
@@ -61,7 +62,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			wish.normalNeed +=  nbItemCanBuy * price /2;
 			wish.luxuryNeed +=  nbItemCanBuy * price /4;
 		}
-//		logln("2indus "+myIndus.getName()+" need "+wish);
+		logln(",\"2indus "+myIndus.getName()+" want\":\" "+wish+"\"");
 		return wish;
 	}
 

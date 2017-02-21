@@ -34,9 +34,10 @@ public abstract class Industry {
 	 */
 	public long needNewWorkers(int nbDays){ return Long.MAX_VALUE; }
 
-	//TODO: canHire? canFire?
+	//TODO: canHire? canFire? canReopen?
+	//public void recruit(province prv, Int2LongMap poptype2chomeur, int nbDays);
 	//TODO: enhance produce to put here the process of thinking to "should i produce, with the current price?" ?
-	//TODO: or paybe produce anyway... it's for "graiculture", that the current model of continuous flow is a bit flaw, and oscillate too much.
+	//TODO: or maybe produce anyway... it's for "graiculture", that the current model of continuous flow is a bit flaw, and oscillate too much.
 
 	public Good getGood() { return createThis; }
 	public Function<ProvinceIndustry,IndustryNeed> getMyNeedsFactory() { return myNeedsFactory; }

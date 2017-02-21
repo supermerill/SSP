@@ -447,10 +447,14 @@ public class FlatCarteV3 implements MapFactory {
 			}
 		}
 		
+		/////////////////////////////////////////////////////////// here testing code to remove.
 		Province centreu = provinces.get(0).get(0);
 		int taillePatcheu = 0;
 		dessine(centreu, taillePatcheu, 10000);
+		Province deux = provinces.get(1).get(0);
+//		dessine(deux, taillePatcheu, 10000);
 		if(true)return;
+		//////////////////////////////////////////////////////////////////////////////////////////
 
 		// on prend des points au pif
 		int ordreGrandeurInit = (int) Math.log1p(nbLigne * nbColonne);

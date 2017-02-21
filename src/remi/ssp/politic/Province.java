@@ -173,10 +173,10 @@ public class Province{
 	public void addMoney(long moneyAdd) { 
 		this.money += moneyAdd; 
 		moneyChangePerDay+=Math.abs(moneyAdd); 
-		if(this.money<0){
-			GlobalDefines.logFlush();
-			System.err.println("Error, now province has no money");
-		}
+//		if(this.money<0){
+//			GlobalDefines.logFlush();
+//			System.err.println("Error, now province has no money");
+//		}
 	}
 	public long getMoneyChangePerDay() { return moneyChangePerDay; }
 	public long getMoneyChangePerDayConsolidated() { return moneyChangePerDayConsolidated; }

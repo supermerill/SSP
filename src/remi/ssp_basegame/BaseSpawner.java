@@ -56,7 +56,7 @@ public class BaseSpawner extends Spawner {
 					//TODO add base techs to civ
 					//TODO add base ideas to civ&prv
 					//add industry to prv
-					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(ElevageIndustry.get()).setProvince(prv).create());
+//					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(ElevageIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(AgricultureIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(HuntingIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(HuntingSportIndustry.get()).setProvince(prv).create());
@@ -80,6 +80,7 @@ public class BaseSpawner extends Spawner {
 					prv.getStock().get(Good.get("meat")).setStock(500);
 					prv.getStock().get(Good.get("crop")).setStock(13500);
 					prv.getStock().get(Good.get("wood_house")).setStock(10);
+					prv.getStock().get(Good.get("wood")).setStock(10000);
 				}
 			}
 		}

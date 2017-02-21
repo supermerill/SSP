@@ -121,6 +121,7 @@ public class Pop {
 		this.cash += moneyAdd; 
 		if(moneyAdd>0) gain += moneyAdd;
 		if(cash<0){
+			GlobalDefines.logFlush();
 			System.err.println("Error, now pop has no money");
 		}
 	}
@@ -137,6 +138,7 @@ public class Pop {
 //		logln("remove "+ (-nb)+" adults from "+nbAdult+", actually "+nbAdult+" = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));
 		nbAdult += nb; 
 		if(nbAdult<0){ 
+			GlobalDefines.logFlush();
 			System.err.println("Error, too low number of mens in pop: "+nbAdult);
 		}
 		if(nb>0){
@@ -184,6 +186,7 @@ public class Pop {
 			nbPopInJobs+=entry.getLongValue();
 		}
 		if(nbPopInJobs != getNbAdult()){
+			GlobalDefines.logFlush();
 			System.err.println("Error: nbAdults="+getNbAdult()+", but i have "+nbPopInJobs+" in jobs");
 		}
 //		logln("pop "+popType+" now has "+nbAdult+" adult = "+(nbMensChomage+nbMensInArmy+nbMensEmployed.values().stream().mapToLong(val -> val).sum()));

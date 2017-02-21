@@ -25,12 +25,14 @@ public class MiddleNeedService extends PopNeed {
 		ProvinceGoods goodStock = prv.getStock().get(serviceGood);
 
 		final long nbMensInPop = myPop.getNbAdult();
-
-		if(totalMoneyThisTurn<=0){
-			System.err.println("ERROR no money for pop:"+totalMoneyThisTurn);
-		}
 		
 		NeedWish wish = new NeedWish(0, 0, 0);
+
+		if(totalMoneyThisTurn<=0){
+			if(nbMensInPop == 1)
+				System.err.println("ERROR no money for pop:" + totalMoneyThisTurn);
+			return wish;
+		}
 		
 		if(nbMensInPop==0){
 			return wish;
