@@ -79,16 +79,18 @@ public class ProvinceIndustry implements Job{
 	@Override
 	public float wantToFire(Province prv, long nbEmployed, int nbDays) {
 		ProvinceGoods prvGood = prv.getStock().get(industry.createThis);
-		
+		//TODO: logs to understand why agri overproductino isn't fired
+//		GlobalDefines.plog(", \"WillfireOverproduction_"+industry.createThis+"_"+nbEmployed+"\":\""+prvGood.getStockConsolidated()+" > "+(prvGood.getNbConsumePerDayConsolidated() * industry.createThis.getOptimalNbDayStock()));
+//		GlobalDefines.plogln(" && "+(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays)+" < "+prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays+"\"");
 		//if too much stock and overproduction
-		if(prvGood.getStockConsolidated() > prvGood.nbProducePerDayConsolidated * industry.createThis.getOptimalNbDayStock()
+		if(prvGood.getStockConsolidated() > prvGood.getNbConsumePerDayConsolidated() * industry.createThis.getOptimalNbDayStock()
 				&& prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays < prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays){
 			//then fire enough to remove overproduction *2 (max 10%)
 			double ratioFire = 1 - (double)(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays) / (double)(prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays);
 			long nbFire = (long) (nbEmployed * ratioFire);
 			nbFire = 1 + nbFire*2;
 			nbFire = Math.min(nbFire, Math.max(1, nbEmployed/10));
-			GlobalDefines.plogln(", \"fireOverproduction_"+industry.createThis+"_"+nbEmployed+"\":"+nbFire);
+//			GlobalDefines.plogln(", \"fireOverproduction_"+industry.createThis+"_"+nbEmployed+"\":"+nbFire);
 			return nbFire;
 		}
 		return 0;

@@ -13,8 +13,9 @@ public class GlobalRandom {
 	static{
 		long time = System.currentTimeMillis();
 		aleat = new GlobalRandom();
-		aleat.rand = new Random();
+//		aleat.rand = new Random();
 //		aleat.rand = new Random(1486746923541l);
+		aleat.rand = new Random(1487782673837l);
 		logln(", \"create Aleat with seed\":"+time);
 	}
 	
@@ -33,17 +34,25 @@ public class GlobalRandom {
 		return rand.nextInt(modulo);
 	}
 
+	
+
+	public long round(double number) {
+		return (long)(number) + getLeftover(number);
+	}
+	
 	/**
 	 * 
 	 * @param leftover between 0 and 1;
-	 * @return 0 or 1
+	 * @return 0 or 1 (always 1 if param is <0)
 	 */
 	public int getLeftover(double leftover) {
 //		System.err.println("leftover: "+leftover);
 		if(leftover>1){
 			leftover = leftover - (long)leftover;
 		}
+		if(leftover==0) return 0;
 		if(leftover<0.2){
+//			System.err.println("(1/leftover) : "+(1/leftover));
 			double inv = Math.max(1,(int)(1/leftover));
 //			System.err.println("rand on : "+(100*inv));
 			int chances = getInt((int)(100*inv), (int)inv);

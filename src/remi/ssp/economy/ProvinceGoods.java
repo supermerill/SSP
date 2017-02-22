@@ -46,17 +46,19 @@ public class ProvinceGoods {
 	public void setNbProduceThisPeriod(float nbProduce) { this.nbProduceThisPeriod = nbProduce; }
 	public float getNbProducePerDayConsolidated() { return nbProducePerDayConsolidated; }
 	public float getStockConsolidated() { return stockConsolidated; }
+	public final static int NBDAYS_CONSOLIDATED = 60;
 	public void updateNbConsumeConsolidated(int nbDays) { //should be called 1 time per tick
-		int nbTicks = Math.max(1, (int) good.getOptimalNbDayStock()*2);
+//		int nbTicks = Math.max(1, (int) good.getOptimalNbDayStock()*2);
+		int nbTicks = NBDAYS_CONSOLIDATED;
 		nbDays = Math.min(nbDays, nbTicks/2);
 		this.nbConsumePerDayConsolidated = 
 				(this.nbConsumePerDayConsolidated*(nbTicks-nbDays)/(float)(nbTicks)) 
-				+ (nbConsumeThisPeriod/(float)(nbTicks+nbDays)); 
+				+ (nbConsumeThisPeriod/(float)(nbTicks)); 
 		this.nbProducePerDayConsolidated = 
 				(this.nbProducePerDayConsolidated*(nbTicks-nbDays)/(float)(nbTicks)) 
-				+ (nbProduceThisPeriod/(float)(nbTicks+nbDays));
-		//stock vary much more quickly, and is not dependent on "days", as it's an instant measure
-		this.stockConsolidated = (this.stockConsolidated*(5)/(float)(6)) + stock/(float)(6); 
+				+ (nbProduceThisPeriod/(float)(nbTicks));
+		//stock (not /days)
+		this.stockConsolidated = (this.stockConsolidated*(NBDAYS_CONSOLIDATED-nbDays)/(float)(NBDAYS_CONSOLIDATED)) + (stock*(nbDays)/(float)(NBDAYS_CONSOLIDATED)); 
 	}
 //	public void addPrice(int price) { this.price += price; }
 	public void addStock(long stock) {
@@ -75,11 +77,12 @@ public class ProvinceGoods {
 	private void addNbConsumeThisPeriod(float nbConsume) { this.nbConsumeThisPeriod += nbConsume; }
 	
 	
-	static float coeffMarketBFR = 0.5f;
+	public static float nbDayMarketBFR = 5f;
 	
 	public long getPriceSellToMarket(int durationInDay){
-		double coeff = Math.max(0.1,prv.getMoneyConsolidated()) / ((1.0+prv.getMoneyChangePerDayConsolidated()*coeffMarketBFR));
+		double coeff = Math.max(0.1,prv.getMoneyConsolidated()) / ((1.0+prv.getMoneyChangePerDayConsolidated()*nbDayMarketBFR));
 		coeff = ( 1f / (1+ coeff*coeff) );
+		
 //		logln("price to sell me :"+( price * (1-coeff) )+" / "+price);
 		//if stock is high and i don't have money, lower this even more
 //		if(prv.getMoney()<0 && stock > 100*getMoneyChangePerDayConsolidated){
@@ -113,7 +116,12 @@ public class ProvinceGoods {
 		
 		if(prv.getPreviousMoney()<0){
 			//buyPrice = 0; //can't buy, faillite // can't do that, money can't circulate if true.
-			buyPrice *= 0.3;
+			double ratio = Math.max(1, -prv.getPreviousMoney()) / (double)(1.0 + prv.getMoneyChangePerDayConsolidated()*nbDayMarketBFR);
+			if(ratio>0.7){
+				buyPrice *= 0.3;
+			}else{
+				buyPrice *= 1-ratio;
+			}
 		}
 			
 		
@@ -125,7 +133,7 @@ public class ProvinceGoods {
 
 	//TODO: use the stock value to compute the price to sell, to avoid selling at loss most of the time.
 	public long getPriceBuyFromMarket(int durationInDay){
-		double coeff = prv.getMoneyConsolidated() / ((1.0+prv.getMoneyChangePerDayConsolidated()*coeffMarketBFR));
+		double coeff = Math.max(0.1,prv.getMoneyConsolidated()) / ((1.0+prv.getMoneyChangePerDayConsolidated()*nbDayMarketBFR));
 		coeff = ( 1f / (1+ coeff*coeff) );
 //		logln("price to buy me :"+( price * (1+coeff) )+" / "+price+"    ("+prv.getMoney()+"/"
 //		+(durationInDay*(1.0+prv.getMoneyChangePerDayConsolidated()))+" = "+(prv.getMoney() / (durationInDay*(1.0+prv.getMoneyChangePerDayConsolidated())))
@@ -134,16 +142,23 @@ public class ProvinceGoods {
 //		long buyPrice = (long)( price * (1+5*coeff) );
 		//don't inflate, as it create a vicious cycle (more pricey -> need more meny -> more pricey)
 		long buyPrice = (long)( price * (1+coeff*0) );
-		if(coeff>0.7){
-			buyPrice = (long)( price * (0.3+coeff) );
-		}
+//		if(coeff>0.7){
+//			buyPrice = (long)( price * (0.3+coeff) );
+//		}
 		if(prv.getMoneyConsolidated()<0){
 //			//TODO more linear one
 //			buyPrice = (long)( buyPrice * 2 );
 //			if(coeff>0.9) buyPrice = (long)( buyPrice * 2 );
 //			if(coeff>0.9) buyPrice = (long)( buyPrice * 2 );
-			buyPrice = (long)( price * (1+coeff) );
+//			System.err.println("!!!<0!! coeff:"+coeff);
+			coeff = Math.max(0.1,-prv.getMoneyConsolidated()) / ((1.0+prv.getMoneyChangePerDayConsolidated()*nbDayMarketBFR));
+			if(coeff>1.5){
+				buyPrice *= 1.5;
+			}else{
+				buyPrice = (long)( price * (1+coeff/3) );
+			}
 		}
+		//don't sell at loss, if possible
 		if(buyPrice<stockPrice){
 			//follow the lower price more if too much stock.
 			if(this.nbConsumePerDayConsolidated * 2 * good.optimalStockNbDays < this.stockConsolidated){

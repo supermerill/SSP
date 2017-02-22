@@ -361,6 +361,7 @@ public class FoodNeed extends PopNeed {
 				nbKiloStock+=entry.getLongValue();
 			}
 			if(nbKiloStock < nbMensInPop * 1.5 * 200){
+				//TODO verify and correct this (hard jump from *1 to 0.5 in fe)
 				float ratio = 0.7f * nbKiloStock / ( nbMensInPop * 1.5f * 200);
 				//reduce ration from 1.5kg to 1kg
 				kgNeeded = (long) (nbMensInPop * nbDays * (0.8f + ratio)); 
@@ -484,128 +485,128 @@ public class FoodNeed extends PopNeed {
 			logln(", \"TRY TO BUY EXTRA SPICEY MEAT\":true");
 //			logResume(nbGoods,"spicey");
 
-			// grab the money back
-			if (nbSurplus >= nbKiloVital) {
-				nbSurplus -= nbKiloVital;
-				newMoney += nbCoinsVital;
-				logln(", \"grabmoneyVital\":" + nbCoinsVital);
-				nbKiloVital = 0;
-				// nbCoinsVital = 0; //not up to date now
-				// grab also from normal
-				if (nbSurplus >= nbKiloNormal) {
-					nbSurplus -= nbKiloNormal;
-					newMoney += nbCoinsNormal;
-					logln(", \"grabmoneyNormal\":" + nbCoinsVital);
-					nbKiloNormal = 0;
-					// nbCoinsNormal = 0;
-
-					for (Good food : luxuryBuyableFood) {
-//						logResume(nbGoods,"luxf");
-						long nb = nbGoods.getLong(food);
-						if (nb == -1)
-							System.err.println("Error in food needs");
-						if (nb == 0)
-							continue; // no food here
-						if (goodPrice.getLong(food) == 0) {
-							System.err.println("Error in food needs: no price for " + food.getName());
-							continue;
-						} // no price here ?
-						if (nbSurplus <= nb) {
-							newMoney -= nbSurplus * goodPrice.getLong(food);
-							logln(", \"spendmoneyLux "+food+"\":" + (nbSurplus * goodPrice.getLong(food)));
-							nbGoods.put(food, nb - nbSurplus);
-							nbSurplus = 0;
-							logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
-							break;
-						} else {
-							newMoney -= nb * goodPrice.getLong(food);
-							logln(", \"spendmoneyLux2 "+food+"\":" + (nb * goodPrice.getLong(food)));
-							nbGoods.put(food, 0);
-							nbSurplus -= nb;
-							logln(", \"finally, iwon't going to buy " + food + "\":true");
-						}
-					}
-				} else {
-//					logResume(nbGoods,"normalf");
-					for (Good food : normalBuyableFood) {
-						long nb = nbGoods.getLong(food);
-						if (nb == -1)
-							System.err.println("Error in food needs");
-						if (nb == 0)
-							continue; // no food here
-						if (goodPrice.getLong(food) == 0) {
-							System.err.println("Error in food needs: no price for " + food.getName());
-							continue;
-						}
-						if (nbSurplus <= nb) {
-							newMoney -= nbSurplus * goodPrice.getLong(food);
-							logln(", \"spendmoneyN "+food+"\":" + (nbSurplus * goodPrice.getLong(food)));
-							nbGoods.put(food, nb - nbSurplus);
-							nbSurplus = 0;
-							logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
-							break;
-						} else {
-							newMoney -= nb * goodPrice.getLong(food);
-							logln(", \"spendmoneyN2 "+food+"\":" + (nb * goodPrice.getLong(food)));
-							nbGoods.put(food, 0);
-							nbSurplus -= nb;
-							logln(", \"finally, iwon't going to buy " + food + "\":true ");
-						}
-					}
-				}
-
-			} else {
-//				logResume(nbGoods,"lowp");
-				for (Good food : lowPriceFood) {
-					long nb = nbGoods.getLong(food);
-					if (nb == -1)
-						System.err.println("Error in food needs");
-					if (nb == 0)
-						continue; // no food here
-					if (goodPrice.getLong(food) == 0) {
-						System.err.println("Error in food needs: no price for " + food.getName());
-						continue;
-					}
-					if (nbSurplus <= nb) {
-						newMoney -= nbSurplus * goodPrice.getLong(food);
-						logln(", \"spendmoneyV "+food+"\":" + (nbSurplus * goodPrice.getLong(food)));
-						nbGoods.put(food, nb - nbSurplus);
-						nbSurplus = 0;
-						logln(", \"finally, iwon't going to buy " + food + "\":true");
-						break;
-					} else {
-						newMoney -= nb * goodPrice.getLong(food);
-						logln(", \"spendmoneyV2 "+food+"\":" + (nb * goodPrice.getLong(food)));
-						nbGoods.put(food, 0);
-						nbSurplus -= nb;
-						logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
-					}
-				}
-				//
-				// //spend money for costly vital food
-				// for(Good food : lowPriceFood){
-				// nbGoods.put(food, 0);
-				// }
-				// int nbKiloVitalObj = nbKiloVital - vitalSurplus;
-				// nbKiloVital = 0;
-				// for(int i=lowPriceFood.size()-1;i>=0;i--){
-				// Good food = lowPriceFood.get(i);
-				// int totalPrice = goodStock.get(food).getStock() *
-				// goodPrice.getInt(food);
-				// if(nbCoins <= totalPrice){
-				// int quantityPicked = nbCoins / goodPrice.getInt(food);
-				// nbKiloVital += quantityPicked;
-				// nbGoods.put(food, quantityPicked);
-				// nbCoins = 0 ;
-				// break;
-				// }else{
-				// nbCoins -= totalPrice;
-				// int quantityPicked = goodStock.get(food).getStock();
-				// nbKiloVital += goodStock.get(food).getStock();
-				// nbGoods.put(food, quantityPicked);
-				// }
-				// }
-			}
+			// grab the money back -> to redo
+//			if (nbSurplus >= nbKiloVital) {
+//				nbSurplus -= nbKiloVital;
+//				newMoney += nbCoinsVital;
+//				logln(", \"grabmoneyVital\":" + nbCoinsVital);
+//				nbKiloVital = 0;
+//				// nbCoinsVital = 0; //not up to date now
+//				// grab also from normal
+//				if (nbSurplus >= nbKiloNormal) {
+//					nbSurplus -= nbKiloNormal;
+//					newMoney += nbCoinsNormal;
+//					logln(", \"grabmoneyNormal\":" + nbCoinsVital);
+//					nbKiloNormal = 0;
+//					// nbCoinsNormal = 0;
+//
+//					for (Good food : luxuryBuyableFood) {
+////						logResume(nbGoods,"luxf");
+//						long nb = nbGoods.getLong(food);
+//						if (nb == -1)
+//							System.err.println("Error in food needs");
+//						if (nb == 0)
+//							continue; // no food here
+//						if (goodPrice.getLong(food) == 0) {
+//							System.err.println("Error in food needs: no price for " + food.getName());
+//							continue;
+//						} // no price here ?
+//						if (nbSurplus <= nb) {
+//							newMoney -= nbSurplus * goodPrice.getLong(food);
+//							logln(", \"spendmoneyLux "+food+"\":" + (nbSurplus * goodPrice.getLong(food)));
+//							nbGoods.put(food, nb - nbSurplus);
+//							nbSurplus = 0;
+//							logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
+//							break;
+//						} else {
+//							newMoney -= nb * goodPrice.getLong(food);
+//							logln(", \"spendmoneyLux2 "+food+"\":" + (nb * goodPrice.getLong(food)));
+//							nbGoods.put(food, 0);
+//							nbSurplus -= nb;
+//							logln(", \"finally, iwon't going to buy " + food + "\":true");
+//						}
+//					}
+//				} else {
+////					logResume(nbGoods,"normalf");
+//					for (Good food : normalBuyableFood) {
+//						long nb = nbGoods.getLong(food);
+//						if (nb == -1)
+//							System.err.println("Error in food needs");
+//						if (nb == 0)
+//							continue; // no food here
+//						if (goodPrice.getLong(food) == 0) {
+//							System.err.println("Error in food needs: no price for " + food.getName());
+//							continue;
+//						}
+//						if (nbSurplus <= nb) {
+//							newMoney -= nbSurplus * goodPrice.getLong(food);
+//							logln(", \"spendmoneyN "+food+"\":" + (nbSurplus * goodPrice.getLong(food)));
+//							nbGoods.put(food, nb - nbSurplus);
+//							nbSurplus = 0;
+//							logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
+//							break;
+//						} else {
+//							newMoney -= nb * goodPrice.getLong(food);
+//							logln(", \"spendmoneyN2 "+food+"\":" + (nb * goodPrice.getLong(food)));
+//							nbGoods.put(food, 0);
+//							nbSurplus -= nb;
+//							logln(", \"finally, iwon't going to buy " + food + "\":true ");
+//						}
+//					}
+//				}
+//
+//			} else {
+////				logResume(nbGoods,"lowp");
+//				for (Good food : lowPriceFood) {
+//					final long nb = nbGoods.getLong(food);
+//					if (nb == -1)
+//						System.err.println("Error in food needs");
+//					if (nb == 0)
+//						continue; // no food here
+//					if (goodPrice.getLong(food) == 0) {
+//						System.err.println("Error in food needs: no price for " + food.getName());
+//						continue;
+//					}
+//					if (nbSurplus <= nb) {
+//						newMoney -= nbSurplus * goodPrice.getLong(food);
+//						logln(", \"spendmoneyV "+food+"\":" + (nbSurplus * goodPrice.getLong(food)));
+//						nbGoods.put(food, nb - nbSurplus);
+//						nbSurplus = 0;
+//						logln(", \"finally, iwon't going to buy " + food + "\":true");
+//						break;
+//					} else {
+//						newMoney -= nb * goodPrice.getLong(food);
+//						logln(", \"spendmoneyV2 "+food+"\":" + (nb * goodPrice.getLong(food)));
+//						nbGoods.put(food, 0);
+//						nbSurplus -= nb;
+//						logln(", \"finally, iwon't going to buy more than " + (nb - nbSurplus) + " of " + food + "\":true ");
+//					}
+//				}
+//				//
+//				// //spend money for costly vital food
+//				// for(Good food : lowPriceFood){
+//				// nbGoods.put(food, 0);
+//				// }
+//				// int nbKiloVitalObj = nbKiloVital - vitalSurplus;
+//				// nbKiloVital = 0;
+//				// for(int i=lowPriceFood.size()-1;i>=0;i--){
+//				// Good food = lowPriceFood.get(i);
+//				// int totalPrice = goodStock.get(food).getStock() *
+//				// goodPrice.getInt(food);
+//				// if(nbCoins <= totalPrice){
+//				// int quantityPicked = nbCoins / goodPrice.getInt(food);
+//				// nbKiloVital += quantityPicked;
+//				// nbGoods.put(food, quantityPicked);
+//				// nbCoins = 0 ;
+//				// break;
+//				// }else{
+//				// nbCoins -= totalPrice;
+//				// int quantityPicked = goodStock.get(food).getStock();
+//				// nbKiloVital += goodStock.get(food).getStock();
+//				// nbGoods.put(food, quantityPicked);
+//				// }
+//				// }
+//			}
 //			logResume(nbGoods,"befSpend");
 
 			// Use this money to buy 10 chunk of random food.
@@ -647,6 +648,9 @@ public class FoodNeed extends PopNeed {
 			if (maxMoneyToSpend.getMoney() < moneyUsed) {
 				cost = Math.max(0, maxMoneyToSpend.getMoney() - moneyUsed);
 				nbFood = (long)(cost / goodPrice.getLong(food));
+				if(cost < nbFood*goodPrice.getLong(food)){
+					
+				}
 			}
 			moneyUsed += cost;
 			// goodStock.get(food).addStock( -nbFood);

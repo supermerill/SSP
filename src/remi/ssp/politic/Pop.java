@@ -117,9 +117,14 @@ public class Pop {
 	protected long gain=0;
 	public long getGain() { return gain; }
 	public void resetGain() { this.gain = 0; }
+	protected long spend=0;
+	public long getSpend() { return spend; }
+	public void resetSpend() { this.spend = 0; }
 	public void addMoney(long moneyAdd) { 
+		GlobalDefines.log(",\"popMC\":"+GlobalDefines.fm(moneyAdd));
 		this.cash += moneyAdd; 
 		if(moneyAdd>0) gain += moneyAdd;
+		if(moneyAdd<0) spend -= moneyAdd;
 		if(cash<0){
 			GlobalDefines.logFlush();
 			System.err.println("Error, now pop has no money");

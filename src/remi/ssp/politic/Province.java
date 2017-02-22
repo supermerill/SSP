@@ -190,8 +190,8 @@ public class Province{
 	public float getRelief() { return relief; }
 	public boolean isCoastal(){ return plages>0; }
 
-	public void resetMoneyComputeNewTurn() { 
-		moneyChangePerDayConsolidated = (moneyChangePerDayConsolidated*5+this.moneyChangePerDay)/6 ;
+	public void resetMoneyComputeNewTurn(int nbDays) { 
+		moneyChangePerDayConsolidated = (long)(moneyChangePerDayConsolidated*5+ (this.moneyChangePerDay/(double)nbDays) )/6 ;
 		this.moneyChangePerDay = 0; 
 		previousMoney = money; 
 		moneyConsolidated = (moneyConsolidated*5+this.previousMoney)/6 ;
