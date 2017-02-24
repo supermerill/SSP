@@ -18,7 +18,7 @@ import remi.ssp.politic.Province;
 public class ElevageIndustry extends Industry {
 
 	static protected ElevageIndustry ptr;
-	public static void load(){ ptr = new ElevageIndustry(); }
+	public static void load(){ ptr = new ElevageIndustry(); Industry.put("elevage", ptr); }
 	public static ElevageIndustry get(){ return ptr; }
 	
 	private ElevageIndustry(){

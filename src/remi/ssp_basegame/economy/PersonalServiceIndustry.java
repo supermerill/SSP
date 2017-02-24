@@ -21,7 +21,7 @@ import remi.ssp.politic.Province;
 public class PersonalServiceIndustry  extends Industry {
 
 	static protected PersonalServiceIndustry ptr;
-	public static void load(){ ptr = new PersonalServiceIndustry(); }
+	public static void load(){ ptr = new PersonalServiceIndustry(); Industry.put("service", ptr); }
 	public static PersonalServiceIndustry get(){ return ptr; }
 
 	private Good tools;

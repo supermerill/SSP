@@ -10,7 +10,9 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.GlobalDefines;
+import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
+import remi.ssp.utils.LongInterval;
 
 public class ProvinceIndustry implements Job{
 	
@@ -77,23 +79,13 @@ public class ProvinceIndustry implements Job{
 	
 
 	@Override
-	public float wantToFire(Province prv, long nbEmployed, int nbDays) {
-		ProvinceGoods prvGood = prv.getStock().get(industry.createThis);
-		//TODO: logs to understand why agri overproductino isn't fired
-		GlobalDefines.log(", \"WillfireOverproduction_"+industry.createThis+"_"+nbEmployed+"\":\""+prvGood.getStockConsolidated()+" > "+(prvGood.getNbConsumePerDayConsolidated() * industry.createThis.getOptimalNbDayStock()));
-		GlobalDefines.logln(" && "+(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays)+" < "+prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays+"\"");
-		//if too much stock and overproduction
-		if(prvGood.getStockConsolidated() > prvGood.getNbConsumePerDayConsolidated() * industry.createThis.getOptimalNbDayStock()
-				&& prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays < prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays){
-			//then fire enough to remove overproduction *2 (max 10%)
-			double ratioFire = 1 - (double)(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays) / (double)(prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays);
-			long nbFire = (long) (nbEmployed * ratioFire);
-			nbFire = 1 + nbFire*2;
-			nbFire = Math.min(nbFire, Math.max(1, nbEmployed/10));
-			GlobalDefines.logln(", \"fireOverproduction_"+industry.createThis+"_"+nbEmployed+"\":"+nbFire);
-			return nbFire;
-		}
-		return 0;
+	public LongInterval needFire(LongInterval toReturn, Province prv, Pop pop, int nbDays) {
+		return industry.needFire(toReturn, this, pop, nbDays);
+	}
+
+	@Override
+	public LongInterval needHire(LongInterval toReturn, Province prv, Pop pop, int nbDays) {
+		return industry.needHire(toReturn, this, pop, nbDays);
 	}
 	
 	

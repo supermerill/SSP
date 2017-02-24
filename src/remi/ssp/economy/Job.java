@@ -1,6 +1,8 @@
 package remi.ssp.economy;
 
+import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
+import remi.ssp.utils.LongInterval;
 
 public interface Job {
 
@@ -12,5 +14,6 @@ public interface Job {
 
 	public void addMoney(long investment);
 
-	public float wantToFire(Province prv, long nbEmployed, int nbDays);
+	public LongInterval needFire(LongInterval toReturn, Province prv, Pop pop, int nbDays);
+	public LongInterval needHire(LongInterval toReturn, Province prv, Pop pop, int nbDays);
 }

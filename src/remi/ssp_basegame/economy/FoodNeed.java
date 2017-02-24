@@ -45,6 +45,9 @@ public class FoodNeed extends PopNeed {
 		super(pop);
 	}
 
+	
+	//TODO: change from vital => crap food, lux => lux food  to vit+n+l => crap food & better if possible
+	// why? to be able to let some money slip to other need if enough food stock.
 	@Override
 	public NeedWish moneyNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
@@ -78,6 +81,7 @@ public class FoodNeed extends PopNeed {
 		List<Good> normalFood = new ArrayList<>();
 		List<Good> luxuryFood = new ArrayList<>();
 		Object2LongMap<Good> goodPrice = new Object2LongOpenHashMap<>();
+		long myStock = 0;
 		for (Entry<Good, ProvinceGoods> entry : goodStock.entrySet()) {
 			// logln("there are a stock of
 			// "+entry.getValue().getStock()+" of "+entry.getKey().getName()+"
@@ -97,15 +101,17 @@ public class FoodNeed extends PopNeed {
 				if (good.getDesirability() > 5) {
 					luxuryFood.add(good);
 				}
+				myStock += myPop.getStock().getLong(good);
 			}
 		}
+		
 		// NOTE: we don't use the joule value yet, we assume a joule value of
 		// 16000 kJ per kilo of food for everything
 		// sort by price (lower first)
 		lowPriceFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
-		kgNeeded = maxKgNeeded;
+		kgNeeded = Math.max(0, maxKgNeeded);
 		for (Good food : lowPriceFood) {
-			 log(", \"i wish buy crap" + food.getName() + "\":{\"price\":" +goodPrice.getLong(food));
+			 log(", \"i wish buy crap " + food.getName() + "\":{\"price\":" +goodPrice.getLong(food));
 			if (kgNeeded <= goodStock.get(food).getStock()) {
 				 logln(", \"kgNeeded\": "+kgNeeded + ", \"stock\":" + goodStock.get(food).getStock()+"}");
 				wish.vitalNeed += kgNeeded * goodPrice.getLong(food);
@@ -131,8 +137,9 @@ public class FoodNeed extends PopNeed {
 
 		// sort by price (lower first)
 		normalFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
-		kgNeeded = maxKgNeeded;
+		kgNeeded = maxKgNeeded /2;
 		for (Good food : normalFood) {
+			 log(", \"i wish buy " + food.getName() + "\":{\"price\":" +goodPrice.getLong(food)+"}");
 			if (kgNeeded <= goodStock.get(food).getStock()) {
 				wish.normalNeed += kgNeeded * goodPrice.getLong(food);
 				kgNeeded = 0;
@@ -147,6 +154,7 @@ public class FoodNeed extends PopNeed {
 		luxuryFood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
 		kgNeeded = maxKgNeeded;
 		for (Good food : luxuryFood) {
+			 log(", \"i wish buy lux " + food.getName() + "\":{\"price\":" +goodPrice.getLong(food)+"}");
 			if (kgNeeded <= goodStock.get(food).getStock()) {
 				wish.luxuryNeed += kgNeeded * goodPrice.getLong(food);
 				kgNeeded = 0;
@@ -157,9 +165,11 @@ public class FoodNeed extends PopNeed {
 			}
 		}
 
+		//logln(", \"food wish bef\":\"" + wish + "\"");
 		// compute extra money needed
 		wish.normalNeed = Math.max(wish.normalNeed - wish.vitalNeed, 0);
 		wish.luxuryNeed = Math.max(wish.luxuryNeed - (wish.vitalNeed + wish.normalNeed), wish.vitalNeed / 2);
+		
 
 		logln(", \"food wish\":\"" + wish + "\"}");
 
@@ -340,6 +350,8 @@ public class FoodNeed extends PopNeed {
 //		logResume(nbGoods,"afterinit");
 
 		// if theere are not a global shortage, sort out the possibilities.
+		long nbCanEat = (nbKiloVital + nbKiloNormal + nbKiloLuxe);
+		long nbShouldBeEat = (nbKiloVital + nbKiloNormal + nbKiloLuxe);
 		long nbSurplus = (nbKiloVital + nbKiloNormal + nbKiloLuxe) - kgNeeded;
 		logln(", \"nbMens\":" + nbMensInPop + ", \"nbKgVital\":" + nbKiloVital + ", \"nbKiloNormal\":" + nbKiloNormal + ", \"nbKiloLuxe\":" + nbKiloLuxe
 				+ ", \"kgFoodNeeded\":" + kgNeeded + ", \"nbSurplus\":" + (nbKiloVital + nbKiloNormal + nbKiloLuxe - kgNeeded));
@@ -360,14 +372,17 @@ public class FoodNeed extends PopNeed {
 			for (it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<Good> entry : currentPopStock.object2LongEntrySet()) {
 				nbKiloStock+=entry.getLongValue();
 			}
-			if(nbKiloStock < nbMensInPop * 1.5 * 200){
-				//TODO verify and correct this (hard jump from *1 to 0.5 in fe)
+			if(0.7f * nbKiloStock < nbMensInPop * 1.5 * 200){
 				float ratio = 0.7f * nbKiloStock / ( nbMensInPop * 1.5f * 200);
+				GlobalDefines.plog(", \"nbKiloStock\":"+nbKiloStock );
+				GlobalDefines.plog(", \" ( nbMensInPop * 1.5f * 200)\":"+ ( nbMensInPop * 1.5f * 200));
+				GlobalDefines.plog(", \"ratio\":"+ratio );
 				//reduce ration from 1.5kg to 1kg
 				kgNeeded = (long) (nbMensInPop * nbDays * (0.8f + ratio)); 
 				nbSurplus = (nbKiloVital + nbKiloNormal + nbKiloLuxe) - kgNeeded;
 				log(", \"rationnement\": true" );
-				myPop.setFoodEffectiveness((float)0.3f + ratio);
+				final double kiloPerDayPerMen = (nbShouldBeEat) / (double) (nbMensInPop * nbDays);
+				myPop.setFoodEffectiveness(Math.min(1, (float) (kiloPerDayPerMen - 0.5)));
 				logln(", \"changeFoodEffectiveness\": " + myPop.getFoodEffectiveness());
 			}
 		}
@@ -384,21 +399,24 @@ public class FoodNeed extends PopNeed {
 			for (it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<Good> entry : currentPopStock.object2LongEntrySet()) {
 				Good food = entry.getKey();
 				long currentStock = entry.getLongValue();
-				log(", \"Stock of " + food + "\" : " + currentStock);
+				logln(", \"Stock of " + food + "\" : " + currentStock);
 				if (currentStock > 0) {
 					if (currentStock > -nbSurplus) {
 						currentPopStock.put(food, currentStock + nbSurplus);
-						kgNeeded -= nbSurplus;
+						kgNeeded += nbSurplus;
+						nbShouldBeEat -= nbSurplus;
 						logln(", \"Use stock of " + food + "\" : " + nbSurplus);
 						nbSurplus = 0;
 					} else {
 						currentPopStock.put(food, 0);
 						nbSurplus += currentStock;
 						kgNeeded -= currentStock;
+						nbShouldBeEat += currentStock;
 						logln(", \"Use All stock of " + food + "\" : " + currentStock);
 					}
 				}
 			}
+			
 			
 
 			if (nbSurplus < 0) {
@@ -420,22 +438,27 @@ public class FoodNeed extends PopNeed {
 				// it's not efficient)
 				// 1.5kg par personne par jour is optimal, less than 0.5 and
 				// people began to die.
-				final double kiloPerDayPerMen = (kgNeeded + nbSurplus) / (double) (nbMensInPop * nbDays);
+				final double kiloPerDayPerMen = (nbShouldBeEat) / (double) (nbMensInPop * nbDays);
+				if(kiloPerDayPerMen <0){
+					System.err.println("error in computation for kiloPerDayPerMen");
+				}
+				
 				// int nbPopNoFood = (int) (nbSurplus / (-0.5f * nbDays));
 				// int nbPopToDie = (int) Math.min(Integer.MAX_VALUE,
 				// Math.min(nbMensInPop, (int) (nbPopNoFood * 0.5)));
 				if (kiloPerDayPerMen < 0.5) {
-					long nbPopNoFood = nbMensInPop - (long) (kiloPerDayPerMen * nbMensInPop / 0.5);
-					logln(", \"famine!\":\" (" + nbPopNoFood + "+" + (nbKiloVital + nbKiloNormal + nbKiloLuxe) + "<=" + kgNeeded + " => " + prv.rationReserve
-							+ ")" + nbMensInPop + " , we need " + (-nbSurplus) + " kg of food\"");
+					long nbPopNoFood = (long) ((0.5-kiloPerDayPerMen) * nbMensInPop); 
+					GlobalDefines.plogln(", \"famine!\":\" (" + nbPopNoFood + " may die because " + (nbKiloVital + nbKiloNormal + nbKiloLuxe) + "<=" + kgNeeded +") we are " 
+					+ nbMensInPop + " , we need " + (-nbSurplus) + " kg more of food (kiloPerDayPerMen="+GlobalDefines.f(kiloPerDayPerMen)+"\"");
 
 					// utilisation loi de poisson avec 30 days half-life.
-					long nbPopToDie = (long) (nbPopNoFood * Math.exp(-0.69 * nbDays / 30d));
-					log(", \"poisson\":" + GlobalDefines.f(Math.exp(-0.69 * nbDays / 30d)));
+//					long nbPopToDie = (long) (nbPopNoFood * Math.exp(-0.69 * nbDays / 30d));
+//					log(", \"poisson\":" + GlobalDefines.f(Math.exp(-0.69 * nbDays / 30d)));
+					long nbPopToDie = GlobalRandom.aleat.poissonLaw(Math.min(Integer.MAX_VALUE,(int)nbMensInPop), (int)(nbPopNoFood/2), nbDays / 30d);
 					log(", \"nbPopToDie(esp)\":" + nbPopToDie);
 
 					// create some variance from my ass
-					nbPopToDie = nbPopToDie / 2 + GlobalRandom.aleat.getInt((int) (nbPopToDie), (int) (nbSurplus));
+//					nbPopToDie = nbPopToDie / 2 + GlobalRandom.aleat.getInt((int) (nbPopToDie), (int) (nbSurplus));
 
 					nbPopToDie = (long) Math.min(Integer.MAX_VALUE, Math.min(nbMensInPop, nbPopToDie));
 					log(", \"nbPopToDie(with some rand)\":" + nbPopToDie);
@@ -449,10 +472,12 @@ public class FoodNeed extends PopNeed {
 					// TODO: remove child first, elder second
 					// }
 
+					
+					//TODO: take into account the ratio elder/other and children/adult and not assume it's 50/50 and 33/66
 					long nbElderDie = myPop.getNbElder()/2;
 					nbElderDie = Math.min(myPop.getNbElder(), GlobalRandom.aleat.normalLaw(Math.min(nbElderDie, nbPopToDie/3)));
 					long nbChildDie = myPop.getNbChildren()/2;
-					nbChildDie = Math.min(myPop.getNbChildren(), GlobalRandom.aleat.normalLaw(Math.min(nbChildDie, (nbPopToDie-nbElderDie)/2)));
+					nbChildDie = Math.min(myPop.getNbChildren(), GlobalRandom.aleat.normalLaw(Math.min(nbChildDie, ((nbPopToDie-nbElderDie)*3)/2)));
 					long nbAdultDie = nbPopToDie - nbElderDie - nbChildDie;
 					if(nbAdultDie>myPop.getNbAdult()){
 						//too much dies, be extrem!
@@ -468,16 +493,20 @@ public class FoodNeed extends PopNeed {
 					myPop.addChildren(-nbChildDie);
 					myPop.addAdult(-nbAdultDie);
 					myPop.addElder(-nbElderDie);
-					log(",\"nbChildDie\":"+nbChildDie+",\"nbAdultDie\":"+nbAdultDie+",\"nbElderDie\":"+nbElderDie);
-					logln(", \"now\": \"" + nbMensInPop + " (" + myPop.getNbAdult() + ") mens\"");
+					GlobalDefines.plog(",\"nbChildDie\":"+nbChildDie+",\"nbAdultDie\":"+nbAdultDie+",\"nbElderDie\":"+nbElderDie);
+					GlobalDefines.plogln(", \"now\": \"" + nbMensInPop + " (" + myPop.getNbAdult() + ") mens\"");
 					myPop.setFoodEffectiveness(0);
 				} else {
 					// reduce effectiveness
-					logln(", \"can eat kg/menday\": " + kiloPerDayPerMen);
+					logln(", \"can eat kg/menday\": " + kiloPerDayPerMen+", \""+kgNeeded
+							+" ("+nbShouldBeEat+") / "+(double) (nbMensInPop * nbDays)+"\":true");
 					myPop.setFoodEffectiveness(Math.min(1, (float) (kiloPerDayPerMen - 0.5)));
 					logln(", \"changeFoodEffectiveness\": " + myPop.getFoodEffectiveness());
 				}
 
+			}else{
+				final double kiloPerDayPerMen = (nbShouldBeEat) / (double) (nbMensInPop * nbDays);
+				myPop.setFoodEffectiveness(Math.min(1, (float) (kiloPerDayPerMen - 0.5)));
 			}
 		} else {
 			// TODO: add a bit of random
@@ -672,6 +701,8 @@ public class FoodNeed extends PopNeed {
 			for (Good food : allBuyableFood) {
 				reserveNeeded -= currentPopStock.getLong(food);
 			}
+			
+			//TODO: if stock >300days, choose food in random instead to be rational
 
 			if (reserveNeeded > 0) {
 				// from the less degradable to the most one (and do not pick all

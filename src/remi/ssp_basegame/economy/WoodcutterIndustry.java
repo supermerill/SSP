@@ -12,7 +12,7 @@ import remi.ssp.politic.Province;
 public class WoodcutterIndustry extends Industry {
 
 	static protected WoodcutterIndustry ptr;
-	public static void load(){ ptr = new WoodcutterIndustry(); }
+	public static void load(){ ptr = new WoodcutterIndustry(); Industry.put("wood", ptr);}
 	public static WoodcutterIndustry get(){ return ptr; }
 
 	protected WoodcutterIndustry() {

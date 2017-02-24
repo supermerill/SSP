@@ -11,8 +11,10 @@ import javax.json.JsonObjectBuilder;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
+import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 import remi.ssp.utils.ComparatorValueDesc;
+import remi.ssp.utils.LongInterval;
 
 public class ProvinceCommerce implements Job{
 
@@ -94,9 +96,14 @@ public class ProvinceCommerce implements Job{
 		jsonOut.add("stock", array);
 	}
 	@Override
-	public float wantToFire(Province prv, long nbEmployed, int nbDays) {
+	public LongInterval needFire(LongInterval toReturn, Province prv, Pop pop, int nbDays) {
 		// TODO Auto-generated method stub
-		return 0;
+		return toReturn;
+	}
+	@Override
+	public LongInterval needHire(LongInterval toReturn, Province prv, Pop pop, int nbDays) {
+		// TODO Auto-generated method stub
+		return toReturn;
 	}
 
 }

@@ -14,7 +14,7 @@ import remi.ssp.politic.Province;
 public class AgricultureIndustry extends Industry {
 
 	static protected AgricultureIndustry ptr;
-	public static void load(){ ptr = new AgricultureIndustry(); }
+	public static void load(){ ptr = new AgricultureIndustry(); Industry.put("agriculture", ptr);}
 	public static AgricultureIndustry get(){ return ptr; }
 
 	private AgricultureIndustry(){
@@ -27,6 +27,8 @@ public class AgricultureIndustry extends Industry {
 		return (BasicIndustryNeeds)indus.getNeed();
 	}
 	
+	public float testefficiency = 1;
+	
 	@Override
 	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
 		Province prv = indus.getProvince();
@@ -34,7 +36,7 @@ public class AgricultureIndustry extends Industry {
 		//TODO: use tools
 		//TODO: evolution de la surface agricole prv.surfaceSol*prv.pourcentChamps*prv.champsRendement
 		//TODO evolution de la surface cultivable par personne
-		int production = 0;
+		long production = 0;
 		int nbChamps = (int) ( (prv.pourcentChamps * prv.surface) * 10); // 10 hectare per argi
 		logln(",\"agrinbChamps\":"+nbChamps+", \"pourcentChamps\":"+prv.pourcentChamps);
 		for(Pop pop : pops){
@@ -48,7 +50,7 @@ public class AgricultureIndustry extends Industry {
 		
 
 		//produce
-		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
+		long intproduction = getNeed(indus).useGoodsAndTools(indus, (long)(production * testefficiency), durationInDay);
 		logln(", \"prod fianle with tools\":"+intproduction);
 	
 		//do not do that, economyplugin will call it after caling this

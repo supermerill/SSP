@@ -4,8 +4,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.function.Function;
 
+import remi.ssp.GlobalDefines;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
+import remi.ssp.utils.LongInterval;
 
 // unlocked by technologies
 // then added to your pool of industry.
@@ -28,11 +30,49 @@ public abstract class Industry {
 	// !!! you must update setRawGoodsCost (to be able compute the marge, the salary and the savings)
 	public abstract long produce(ProvinceIndustry indus, Collection<Pop> pop, int durationInDay);
 	
+	
+	
 	/**
-	 * Rediine this method to limit the number of people that can be hire here.
+	 * Redefine this method to limit the number of people that can be hire here.
+	 * This implementation does nothing interesting.
+	 * @param pop 
 	 * @return number of maximum new workers this industry can accept this period
+	 * @Deprecated not used yet (i think)
 	 */
-	public long needNewWorkers(int nbDays){ return Long.MAX_VALUE; }
+	public LongInterval needHire(LongInterval toReturn, ProvinceIndustry provinceIndustry, Pop pop, int nbDays)
+	{ if(toReturn==null)toReturn=new LongInterval(0, 0); return toReturn.set(DEF_INTER); }
+	
+
+	/**
+	 * Redefine this method to set a minimum number of people that should be fired here.
+	 * This base implementation will fire a minimum number of people if it detect an overproduction.
+	 * @param provinceIndustry 
+	 * @return number of minimum workers this industry should fire
+	 */
+	public LongInterval needFire(LongInterval toReturn, ProvinceIndustry indus, Pop pop, int nbDays)
+	{
+		if(toReturn==null)toReturn=new LongInterval(0, 0);
+		toReturn.set(DEF_INTER); 
+		Province prv = indus.getProvince();
+		long nbEmployed = pop.getNbMensEmployed(indus);
+		ProvinceGoods prvGood = prv.getStock().get(createThis);
+		//TODO: logs to understand why agri overproductino isn't fired
+		GlobalDefines.log(", \"WillfireOverproduction_"+createThis+"_"+nbEmployed+"\":\""+prvGood.getStockConsolidated()
+		+" > "+(prvGood.getNbConsumePerDayConsolidated() * createThis.getOptimalNbDayStock()));
+		GlobalDefines.logln(" && "+(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays)+" < "+prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays+"\"");
+		//if too much stock and overproduction
+		if(prvGood.getStockConsolidated() > prvGood.getNbConsumePerDayConsolidated() * createThis.getOptimalNbDayStock()
+				&& prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays < prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays){
+			//then fire enough to remove overproduction *2 (max 10%)
+			double ratioFire = 1 - (double)(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays) / (double)(prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays);
+			long nbFire = (long) (nbEmployed * ratioFire);
+			nbFire = 1 + nbFire*2;
+			nbFire = Math.min(nbFire, Math.max(1, nbEmployed/10));
+			GlobalDefines.logln(", \"fireOverproduction_"+createThis+"_"+nbEmployed+"\":"+nbFire);
+			return toReturn.set(nbFire, Long.MAX_VALUE);
+		}
+		return toReturn;
+	}
 
 	//TODO: canHire? canFire? canReopen?
 	//public void recruit(province prv, Int2LongMap poptype2chomeur, int nbDays);
@@ -52,4 +92,6 @@ public abstract class Industry {
 		return price;
 	}
 	
+	
+	protected static final LongInterval DEF_INTER = new LongInterval(0, Long.MAX_VALUE);
 }

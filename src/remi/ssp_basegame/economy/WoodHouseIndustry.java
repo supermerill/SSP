@@ -15,6 +15,7 @@ public class WoodHouseIndustry extends Industry {
 	public static void load(){
 		tools = Good.get("wood_goods");
 		ptr = new WoodHouseIndustry();
+		Industry.put("wood_house", ptr);
 	}
 	public static WoodHouseIndustry get(){ return ptr; }
 

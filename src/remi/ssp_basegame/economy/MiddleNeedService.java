@@ -43,6 +43,11 @@ public class MiddleNeedService extends PopNeed {
 		long price = goodStock.getPriceBuyFromMarket(nbDays);
 		
 		wish.luxuryNeed += Math.min(stock, nbMensInPop * nbDays * (myPop.getPopType()+1)) * price;
+		//use at least 10% of our budget for this (can be changed by tech?
+		if(wish.luxuryNeed < myPop.getMoney()/10){
+			wish.luxuryNeed = myPop.getMoney()/10;
+		}
+		
 		
 		return wish;
 	}

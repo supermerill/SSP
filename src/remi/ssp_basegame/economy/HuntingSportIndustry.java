@@ -15,7 +15,7 @@ import remi.ssp.politic.Province;
 public class HuntingSportIndustry extends Industry {
 
 	static protected HuntingSportIndustry ptr;
-	public static void load(){ ptr = new HuntingSportIndustry(); }
+	public static void load(){ ptr = new HuntingSportIndustry(); Industry.put("bighunting", ptr); }
 	public static HuntingSportIndustry get(){ return ptr; }
 
 	protected HuntingSportIndustry() {

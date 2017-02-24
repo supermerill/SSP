@@ -42,7 +42,7 @@ public class HouseNeed extends PopNeed{
 			lowPriceHouse.add(house);
 			nbHousesNeeded -= myPop.getStock().getLong(house);
 			goodPrice.put(house, goodStock.get(house).getPriceBuyFromMarket(nbDays));
-			logln("price of "+house+" is "+goodPrice.getLong(house));
+			logln(", \"price of "+house+" is\":"+goodPrice.getLong(house));
 		}
 		
 		//vital: at least the worst house for every houseless
@@ -51,7 +51,7 @@ public class HouseNeed extends PopNeed{
 			ListIterator<Good> it = lowPriceHouse.listIterator();
 			while(it.hasNext()){
 				Good house = it.next();
-				logln("check "+house);
+				logln(", \"check\":\""+house+"\"");
 				if(nbHousesNeeded <= goodStock.get(house).getStock()){
 					wish.vitalNeed += nbHousesNeeded * goodPrice.getLong(house);
 					nbHousesNeeded = 0;
@@ -60,14 +60,14 @@ public class HouseNeed extends PopNeed{
 					wish.vitalNeed += goodStock.get(house).getStock() * goodPrice.getLong(house);
 					nbHousesNeeded -= goodStock.get(house).getStock();
 					it.remove();
-					logln("i can buy "+goodStock.get(house).getStock());
+					logln(", \"i can buy\":"+goodStock.get(house).getStock());
 				}
 			}
 			if(nbHousesNeeded > 0){
 				//manque => certain peuvent mourir de froid et/ou maladie
 				wish.normalNeed = 0;
 				wish.luxuryNeed = wish.vitalNeed;
-				logln("--- house need? not enough ---- "+wish);
+				logln(", \"--- house need? not enough ----\":\""+wish+"\"");
 				return wish;
 			}
 		}
@@ -83,7 +83,7 @@ public class HouseNeed extends PopNeed{
 		//luxury: upgrade some house (up to lux). Do not consume too much money
 		wish.luxuryNeed = (long) (moneyObj * 0.5);
 
-		logln("--- house need? ---- "+wish);
+		logln(", \"--- house need? ----\":\""+wish+"\"");
 		return wish;
 	}
 

@@ -37,7 +37,7 @@ public class RichNeedService extends PopNeed {
 		}
 		//i need to have at least a secretary
 		
-		//i wish i have the money for at least one man-hour of personal service each day
+		//i wish i have the money for at least one maid
 		long stock = goodStock.getStock();
 		long price = goodStock.getPriceBuyFromMarket(nbDays);
 		

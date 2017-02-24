@@ -13,7 +13,7 @@ import remi.ssp.politic.Province;
 public class FisheryIndustry extends Industry {
 
 	static protected FisheryIndustry ptr;
-	public static void load(){ ptr = new FisheryIndustry(); }
+	public static void load(){ ptr = new FisheryIndustry(); Industry.put("fishing", ptr); }
 	public static FisheryIndustry get(){ return ptr; }
 
 	private FisheryIndustry(){

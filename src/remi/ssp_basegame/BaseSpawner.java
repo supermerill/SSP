@@ -24,6 +24,7 @@ import remi.ssp_basegame.economy.ElevageIndustry;
 import remi.ssp_basegame.economy.HuntingIndustry;
 import remi.ssp_basegame.economy.HuntingSportIndustry;
 import remi.ssp_basegame.economy.PersonalServiceIndustry;
+import remi.ssp_basegame.economy.SubsistanceIndustry;
 import remi.ssp_basegame.economy.WoodGoodsArtisanalIndustry;
 import remi.ssp_basegame.economy.WoodHouseIndustry;
 import remi.ssp_basegame.economy.WoodcutterIndustry;
@@ -64,6 +65,7 @@ public class BaseSpawner extends Spawner {
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(WoodGoodsArtisanalIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(WoodHouseIndustry.get()).setProvince(prv).create());
 					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(PersonalServiceIndustry.get()).setProvince(prv).create());
+					prv.addIndustry(ProvinceIndustryFactory.creator.setInustry(SubsistanceIndustry.get()).setProvince(prv).create());
 					
 //					for( ProvinceIndustry indus : prv.getIndustries()){
 //						logln("province has "+indus.getName());
@@ -135,7 +137,7 @@ public class BaseSpawner extends Spawner {
 					pop.setNbMensChomage(pop.getNbAdult());
 					pop.addMoney(pop.getNbAdult()*10000);
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
-					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*950); //~some day of food
+					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*250); //~some day of food
 					pop.getPopNeeds().add(PopNeed.create("middle_service", pop));
 //					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 				}

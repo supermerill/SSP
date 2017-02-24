@@ -59,25 +59,33 @@ public abstract class PopNeed extends Needs {
 		return quantityBuy * price;
 	}
 
+	//TODO: it was crashing here (too muchmoney spend) but i think the problem comes from baseEconomy
 	public long simpleConsume(long maxNb, Good good, long moneyToSpend, int nbDays){
 		Province prv = myPop.getProvince();
 		Object2LongMap<Good> currentStock = myPop.getStock();
 		ProvinceGoods market = prv.getStock().get(good);
 		logln(", \"SC_"+myPop+"_"+good+"\":{\"stock\":"+market.getStock()+", \"want\":"+(maxNb - currentStock.getLong(good))+"}");
 		long quantityBuy = Math.min(market.getStock(), maxNb - currentStock.getLong(good));
-		long price = market.getPriceBuyFromMarket(nbDays);
+		final long price = market.getPriceBuyFromMarket(nbDays);
+		final long wtf = quantityBuy * price;
+		final boolean wtf2 = (quantityBuy * price > moneyToSpend);
+		final long wtf22 = quantityBuy;
+		final long wtf23 = moneyToSpend;
+		boolean wtf3 = false;
 		if(quantityBuy * price > moneyToSpend){
 			quantityBuy = (moneyToSpend / price);
+			wtf3 = true;
 		}
-		//buy
-		moneyToSpend  -= quantityBuy * price;
-		if(moneyToSpend <0){
+		final long wtf4 = quantityBuy;
+		if(quantityBuy > 0){
+			//buy
+			long moneySpend = quantityBuy * price;
+			moneyToSpend  -= moneySpend;
+			prv.addMoney(moneySpend);
+			myPop.addMoney(- moneySpend);
+//			market.addNbConsumePerDay(quantityBuy / (float)nbDays);
+			market.addStock( -quantityBuy);
 		}
-		prv.addMoney(quantityBuy * price);
-		myPop.addMoney(- price * quantityBuy);
-//		market.addNbConsumePerDay(quantityBuy / (float)nbDays);
-		market.addStock( -quantityBuy);
-		
 		return quantityBuy * price;
 	}
 	

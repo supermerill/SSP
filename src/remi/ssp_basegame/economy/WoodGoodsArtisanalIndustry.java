@@ -14,7 +14,7 @@ import remi.ssp.politic.Province;
 public class WoodGoodsArtisanalIndustry extends Industry {
 
 	static protected WoodGoodsArtisanalIndustry ptr;
-	public static void load(){ ptr = new WoodGoodsArtisanalIndustry(); }
+	public static void load(){ ptr = new WoodGoodsArtisanalIndustry(); Industry.put("wood_goods", ptr); }
 	public static WoodGoodsArtisanalIndustry get(){ return ptr; }
 	
 	Good wood;
