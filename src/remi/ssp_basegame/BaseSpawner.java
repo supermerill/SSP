@@ -34,24 +34,25 @@ public class BaseSpawner extends Spawner {
 	
 
 	/**
-	 * populate CurrentGame.map (provinces +plots)
+	 * populate CurrentGame.get().map (provinces +plots)
 	 * 
 	 */
 	public void createMap(){
-		CurrentGame.map = new FlatCarteV3().createMap(2, 2);
+		CurrentGame.get().map = new FlatCarteV3().createMap(2, 2);
 	}
 	
 	/**
-	 * use CurrentGame.map to populate CurrentGame.civs
+	 * use CurrentGame.get().map to populate CurrentGame.get().civs
 	 * 
 	 */
 	public void createCivs(){
-		CurrentGame.civs = new ArrayList<>();
+		CurrentGame.get().civs = new ArrayList<>();
 		//we create 1 civ per land hex at startup
-		for(List<Province> prvs : CurrentGame.map.provinces){
+		for(List<Province> prvs : CurrentGame.get().map.provinces){
 			for(Province prv : prvs){
 				if(prv.surfaceSol > 10){
 					Civilisation civ = new Civilisation();
+					civ.setName("civ_"+prv);
 					civ.getProvinces().add(prv);
 					prv.setOwner(civ);
 					//TODO add base techs to civ
@@ -71,7 +72,7 @@ public class BaseSpawner extends Spawner {
 //						logln("province has "+indus.getName());
 //					}
 					
-					CurrentGame.civs.add(civ);
+					CurrentGame.get().civs.add(civ);
 					
 					//add all province goods possible
 					for(Good good : Good.GoodFactory.goodList.values()){
@@ -89,14 +90,14 @@ public class BaseSpawner extends Spawner {
 	}
 
 	/**
-	 * use CurrentGame.map and CurrentGame.civs to add pop on provinces
+	 * use CurrentGame.get().map and CurrentGame.get().civs to add pop on provinces
 	 * 
 	 */
 	public void createPop(){
 		Random rand = new Random();
-		for(int i=0;i<CurrentGame.map.provinces.size();i++){
-			for(int j=0;j<CurrentGame.map.provinces.get(i).size();j++){
-				Province prv = CurrentGame.map.provinces.get(i).get(j);
+		for(int i=0;i<CurrentGame.get().map.provinces.size();i++){
+			for(int j=0;j<CurrentGame.get().map.provinces.get(i).size();j++){
+				Province prv = CurrentGame.get().map.provinces.get(i).get(j);
 				if(prv.surfaceSol > 10){
 					//rich
 					Pop pop = new Pop(prv);
@@ -152,9 +153,9 @@ public class BaseSpawner extends Spawner {
 	 * call this when you add a new indutry to some provinces. Or do the job yourself ffs!
 	 */
 	public static void fixJobFromIndustryAndCommerce(){
-		for(int i=0;i<CurrentGame.map.provinces.size();i++){
-			for(int j=0;j<CurrentGame.map.provinces.get(i).size();j++){
-				Province prv = CurrentGame.map.provinces.get(i).get(j);
+		for(int i=0;i<CurrentGame.get().map.provinces.size();i++){
+			for(int j=0;j<CurrentGame.get().map.provinces.get(i).size();j++){
+				Province prv = CurrentGame.get().map.provinces.get(i).get(j);
 				Set<Job> jobs = new HashSet<>();
 				for(Pop pop: prv.getPops()){
 					jobs.clear();

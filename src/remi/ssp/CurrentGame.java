@@ -9,8 +9,26 @@ import remi.ssp.politic.Culture;
 
 public class CurrentGame {
 
-	public static Carte map;
-	public static List<Civilisation> civs;
-	public static Map<String, Culture> cultures;
+	protected static CurrentGame me = new CurrentGame();
+	
+	public static CurrentGame get(){
+		return me;
+	}
+	
+	public Carte map;
+	public List<Civilisation> civs;
+	public Map<String, Culture> cultures;
+
+	Carte getMap(){ return map; }
+	List<Civilisation> getCivs(){ return civs; }
+	Civilisation getCiv(String name){
+		for(Civilisation civ : civs){
+			if(civ.getName().equals(name)){
+				return civ;
+			}
+		}
+		return null;
+	}
+	Map<String, Culture> getCults(){ return cultures; }
 	
 }

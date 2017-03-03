@@ -76,7 +76,7 @@ public class BaseEconomy extends Economy {
 	public void doTurn(Carte map, int nbDays) {
 		// TODO: REMINDER: don't forget to clear the TradeRouteExchange
 		// structure from all civ & prv before calling this
-		for (Civilisation civ : CurrentGame.civs) {
+		for (Civilisation civ : CurrentGame.get().civs) {
 			civ.getTradeRouteExchange().clear();
 		}
 		for (List<Province> prvs : map.provinces) {

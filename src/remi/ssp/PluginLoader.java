@@ -126,28 +126,28 @@ public class PluginLoader{
 			for(int i=0;i<arrayCult.size();i++){
 				Culture cult = new Culture();
 				cult.load(arrayCult.getJsonObject(i));
-				CurrentGame.cultures.put(cult.getName(), cult);
+				CurrentGame.get().cultures.put(cult.getName(), cult);
 			}
 			
 			//cultures
-			CurrentGame.cultures = new HashMap<>();
+			CurrentGame.get().cultures = new HashMap<>();
 			
 			
 			//Carte -> province -> pop -> popneed, stock, prvindus
 			// province-province links & plotplot links
-			CurrentGame.map = new Carte();
-			CurrentGame.map.load(root.getJsonObject("map"));
+			CurrentGame.get().map = new Carte();
+			CurrentGame.get().map.load(root.getJsonObject("map"));
 			
 			// civilization 
 			//				-> equipment developed
 			// 				-> division -> battalion
 			//				-> division unit -> battalion unit
-			CurrentGame.civs = new ArrayList<>();
+			CurrentGame.get().civs = new ArrayList<>();
 			JsonArray arrayCiv = root.getJsonArray("civs");
 			for(int i=0;i<arrayCiv.size();i++){
 				Civilisation civ = new Civilisation();
-				civ.load(arrayCiv.getJsonObject(i), CurrentGame.map);
-				CurrentGame.civs.add(civ);
+				civ.load(arrayCiv.getJsonObject(i), CurrentGame.get().map);
+				CurrentGame.get().civs.add(civ);
 			}
 
 			// province trade routes ?
@@ -165,23 +165,23 @@ public class PluginLoader{
 			JsonObjectBuilder root = Json.createObjectBuilder();
 
 			JsonArrayBuilder arrayCults = Json.createArrayBuilder();
-			for(int i=0;i<CurrentGame.cultures.size();i++){
+			for(int i=0;i<CurrentGame.get().cultures.size();i++){
 				JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-				CurrentGame.cultures.get(i).save(objectBuilder);
+				CurrentGame.get().cultures.get(i).save(objectBuilder);
 				arrayCults.add(objectBuilder);
 			}
 			root.add("cults", arrayCults);
 			
 			//Carte -> province -> pop -> popneed, stock, prvindus
 			JsonObjectBuilder object = Json.createObjectBuilder();
-			CurrentGame.map.save(object);
+			CurrentGame.get().map.save(object);
 			root.add("map", object);
 			
 			// civilization 
 			JsonArrayBuilder arrayCivs = Json.createArrayBuilder();
-			for(int i=0;i<CurrentGame.civs.size();i++){
+			for(int i=0;i<CurrentGame.get().civs.size();i++){
 				JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-				CurrentGame.civs.get(i).save(objectBuilder);
+				CurrentGame.get().civs.get(i).save(objectBuilder);
 				arrayCivs.add(objectBuilder);
 			}
 			root.add("civs", arrayCivs);

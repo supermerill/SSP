@@ -40,7 +40,7 @@ public class SimpleMapViewer extends JComponent{
 
 		//create map
 		view.map = new AnneauCarteV2().createMap(8, 8);
-		CurrentGame.map = view.map;
+		CurrentGame.get().map = view.map;
 		
 		//create civs
 		

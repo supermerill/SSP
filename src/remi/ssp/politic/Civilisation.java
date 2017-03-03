@@ -26,9 +26,10 @@ import remi.ssp.army.DivisionUnit;
 import remi.ssp.army.EquipmentDevelopped;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Needs;
+import remi.ssp.technology.NameDescription;
 import remi.ssp.technology.Technology;
 
-public class Civilisation {
+public class Civilisation extends NameDescription{
 
 	List<Province> provinces = new ArrayList<>();
 	
@@ -85,12 +86,16 @@ public class Civilisation {
 	public Technology getCurrentResearch() {
 		return selectedResearch;
 	}
+	public void setName(String name) {
+		super.name = name;
+	}
 	
 	public void load(JsonObject jsonObj, Carte carte){
+		super.load(jsonObj);
 		
 		mensInReserve = jsonObj.getInt("mensRsv");
 		
-		mainCulture = CurrentGame.cultures.get(jsonObj.get("cultName"));
+		mainCulture = CurrentGame.get().cultures.get(jsonObj.get("cultName"));
 
 		JsonArray array = jsonObj.getJsonArray("prvs");
 		provinces.clear();
@@ -126,6 +131,8 @@ public class Civilisation {
 	}
 	
 	public void save(JsonObjectBuilder jsonOut){
+		super.save(jsonOut);
+		
 		jsonOut.add("mensRsv", mensInReserve);
 
 		jsonOut.add("cultName", mainCulture.getName());

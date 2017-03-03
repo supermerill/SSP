@@ -23,16 +23,16 @@ public abstract class Plugin implements Serializable{
 	public Collection<String> modsNeeded(){return Collections.emptyList();}
 	public Collection<String> modsIncompatible(){return Collections.emptyList();}
 	
-
-	//before anything, but after all plugin are loaded.
-	public void init(){}
-
 	//load data & algo into containers
 	public void loadGoods(){} //1
 	public void loadEquipment(){} //2
 	public void loadIndustry(){} //3
 	
-	
+
+
+	//before anything, but after all plugin are loaded.
+	public void init(){}
+
 	
 	
 }

@@ -44,6 +44,8 @@ public class Pop {
 		// RICH : possess things inside the province (that can be possessed)
 		//		can be downdgraded to middle if not enough things to own, or not wealthy enough vs middle
 		popTypeName.add("rich"); 
+		
+		//TODO: slaves: like investment for the richs: they give their money to rich & medium, and use the rich & medium money to satisfy their needs.
 	}
 
 	public Pop(){}
@@ -281,7 +283,7 @@ public class Pop {
 		sante = (float) jsonObj.getJsonNumber("pv").doubleValue();
 		foodEffectiveness = (float) jsonObj.getJsonNumber("foodEff").doubleValue();
 		
-		culture = CurrentGame.cultures.get(jsonObj.get("cultName"));
+		culture = CurrentGame.get().cultures.get(jsonObj.get("cultName"));
 		
 	}
 	

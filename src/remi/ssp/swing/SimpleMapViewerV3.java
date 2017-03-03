@@ -42,9 +42,9 @@ public class SimpleMapViewerV3 extends JComponent{
 		BaseSpawner spawner = new BaseSpawner();
 		//create map
 //		view.map = new FlatCarteV3().createMap(10, 10);
-//		CurrentGame.map = view.map;
+//		CurrentGame.get().map = view.map;
 		spawner.createMap();
-		view.map = CurrentGame.map;
+		view.map = CurrentGame.get().map;
 		
 		//create civs
 		spawner.createCivs();

@@ -477,7 +477,7 @@ public class FoodNeed extends PopNeed {
 					long nbElderDie = myPop.getNbElder()/2;
 					nbElderDie = Math.min(myPop.getNbElder(), GlobalRandom.aleat.normalLaw(Math.min(nbElderDie, nbPopToDie/3)));
 					long nbChildDie = myPop.getNbChildren()/2;
-					nbChildDie = Math.min(myPop.getNbChildren(), GlobalRandom.aleat.normalLaw(Math.min(nbChildDie, ((nbPopToDie-nbElderDie)*3)/2)));
+					nbChildDie = Math.min(myPop.getNbChildren(), GlobalRandom.aleat.normalLaw(Math.min(nbChildDie, ((nbPopToDie-nbElderDie)*5)/6)));
 					long nbAdultDie = nbPopToDie - nbElderDie - nbChildDie;
 					if(nbAdultDie>myPop.getNbAdult()){
 						//too much dies, be extrem!
