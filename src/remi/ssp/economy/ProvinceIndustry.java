@@ -6,15 +6,15 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import remi.ssp.GlobalDefines;
+import remi.ssp.network.SimpleSerializable;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 import remi.ssp.utils.LongInterval;
 
-public class ProvinceIndustry implements Job{
+public class ProvinceIndustry implements Job, SimpleSerializable{
 	
 	public static class ProvinceIndustryFactory{
 		public static ProvinceIndustryFactory creator = new ProvinceIndustryFactory();

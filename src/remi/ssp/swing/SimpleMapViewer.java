@@ -40,7 +40,7 @@ public class SimpleMapViewer extends JComponent{
 
 		//create map
 		view.map = new AnneauCarteV2().createMap(8, 8);
-		CurrentGame.get().map = view.map;
+		CurrentGame.get().setMap(view.map);
 		
 		//create civs
 		
@@ -60,9 +60,9 @@ public class SimpleMapViewer extends JComponent{
 //		Nourriture algoN = new Nourriture(){};
 		while(true){
 			//Economy.ptr.doTurn(map, 30);
-//			for(int i=0;i<map.provinces.size();i++){
-//				for(int j=0;j<map.provinces.get(i).size();j++){
-//					Province prv = map.provinces.get(i).get(j);
+//			for(int i=0;i<map.getProvinces().size();i++){
+//				for(int j=0;j<map.getProvinces().get(i).size();j++){
+//					Province prv = map.getProvinces().get(i).get(j);
 //					
 ////						algoN.getNourritureSemaine(prv);
 //				}
@@ -91,9 +91,9 @@ public class SimpleMapViewer extends JComponent{
 		int maxX = 0;
 		
 		//for each hex, draw it in blue or green
-		for(int i=0;i<map.provinces.size();i++){
-			for(int j=0;j<map.provinces.get(i).size();j++){
-				Province prv = map.provinces.get(i).get(j);
+		for(int i=0;i<map.getProvinces().size();i++){
+			for(int j=0;j<map.getProvinces().get(i).size();j++){
+				Province prv = map.getProvinces().get(i).get(j);
 				if(prv.surfaceSol > 10){
 
 					Color altitudeColor = Color.BLACK; //new Color(0, 1-prv.relief,0);
@@ -147,9 +147,9 @@ public class SimpleMapViewer extends JComponent{
 				}
 			}
 		}
-		for(int x=0;x<map.provinces.size();x++){
-			for(int y=0;y<map.provinces.get(x).size();y++){
-				Province prv = map.provinces.get(x).get(y);
+		for(int x=0;x<map.getProvinces().size();x++){
+			for(int y=0;y<map.getProvinces().get(x).size();y++){
+				Province prv = map.getProvinces().get(x).get(y);
 				int i= prv.centerPlot.getX();
 				int j= prv.centerPlot.getY();
 				g.setColor(Color.BLACK);
@@ -165,9 +165,9 @@ public class SimpleMapViewer extends JComponent{
 			}
 		}
 		//for each hex, draw it in blue or green
-		for(int i=0;i<map.plots.size();i++){
-			for(int j=0;j<map.plots.get(i).size();j++){
-				Plot plot = map.plots.get(i).get(j);
+		for(int i=0;i<map.getPlots().size();i++){
+			for(int j=0;j<map.getPlots().get(i).size();j++){
+				Plot plot = map.getPlots().get(i).get(j);
 				Color mix = Color.BLACK;
 				if(plot != null){
 					Province prv = plot.getProvince();
@@ -187,8 +187,8 @@ public class SimpleMapViewer extends JComponent{
 				g.fillOval(1+maxX+(i*3*taille)/4, 1+((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))), taille-2, taille-2);
 			}
 		}
-		for(int x=0;x<map.provinces.size();x++){
-			for(int y=0;y<map.provinces.get(x).size();y++){
+		for(int x=0;x<map.getProvinces().size();x++){
+			for(int y=0;y<map.getProvinces().get(x).size();y++){
 				if(x%2==0){
 					if(y%2==0) g.setColor(Color.ORANGE);
 					else g.setColor(Color.YELLOW);
@@ -196,15 +196,15 @@ public class SimpleMapViewer extends JComponent{
 					if(y%2==0) g.setColor(Color.BLUE);
 					else g.setColor(Color.CYAN);
 				}
-				Province prv = map.provinces.get(x).get(y);
+				Province prv = map.getProvinces().get(x).get(y);
 				int i= prv.centerPlot.getX();
 				int j= prv.centerPlot.getY();
 				g.fillOval(maxX + taille/4 + (i*3*taille)/4, ((i%2==0)?(j*(taille-1)):(taille/2+j*(taille-1))) + taille/4, taille/2, taille/2);
 			}
 		}
-		for(int i=0;i<map.plots.size();i++){
-			for(int j=0;j<map.plots.get(i).size();j++){
-				Plot plot = map.plots.get(i).get(j);
+		for(int i=0;i<map.getPlots().size();i++){
+			for(int j=0;j<map.getPlots().get(i).size();j++){
+				Plot plot = map.getPlots().get(i).get(j);
 				if(plot != null){
 					for(int n=0;n<plot.around.length;n++){
 						if(plot.around[n] != null){
@@ -218,9 +218,9 @@ public class SimpleMapViewer extends JComponent{
 			}
 		}
 
-//		for(int x=0;x<map.provinces.size();x++){
-//			for(int y=0;y<map.provinces.get(x).size();y++){
-//				Province prv = map.provinces.get(x).get(y);
+//		for(int x=0;x<map.getProvinces().size();x++){
+//			for(int y=0;y<map.getProvinces().get(x).size();y++){
+//				Province prv = map.getProvinces().get(x).get(y);
 //				int i= prv.centerPlot.getX();
 //				int j= prv.centerPlot.getY();
 //				g.setColor(Color.RED);

@@ -13,6 +13,12 @@ public class basicLawsPlugins {
 	 *  - cohabitation : low rebellion, low conversion
 	 *  - integration : no rebellion, no conversion
 	 * 
+	 * standing army
+	 * - noble army
+	 * - 1 year service
+	 * - 2 year service
+	 * - 3 year service
+	 * - professional army
 	 * 
 	 * 
 	 * 

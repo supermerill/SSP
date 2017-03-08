@@ -13,11 +13,12 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import remi.ssp.politic.Civilisation;
+import remi.ssp.technology.NameDescription;
 
-public class DivisionTemplate {
+public class DivisionTemplate extends NameDescription{
 	
 	private final int id;
-	public DivisionTemplate(int id){this.id = id;}
+	public DivisionTemplate(int id){this.id = id; this.name = "id_"+id;}
 	public DivisionTemplate(Civilisation others){
 		int i=0;
 		for(DivisionTemplate other : others.getDivisionTemplate()){
@@ -31,6 +32,11 @@ public class DivisionTemplate {
 	
 
 	Object2IntMap<Battalion> nbBattalions = new Object2IntOpenHashMap<>();
+	
+	public Object2IntMap<Battalion> getNbBattalions() {
+		return nbBattalions;
+	}
+	
 	// cached value, = all mens in battalions.
 	//int nbMens;
 	int getMens(){
@@ -50,7 +56,7 @@ public class DivisionTemplate {
 	}
 
 	public void load(JsonObject jsonObj, Civilisation civ) {
-
+		super.load(jsonObj);
 		JsonArray array = jsonObj.getJsonArray("bats");
 		nbBattalions.clear();
 		for(int i=0;i<array.size();i+=2){
@@ -62,6 +68,7 @@ public class DivisionTemplate {
 	}
 
 	public void save(JsonObjectBuilder jsonOut) {
+		super.save(jsonOut);
 		JsonArrayBuilder array = Json.createArrayBuilder();
 		for(Entry<Battalion> bat : nbBattalions.object2IntEntrySet()){
 			JsonObjectBuilder objBuild = Json.createObjectBuilder();

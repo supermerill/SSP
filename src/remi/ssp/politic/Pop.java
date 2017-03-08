@@ -24,8 +24,10 @@ import remi.ssp.economy.Industry;
 import remi.ssp.economy.Job;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceCommerce;
+import remi.ssp.network.SimpleSerializable;
+import remi.ssp.utils.U;
 
-public class Pop {
+public class Pop implements SimpleSerializable {
 	Province prv; //weak?
 	Culture culture; //TODO: save/load with index
 	int popType;
@@ -283,7 +285,7 @@ public class Pop {
 		sante = (float) jsonObj.getJsonNumber("pv").doubleValue();
 		foodEffectiveness = (float) jsonObj.getJsonNumber("foodEff").doubleValue();
 		
-		culture = CurrentGame.get().cultures.get(jsonObj.get("cultName"));
+		culture = CurrentGame.get().getCults().get(jsonObj.get("cultName"));
 		
 	}
 	
@@ -339,7 +341,7 @@ public class Pop {
 		jsonOut.add("pv", sante);
 		jsonOut.add("foodEff", foodEffectiveness);
 
-		jsonOut.add("cultName", culture.getName());
+		U.addStrOrNull(jsonOut,"cultName", culture.getName());
 	}
 	
 }

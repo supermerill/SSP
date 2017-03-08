@@ -45,11 +45,12 @@ public class FlatCarteV3 implements MapFactory {
 	public Carte createMap(int width, int height) {
 		Carte carte = new Carte();
 		currentcarte = carte;
-		carte.provinces = provinces;
-		carte.plots = plots;
-		carte.nbLigne = nbLigne;
-		carte.nbColonne = nbColonne;
+		plots = carte.getPlots();
+		provinces = carte.getProvinces();
+		carte.setNbLigne(nbLigne);
+		carte.setNbColonne(nbColonne);
 		createAnneau(height, width);
+		for(List<Province> prvs:provinces) for(Province prv:prvs) if(prv!=null) carte.getAllProvinces().add(prv);
 		// now, the structure is done, launch a creation of map
 		createSol();
 		createRelief();
@@ -151,11 +152,11 @@ public class FlatCarteV3 implements MapFactory {
 		//lower right corner
 //		int maxplotx = 1 + 5 * ((nbColonne-1)/2) + 3 * ((nbColonne-1)%2) + (nbLigne-1);
 		int maxplotx = nbColonne*3 + nbLigne - nbColonne/2;
-		currentcarte.nbPlotColonne = maxplotx;
+		currentcarte.setNbPlotColonne(maxplotx);
 		//lower left corner
 //		int maxploty = 1 + offsetPlotY + 2*(nbLigne-1) + (nbLigne-1)/2;
 		int maxploty = nbColonne + nbLigne*3 - nbLigne/2;
-		currentcarte.nbPlotLigne = maxploty;
+		currentcarte.setNbPlotLigne(maxploty);
 		//add offset (from province to plot)
 		maxplotx += 0;
 		maxploty -= 1;

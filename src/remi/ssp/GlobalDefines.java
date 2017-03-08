@@ -60,6 +60,5 @@ public class GlobalDefines {
 	public static void cleanup(){
 		if(out!=null) out.close();
 	}
-	
 
 }

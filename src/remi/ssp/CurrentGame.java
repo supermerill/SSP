@@ -1,5 +1,7 @@
 package remi.ssp;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,13 +17,13 @@ public class CurrentGame {
 		return me;
 	}
 	
-	public Carte map;
-	public List<Civilisation> civs;
-	public Map<String, Culture> cultures;
+	protected Carte map;
+	protected List<Civilisation> civs = new ArrayList<>();
+	protected Map<String, Culture> cultures = new HashMap<>();
 
-	Carte getMap(){ return map; }
-	List<Civilisation> getCivs(){ return civs; }
-	Civilisation getCiv(String name){
+	public Carte getMap(){ return map; }
+	public List<Civilisation> getCivs(){ return civs; }
+	public Civilisation getCiv(String name){
 		for(Civilisation civ : civs){
 			if(civ.getName().equals(name)){
 				return civ;
@@ -29,6 +31,9 @@ public class CurrentGame {
 		}
 		return null;
 	}
-	Map<String, Culture> getCults(){ return cultures; }
+	public Map<String, Culture> getCults(){ return cultures; }
+	public void setMap(Carte createMap) {
+		this.map = createMap;
+	}
 	
 }

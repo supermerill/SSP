@@ -9,14 +9,14 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import remi.ssp.network.SimpleSerializable;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
-import remi.ssp.utils.ComparatorValueDesc;
 import remi.ssp.utils.LongInterval;
 
-public class ProvinceCommerce implements Job{
+public class ProvinceCommerce implements Job, SimpleSerializable{
 
 	Province province;
 	

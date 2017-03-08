@@ -13,7 +13,7 @@ public class BaseResearch extends Research {
 
 	@Override
 	public void research4all(int nbDays) {
-		for(Civilisation civ : CurrentGame.get().civs){
+		for(Civilisation civ : CurrentGame.get().getCivs()){
 			
 			//ultra-basic one
 			Technology tech = civ.getCurrentResearch();
@@ -55,16 +55,13 @@ public class BaseResearch extends Research {
 	public void ideaPropagation(int nbDays) {
 		
 		//for all province
-		for(List<Province> prvs : CurrentGame.get().map.provinces){
-			for(Province prv : prvs){
+		for(Province prv : CurrentGame.get().getMap().getAllProvinces()){
 				//for each trading province (nearby+sea?)
 					//compute a coeff (from culture, and amount of goods)
 					//check ideas that you don't have
 						//add coeff from idea compatibility (researched tech, ...)
 						//tick a chance to spread
 						//if success, add this idea to the prv.
-				
-			}
 		}
 		
 	}

@@ -12,15 +12,20 @@ public class NetworkReflexion implements Function<String, String>{
 	public String apply(String t) {
 		
 		//first level: raccourci
-		return decode(CurrentGame.get(), t);
+		Object result = decode(CurrentGame.get(), t);
+		if(result == null){
+			return "null";
+		}else{
+			return result.toString();
+		}
 	}
 	
 
-	Pattern regexp = Pattern.compile("([^(]+)\\((([^)\\\\]|\\\\\\\\|\\\\\\))+)\\)(.|;)(.*)");
+	Pattern regexp = Pattern.compile("([^(]+)\\((([^)\\\\]|\\\\\\\\|\\\\\\))*)\\)(.|;)(.*)");
 	Matcher match = regexp.matcher("");
 	
 	
-	public String decode(Object currentObject, String cmd){
+	public Object decode(Object currentObject, String cmd){
 		match.reset(cmd);
 		Object result;
 		
@@ -34,11 +39,11 @@ public class NetworkReflexion implements Function<String, String>{
 					//for now, i only support one-string argument
 					result = currentObject.getClass().getMethod(functionName, String.class).invoke(currentObject, functionArgs);
 				}else{
-					result = currentObject.getClass().getMethod(functionName, String.class).invoke(currentObject);
+					result = currentObject.getClass().getMethod(functionName).invoke(currentObject);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				return "error";
+				return "error: "+e.toString();
 			}
 			
 			if(leftover.length()>0 && result != null){
@@ -48,11 +53,7 @@ public class NetworkReflexion implements Function<String, String>{
 					return "error, bad object: "+result.getClass().getName()+", can't call "+leftover+" on it.";
 				}
 			}else{
-				if(result == null){
-					return "null";
-				}else{
-					return result.toString();
-				}
+				return result;
 			}
 			
 		}

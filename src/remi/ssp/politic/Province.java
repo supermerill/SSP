@@ -16,16 +16,16 @@ import javax.json.JsonObjectBuilder;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import remi.ssp.GlobalDefines;
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.TradeRoute;
+import remi.ssp.network.SimpleSerializable;
 import remi.ssp.technology.Idea;
 
-public class Province{
+public class Province implements SimpleSerializable{
 	private static final long serialVersionUID = ((long)"Province".hashCode()) + 1L;
 	
 	//for plug-ins

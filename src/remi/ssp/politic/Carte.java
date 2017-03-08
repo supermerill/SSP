@@ -1,10 +1,7 @@
 package remi.ssp.politic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -12,19 +9,70 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
-import remi.ssp.economy.Good;
+import remi.ssp.network.SimpleSerializable;
 
-public class Carte {
+public class Carte implements SimpleSerializable {
 
 	// ceci est une implémentation, gaffe!
 	//il faudrait une Province -> x,y,image pour etre plus générique, pt-etre stoké dans Province?
-	public List<List<Province>> provinces = new ArrayList<>();
-	public List<List<Plot>> plots = new ArrayList<>();
-	public int nbLigne = 0, nbColonne = 0;
-	public int nbPlotLigne = 0, nbPlotColonne = 0;
-	Random rand = new Random();
+	protected List<List<Province>> provinces = new ArrayList<>();
+	protected List<Province> allprovinces = new ArrayList<>();
+	protected List<List<Plot>> plots = new ArrayList<>();
+	protected int nbLigne = 0, nbColonne = 0;
+	protected int nbPlotLigne = 0, nbPlotColonne = 0;
 	
+
+
+	public List<Province> getAllProvinces() {
+		return allprovinces;
+	}
+	
+	public int getNbLigne() {
+		return nbLigne;
+	}
+
+	public void setNbLigne(int nbLigne) {
+		this.nbLigne = nbLigne;
+	}
+
+	public int getNbColonne() {
+		return nbColonne;
+	}
+
+	public void setNbColonne(int nbColonne) {
+		this.nbColonne = nbColonne;
+	}
+
+	public int getNbPlotLigne() {
+		return nbPlotLigne;
+	}
+
+	public void setNbPlotLigne(int nbPlotLigne) {
+		this.nbPlotLigne = nbPlotLigne;
+	}
+
+	public int getNbPlotColonne() {
+		return nbPlotColonne;
+	}
+
+	public void setNbPlotColonne(int nbPlotColonne) {
+		this.nbPlotColonne = nbPlotColonne;
+	}
+
+	public List<List<Province>> getProvinces() {
+		return provinces;
+	}
+	public Province getProvince(int i, int j) {
+		return provinces.get(i).get(j);
+	}
+	public Province setProvince(int i, int j) {
+		return provinces.get(i).get(j);
+	}
+
+	public List<List<Plot>> getPlots() {
+		return plots;
+	}
+
 	public void load(JsonObject readObject) {
 		plots.clear();
 		JsonArray arrayPlot = readObject.getJsonArray("plots");
@@ -51,6 +99,7 @@ public class Carte {
 		for(int i=0;i<arrayPrv.size();i++){
 			Province prv = new Province();
 			prv.load(arrayPrv.getJsonObject(i));
+			allprovinces.add(prv);
 			while(provinces.size()<=prv.x){
 				provinces.add(new ArrayList<>());
 			}

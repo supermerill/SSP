@@ -1,12 +1,22 @@
 package remi.ssp.politic;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-public class Plot {
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import remi.ssp.network.SimpleSerializable;
+import remi.ssp.utils.U;
+
+public class Plot implements SimpleSerializable {
 	short x;
 	short y;
 	//can be 5 if making a globe... be careful!
@@ -69,6 +79,33 @@ public class Plot {
 			arrayPlots.add(around[i].y);
 		}
 		jsonOut.add("plots", arrayPlots);
+	}
+	
+	
+	public List<Plot> nearest(Plot farAway){
+		Object2IntMap<Plot> dist = new Object2IntOpenHashMap<>();
+		dist.defaultReturnValue(Integer.MAX_VALUE);
+		Map<Plot, Plot> previous = new HashMap<>();
+		dist.put(this, 0);
+		while(dist.size()>0){
+			Plot best = U.getMin(dist);
+			int pos = dist.getInt(best);
+			for(Plot p : best.around){
+				if(dist.getInt(p) > pos+1){
+					previous.put(p, best);
+					dist.put(p, pos+1);
+				}
+				if(p == farAway) break;
+			}
+		}
+
+		//create list
+		LinkedList<Plot> retList = new LinkedList<>();
+		retList.addLast(farAway);
+		while(previous.containsKey(retList.getFirst())){
+			retList.addFirst(previous.get(retList.getFirst()));
+		}
+		return retList;
 	}
 	
 }

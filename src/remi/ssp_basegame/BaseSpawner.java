@@ -38,7 +38,7 @@ public class BaseSpawner extends Spawner {
 	 * 
 	 */
 	public void createMap(){
-		CurrentGame.get().map = new FlatCarteV3().createMap(2, 2);
+		CurrentGame.get().setMap(new FlatCarteV3().createMap(2, 2));
 	}
 	
 	/**
@@ -46,9 +46,8 @@ public class BaseSpawner extends Spawner {
 	 * 
 	 */
 	public void createCivs(){
-		CurrentGame.get().civs = new ArrayList<>();
 		//we create 1 civ per land hex at startup
-		for(List<Province> prvs : CurrentGame.get().map.provinces){
+		for(List<Province> prvs : CurrentGame.get().getMap().getProvinces()){
 			for(Province prv : prvs){
 				if(prv.surfaceSol > 10){
 					Civilisation civ = new Civilisation();
@@ -72,7 +71,7 @@ public class BaseSpawner extends Spawner {
 //						logln("province has "+indus.getName());
 //					}
 					
-					CurrentGame.get().civs.add(civ);
+					CurrentGame.get().getCivs().add(civ);
 					
 					//add all province goods possible
 					for(Good good : Good.GoodFactory.goodList.values()){
@@ -95,9 +94,9 @@ public class BaseSpawner extends Spawner {
 	 */
 	public void createPop(){
 		Random rand = new Random();
-		for(int i=0;i<CurrentGame.get().map.provinces.size();i++){
-			for(int j=0;j<CurrentGame.get().map.provinces.get(i).size();j++){
-				Province prv = CurrentGame.get().map.provinces.get(i).get(j);
+		for(int i=0;i<CurrentGame.get().getMap().getProvinces().size();i++){
+			for(int j=0;j<CurrentGame.get().getMap().getProvinces().get(i).size();j++){
+				Province prv = CurrentGame.get().getMap().getProvinces().get(i).get(j);
 				if(prv.surfaceSol > 10){
 					//rich
 					Pop pop = new Pop(prv);
@@ -153,9 +152,9 @@ public class BaseSpawner extends Spawner {
 	 * call this when you add a new indutry to some provinces. Or do the job yourself ffs!
 	 */
 	public static void fixJobFromIndustryAndCommerce(){
-		for(int i=0;i<CurrentGame.get().map.provinces.size();i++){
-			for(int j=0;j<CurrentGame.get().map.provinces.get(i).size();j++){
-				Province prv = CurrentGame.get().map.provinces.get(i).get(j);
+		for(int i=0;i<CurrentGame.get().getMap().getProvinces().size();i++){
+			for(int j=0;j<CurrentGame.get().getMap().getProvinces().get(i).size();j++){
+				Province prv = CurrentGame.get().getMap().getProvinces().get(i).get(j);
 				Set<Job> jobs = new HashSet<>();
 				for(Pop pop: prv.getPops()){
 					jobs.clear();

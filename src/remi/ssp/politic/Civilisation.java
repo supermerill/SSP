@@ -2,11 +2,7 @@ package remi.ssp.politic;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -17,19 +13,19 @@ import javax.json.JsonObjectBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.CurrentGame;
 import remi.ssp.army.Battalion;
 import remi.ssp.army.DivisionTemplate;
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.army.EquipmentDevelopped;
-import remi.ssp.economy.Good;
-import remi.ssp.economy.Needs;
+import remi.ssp.network.SimpleSerializable;
 import remi.ssp.technology.NameDescription;
 import remi.ssp.technology.Technology;
+import remi.ssp.utils.U;
 
-public class Civilisation extends NameDescription{
+public class Civilisation extends NameDescription implements SimpleSerializable{
 
 	List<Province> provinces = new ArrayList<>();
 	
@@ -44,7 +40,7 @@ public class Civilisation extends NameDescription{
 	Object2LongMap<Civilisation> lastTradeRouteExchange = new Object2LongOpenHashMap<>(); //TODOSAVE cache value for economy (TODO: reasert)
 	
 	
-	Culture mainCulture;
+	Culture mainCulture = new Culture();
 	
 	//TODO put this into a "edict class"
 	public int getMinAgeWork(){ return 10; }
@@ -53,9 +49,11 @@ public class Civilisation extends NameDescription{
 
 	public List<Province> getProvinces() { return provinces; }
 	public List<DivisionUnit> getDivisions() { return divisions; }
+	public DivisionUnit getDivision(String name){for(DivisionUnit d : getDivisions()) if(d.getName().equals(name)) return d; return null;}
 	public List<DivisionTemplate> getDivisionTemplate() { return divisionTemplate; }
 	public List<Battalion> getBattalionTemplate() { return battalionTemplate; }
 	public int getMensInReserve() { return mensInReserve; }
+	public void addMensInReserve(int modif) { mensInReserve+=modif; }
 	public Object2LongMap<EquipmentDevelopped> getEquipmentReserve() { return equipmentReserve; }
 	public Object2LongMap<Civilisation> getTradeRouteExchange() { return lastTradeRouteExchange; }
 	
@@ -95,7 +93,7 @@ public class Civilisation extends NameDescription{
 		
 		mensInReserve = jsonObj.getInt("mensRsv");
 		
-		mainCulture = CurrentGame.get().cultures.get(jsonObj.get("cultName"));
+		mainCulture = CurrentGame.get().getCults().get(jsonObj.get("cultName"));
 
 		JsonArray array = jsonObj.getJsonArray("prvs");
 		provinces.clear();
@@ -135,7 +133,7 @@ public class Civilisation extends NameDescription{
 		
 		jsonOut.add("mensRsv", mensInReserve);
 
-		jsonOut.add("cultName", mainCulture.getName());
+		U.addStrOrNull(jsonOut,"cultName", mainCulture.getName());
 		
 		JsonArrayBuilder array = Json.createArrayBuilder();
 		for(Province prv : provinces){

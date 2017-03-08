@@ -6,6 +6,8 @@ import java.net.Socket;
 
 public class SSPServerSocket extends java.net.ServerSocket implements Runnable{
 
+	public static int port = 8945;
+	
 	public SSPServerSocket() throws IOException {
 		super();
 	}
@@ -13,7 +15,7 @@ public class SSPServerSocket extends java.net.ServerSocket implements Runnable{
 	
 	public void start(){
 		try{
-			this.bind(new InetSocketAddress("localhost", 8945));
+			this.bind(new InetSocketAddress("localhost", port));
 			new Thread(this).start();
 		}catch(Exception e){
 			throw new RuntimeException(e);

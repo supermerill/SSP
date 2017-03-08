@@ -21,11 +21,12 @@ public class AnneauCarte implements MapFactory {
 	
 	@Override
 	public Carte createMap(int width, int height) {
-		createAnneau(height, width);
 		Carte carte = new Carte();
-		carte.provinces = provinces;
-		carte.nbLigne = nbLigne;
-		carte.nbColonne = nbColonne;
+//		carte.provinces = provinces;
+		provinces = carte.getProvinces();
+		createAnneau(height, width);
+		carte.setNbLigne(nbLigne);
+		carte.setNbColonne(nbColonne);
 		return carte;
 	}
 

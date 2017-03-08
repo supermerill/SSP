@@ -42,10 +42,12 @@ public class AnneauCarteV2 implements MapFactory {
 	public Carte createMap(int width, int height) {
 		Carte carte = new Carte();
 		currentcarte = carte;
-		carte.provinces = provinces;
-		carte.plots = plots;
-		carte.nbLigne = nbLigne;
-		carte.nbColonne = nbColonne;
+//		carte.provinces = provinces;
+//		carte.plots = plots;
+		plots = carte.getPlots();
+		provinces = carte.getProvinces();
+		carte.setNbLigne(nbLigne);
+		carte.setNbColonne(nbColonne);
 		createAnneau(height, width);
 		return carte;
 	}
@@ -124,14 +126,14 @@ public class AnneauCarteV2 implements MapFactory {
 		int minploty = 0;//offset + ((nbColonne-1)%2) - 2 * ((nbColonne-1)/2);
 		//lower right corner
 		int maxplotx = 1 + 5 * ((nbColonne-1)/2) + 3 * ((nbColonne-1)%2) + (nbLigne-1);
-		currentcarte.nbPlotColonne = maxplotx;
+		currentcarte.setNbPlotColonne(maxplotx);
 		//lower left corner
 		int maxploty = 1 + offsetPlotY + 2*(nbLigne-1) + (nbLigne-1)/2;
-		currentcarte.nbPlotLigne = maxploty;
+		currentcarte.setNbPlotLigne(maxploty);
 		//add offset (from province to plot)
 		maxploty += 2;
 		maxplotx += 2;
-		logln("coloneplotfrom 0 to: "+currentcarte.nbPlotColonne+", lines from "+(-offsetPlotY)+" to "+(currentcarte.nbPlotLigne-offsetPlotY)+" ("+currentcarte.nbPlotLigne+")");
+		logln("coloneplotfrom 0 to: "+currentcarte.getNbPlotColonne()+", lines from "+(-offsetPlotY)+" to "+(currentcarte.getNbPlotLigne()-offsetPlotY)+" ("+currentcarte.getNbPlotLigne()+")");
 		//check lower left 
 		for (int i = 0; i < maxplotx; i++) {
 			List<Plot> colonne = new ArrayList<>();
@@ -253,18 +255,18 @@ public class AnneauCarteV2 implements MapFactory {
 		int ypoffx = 0;
 		int ymoffx = 0;
 		if(xm1<0){
-			xm1 += currentcarte.nbPlotColonne;
+			xm1 += currentcarte.getNbPlotColonne();
 //			xmoffy = 2 - nbColonne;
-		}else if(xp1>=currentcarte.nbPlotColonne){
-			xp1 -= currentcarte.nbPlotColonne;
+		}else if(xp1>=currentcarte.getNbPlotColonne()){
+			xp1 -= currentcarte.getNbPlotColonne();
 //			xpoffy = nbColonne-2;
 		}
 		if(ym1<0){
-			ym1 += currentcarte.nbPlotLigne;
+			ym1 += currentcarte.getNbPlotLigne();
 //			ymoffx = 
 		}
-		if(yp1>=currentcarte.nbPlotLigne){
-			yp1 -= currentcarte.nbPlotLigne;
+		if(yp1>=currentcarte.getNbPlotLigne()){
+			yp1 -= currentcarte.getNbPlotLigne();
 		}
 		logln("setnearby plot "+x+":"+y+ " "+xm1+"->"+xp1+" : "+ym1+"->"+yp1);
 		logln("plot.size="+plots.size()+", plot(x).size="+plots.get(x).size()

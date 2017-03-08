@@ -53,6 +53,7 @@ public class BattalionUnit {
 	public int getNbMsRunInCurrentBattle() { return nbMsRunInCurrentBattle; }
 	public void setNbMsRunInCurrentBattle(int nbMsRunInCurrentBattle) { this.nbMsRunInCurrentBattle = nbMsRunInCurrentBattle; }
 	public Battalion getTemplate() { return template; }
+	public void setTemplate(Battalion template) { this.template = template; }
 	public BattalionBattleDecision getCurrentBattleDecision() { return currentBattleDecision; }
 //	public int getX() { return plot.getX(); }
 //	public int getY() { return plot.getY(); }

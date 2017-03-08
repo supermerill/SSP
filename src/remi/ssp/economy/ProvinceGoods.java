@@ -3,10 +3,10 @@ package remi.ssp.economy;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import remi.ssp.GlobalDefines;
+import remi.ssp.network.SimpleSerializable;
 import remi.ssp.politic.Province;
 
-public class ProvinceGoods {
+public class ProvinceGoods implements SimpleSerializable {
 //	
 	protected Province prv;
 	protected Good good;

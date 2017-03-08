@@ -76,20 +76,17 @@ public class BaseEconomy extends Economy {
 	public void doTurn(Carte map, int nbDays) {
 		// TODO: REMINDER: don't forget to clear the TradeRouteExchange
 		// structure from all civ & prv before calling this
-		for (Civilisation civ : CurrentGame.get().civs) {
+		for (Civilisation civ : CurrentGame.get().getCivs()) {
 			civ.getTradeRouteExchange().clear();
 		}
-		for (List<Province> prvs : map.provinces) {
-			for (Province prv : prvs) {
-				prv.getLastTradeRouteExchange().clear();
-			}
+		for (Province prv : map.getAllProvinces()) {
+			prv.getLastTradeRouteExchange().clear();
 		}
 
 		final Object2LongMap<Province> prv2Wealth = new Object2LongOpenHashMap<Province>();
 		final List<Province> allPrvs = new ArrayList<>();
-		for (List<Province> prvs : map.provinces) {
+		for (Province prv : map.getAllProvinces()) {
 			// init map to compute prices
-			for (Province prv : prvs) {
 				// do not make eco on sea tile and no-pop tiles.
 				if (prv.getNbAdult() == 0) {
 					continue;
@@ -126,7 +123,7 @@ public class BaseEconomy extends Economy {
 				logln("\"produce_" + prv + "\":{ \"province\":\"" + prv + "\"");
 				produce(prv, nbDays);
 				logln("}");
-			}
+			
 		}
 		for (Province prv : allPrvs) {
 			for (Pop pop : prv.getPops()) {
