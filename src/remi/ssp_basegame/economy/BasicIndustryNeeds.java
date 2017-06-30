@@ -1,19 +1,19 @@
 package remi.ssp_basegame.economy;
 
+import static remi.ssp.GlobalDefines.logln;
+
 import java.util.Map;
 
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.economy.Good;
-import remi.ssp.economy.Industry;
 import remi.ssp.economy.IndustryNeed;
-import remi.ssp.economy.Needs.NeedWish;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.politic.Province;
-import static remi.ssp.GlobalDefines.logln;
 
 //TODO: a more complex one: raw from the map, and tools from goods available in market & their tools efficiency (and an upgrade of stock tools)
 
@@ -34,6 +34,30 @@ public class BasicIndustryNeeds extends IndustryNeed {
 	public BasicIndustryNeeds addToolGood(Good good, float quantityPerProduct){
 		toolsNeeded.put(good, quantityPerProduct);
 		return this;
+	}
+	
+
+
+	@Override
+	public Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
+		Object2LongMap<Good> currentStock = myIndus.getStock();
+		Object2LongMap<Good> wanted = new Object2LongOpenHashMap<>();
+		long maxLastProd = Math.max(1, myIndus.getPreviousProduction());
+		//vital: raw needed
+		//normal: tools (and a bit more raw)
+		//luxury : a bit more tools & raw
+		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
+			long nbItemWantBuy = Math.max(0, 
+					(long)(2 * maxLastProd * needed.getFloatValue()) - currentStock.getLong(needed.getKey()));
+			wanted.put(needed.getKey(), nbItemWantBuy);
+		}
+		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
+			long nbItemWantBuy = Math.max(0, 
+					(long)(2*maxLastProd * needed.getFloatValue()*0.9f) - currentStock.getLong(needed.getKey()));
+			wanted.put(needed.getKey(), wanted.getLong(needed.getKey()) + nbItemWantBuy);
+		}
+		logln(",\"2indus "+myIndus.getName()+" want\":\" "+wanted+"\"");
+		return wanted;
 	}
 
 
@@ -72,7 +96,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 	 * Use the helper methods to avoid breaking the program
 	 * @param prv province (market)
 	 * @param nbEmployes number of workers
-	 * @param currentStock Our stock (put new goods inside that)
+	 * @param currentProvinceStock Our stock (put new goods inside that)
 	 * @param maxMoneyToSpend  the money we can spend (by category)
 	 * @param nbDays period
 	 * @return the amount of money that must be removed from the provinceindustry instance
@@ -190,18 +214,38 @@ public class BasicIndustryNeeds extends IndustryNeed {
 		long realProd = quantity;
 		//restrict production to the max available from raw materials
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
+			if(stock.getStock().getLong(needed.getKey())<0){
+				System.err.println("Error, negative number of raw");
+			}
 			realProd = Math.min(realProd, (int)(stock.getStock().getLong(needed.getKey())/needed.getFloatValue()));
+			if(stock.getStock().getLong(needed.getKey())<0){
+				System.err.println("Error, negative number of raw");
+			}
 		}
 		//remove used raw material
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
+			if(stock.getStock().getLong(needed.getKey())<0){
+				System.err.println("Error, negative number of mat");
+			}
 			stock.getStock().put(needed.getKey(), stock.getStock().getLong(needed.getKey()) - (long)(needed.getFloatValue()* realProd));
+			if(stock.getStock().getLong(needed.getKey())<0){
+				System.err.println("Error, negative number of mat");
+			}
 		}
 
 		// break some tools (0.5% of tools break per use per day)
 		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
+			if(stock.getStock().getLong(needed.getKey())<0){
+				System.err.println("Error, negative number of tools");
+			}
 			stock.getStock().put(needed.getKey(), (long)(
 					Math.min(stock.getStock().getLong(needed.getKey()), realProd) * 0.005f * nbDays * needed.getFloatValue())  );
+			if(stock.getStock().getLong(needed.getKey())<0){
+				System.err.println("Error, negative number of tools");
+			}
 		}
+		
+
 		
 		return realProd;
 	}

@@ -27,7 +27,7 @@ public class FisheryIndustry extends Industry {
 	}
 	
 	@Override
-	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay, long wish) {
 		Province prv = indus.getProvince();
 		if(!prv.isCoastal()) return 0;
 		
@@ -52,7 +52,23 @@ public class FisheryIndustry extends Industry {
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (long)production * durationInDay, durationInDay);
 
+		//store prod
+		indus.getStock().put(getGood(),indus.getStock().getLong(getGood())+intproduction);
 		return intproduction;
+	}
+	
+	@Override
+	public long getMenWish(ProvinceIndustry indus, double currentConsumptionPD) {
+		Province prv = indus.getProvince();
+		if(!prv.isCoastal()) return 0;
+		int seaTiles = 0;
+		for (int i = 0; i < prv.myPLots.length; i++) {
+//						if (prv.proche[i] != null && prv.proche[i].surfaceSol < 10)
+//							seaTiles++;
+			if (prv.myPLots[i] != null && prv.myPLots[i].isSea) seaTiles ++;
+		}
+		long nbMensWish = (long) (currentConsumptionPD / ((2+seaTiles/2) * 1));
+		return nbMensWish;
 	}
 
 }

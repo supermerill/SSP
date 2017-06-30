@@ -75,7 +75,7 @@ public class SimpleMapViewerV3 extends JComponent{
 			GlobalDefines.logFlush();
 			this.repaint();
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

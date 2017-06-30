@@ -3,12 +3,20 @@ package remi.ssp.economy;
 import static remi.ssp.GlobalDefines.log;
 import static remi.ssp.GlobalDefines.logln;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 
@@ -35,6 +43,88 @@ public abstract class PopNeed extends Needs {
 
 	public void save(JsonObjectBuilder objectBuilder) {}
 
+	protected Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays, Collection<Good> possibleGoods, double nbPerDayPerMen) {
+		Map<Good, ProvinceGoods> goodStock = prv.getStock();
+
+		final long nbMensInPop = myPop.getNbAdult() + myPop.getNbChildren() + myPop.getNbElder();
+
+		Object2LongOpenHashMap<Good> wish = new Object2LongOpenHashMap<>();
+		
+		if (totalMoneyThisTurn <= 0) {
+			if(nbMensInPop == 1)
+				System.err.println("ERROR no money for pop:" + totalMoneyThisTurn);
+			return wish;
+		}
+
+		if (nbMensInPop == 0) {
+			return wish;
+		}
+//
+//		// all prices = price - min price*
+//		// all prices = price / max price
+//		// now prices are between 0 and 1
+//		// all prices = 1 - price ^2
+//		// now prices are the weight used to choose the quantity we want to buy
+//
+//		long maxPrice = 0;
+//		long minPrice = Long.MAX_VALUE;
+//		Object2LongMap<Good> goodPrice = new Object2LongOpenHashMap<>();
+//		for (Entry<Good, ProvinceGoods> entry : goodStock.entrySet()) {
+//			Good good = entry.getKey();
+//			if(possibleGoods.contains(good) && entry.getValue().getStock() > 0) {
+//				long price = entry.getValue().getPriceBuyFromMarket(nbDays);
+//				maxPrice = Math.max(maxPrice, price);
+//				minPrice = Math.min(minPrice, price);
+//				goodPrice.put(good, price);
+//			}
+//		}
+//		maxPrice -= minPrice;
+//		double totQte = 0;
+//		Object2DoubleMap<Good> goodQte = new Object2DoubleOpenHashMap<>();
+//		for(it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<Good> entry : goodPrice.object2LongEntrySet()){
+//			double temp = entry.getLongValue() - minPrice;
+//			temp = temp / maxPrice;
+//			temp = temp * temp;
+//			totQte += temp;
+//			goodQte.put(entry.getKey(), temp);
+//		}
+////		if(totQte == 0){
+////			System.err.println("no "+this.name+" possible: ");
+////		}
+//		for(it.unimi.dsi.fastutil.objects.Object2DoubleMap.Entry<Good> entry : goodQte.object2DoubleEntrySet()){
+//			entry.setValue(entry.getDoubleValue() / totQte);
+//		}
+//		
+//		// now, i try to buy enought food (nbMens * nbPerDayPerMen * nbdays) mult by quantity. I stop when i have not enough money
+//		long multNbFood = (long) (nbMensInPop * nbPerDayPerMen * nbDays);
+//		long moneyNow = totalMoneyThisTurn;
+//		List<Good> lstGood= new ArrayList<>(goodQte.keySet());
+//		lstGood.sort((o1, o2) -> Long.compare(goodPrice.getLong(o1), goodPrice.getLong(o2)));
+//		for(Good good : lstGood){
+//			long price = goodPrice.getLong(good);
+//			double qteGood = goodQte.getDouble(good);
+//			if(price * qteGood * multNbFood > moneyNow){
+//				wish.put(good, moneyNow / price);
+//				moneyNow = 0;
+//				break;
+//			}else{
+//				moneyNow -= price * qteGood * multNbFood;
+//				wish.put(good, (long)(qteGood * multNbFood));
+//			}
+//		}
+//		
+//		//if not enough, we ad a bit of everithing
+//		
+//		
+//		
+//		logln(", \"food wish/need\":\"" + wish + "\"}");
+		
+		for(Good good : possibleGoods){
+			wish.put(good, (long) (nbPerDayPerMen * nbDays * nbMensInPop));
+		}
+		return wish;
+	}
+
 
 	public long simpleBuy(long maxNb, Good good, long moneyToSpend, int nbDays){
 		Province prv = myPop.getProvince();
@@ -54,7 +144,7 @@ public abstract class PopNeed extends Needs {
 		myPop.addMoney(- price * quantityBuy);
 		currentStock.put(good, currentStock.getLong(good) + quantityBuy);
 //		market.addNbConsumePerDay(quantityBuy / (float)nbDays);
-		market.addStock( -quantityBuy);
+		market.addStock( -quantityBuy,prv.getStock().get(good).getPriceBuyFromMarket(nbDays));
 		
 		return quantityBuy * price;
 	}
@@ -84,7 +174,7 @@ public abstract class PopNeed extends Needs {
 			prv.addMoney(moneySpend);
 			myPop.addMoney(- moneySpend);
 //			market.addNbConsumePerDay(quantityBuy / (float)nbDays);
-			market.addStock( -quantityBuy);
+			market.addStock( -quantityBuy,prv.getStock().get(good).getPriceBuyFromMarket(nbDays));
 		}
 		return quantityBuy * price;
 	}
@@ -94,7 +184,7 @@ public abstract class PopNeed extends Needs {
 		long price = prv.getStock().get(good).getPriceBuyFromMarket(nbDays);
 		prv.addMoney(price*quantity);
 //		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
-		prv.getStock().get(good).addStock(-quantity);
+		prv.getStock().get(good).addStock(-quantity,prv.getStock().get(good).getPriceBuyFromMarket(nbDays));
 		myPop.addMoney(-price*quantity);
 		return price*quantity;
 	}
@@ -104,7 +194,7 @@ public abstract class PopNeed extends Needs {
 		long price = prv.getStock().get(good).getPriceBuyFromMarket(nbDays);
 //		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
 		prv.addMoney(price*quantity);
-		prv.getStock().get(good).addStock(-quantity);
+		prv.getStock().get(good).addStock(-quantity,prv.getStock().get(good).getPriceBuyFromMarket(nbDays));
 		log(",\""+myPop+"_buy_qtt\":"+(price*quantity)+",\""+myPop+"_buy_Mbefore\":"+myPop.getMoney());
 		myPop.addMoney(-price*quantity);
 		logln(",\""+myPop+"_buy_Mafter\":"+myPop.getMoney());

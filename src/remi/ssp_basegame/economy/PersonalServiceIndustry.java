@@ -38,7 +38,7 @@ public class PersonalServiceIndustry  extends Industry {
 	}
 	
 	@Override
-	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay, long wish) {
 		Province prv = indus.getProvince();
 		
 
@@ -61,8 +61,22 @@ public class PersonalServiceIndustry  extends Industry {
 
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
-		
+
+		//store prod
+		indus.getStock().put(getGood(),indus.getStock().getLong(getGood())+intproduction);
 		return intproduction;
+	}
+
+	@Override
+	public long getMenWish(ProvinceIndustry indus, double currentConsumptionPD) {
+		Province prv = indus.getProvince();
+		double prodPerMen = 0;
+		for(Pop pop : prv.getPops()){
+			float educCoeff = (0.5f+pop.getEducationMoy()/2);
+			prodPerMen += (double) (currentConsumptionPD / (10*educCoeff));
+		}
+		prodPerMen = prodPerMen / prv.getPops().size();
+		return (long) (currentConsumptionPD/prodPerMen);
 	}
 	
 }

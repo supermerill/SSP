@@ -2,6 +2,7 @@ package remi.ssp.economy;
 
 import java.util.HashMap;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import remi.ssp.politic.Province;
 
@@ -46,6 +47,17 @@ public abstract class Needs implements Comparable<Needs>{
 	public float getOptimalStockPerPop() { return optimalStockPerPop; }
 	public float getMinimumStockPerPop() { return minimumStockPerPop; }
 	
+
+	/**
+	 * How many of any goods you need for you?
+	 * @param prv province
+	 * @param totalMoneyThisTurn money available
+	 * @param nbDays nbDays before the next tick
+	 * @return good-> nb wished
+	 */
+	public abstract Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays);
+	
+	
 	/**
 	 * You should watch the BasicIndutryNeed or FoodNeed instead.
 	 * @param prv
@@ -75,7 +87,7 @@ public abstract class Needs implements Comparable<Needs>{
 		return name.compareTo(o.name);
 	}
 	
-	
+
 	public static class NeedWish{
 		public long vitalNeed; // MUST be completed. No need for more.
 		public long normalNeed; // should be completed. Okay to have some more

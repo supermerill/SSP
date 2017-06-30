@@ -3,6 +3,11 @@ package remi.ssp_basegame.economy;
 import static remi.ssp.GlobalDefines.f;
 import static remi.ssp.GlobalDefines.logln;
 
+import java.util.Arrays;
+import java.util.Map;
+
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceGoods;
@@ -18,6 +23,30 @@ public class MiddleNeedService extends PopNeed {
 	public MiddleNeedService(Pop pop) {
 		super(pop);
 		serviceGood = Good.get("service");
+	}
+
+	@Override
+	public Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
+		final long nbMensInPop = myPop.getNbAdult() + myPop.getNbChildren() + myPop.getNbElder();
+
+		Object2LongOpenHashMap<Good> wish = new Object2LongOpenHashMap<>();
+		
+		if (totalMoneyThisTurn <= 0) {
+			if(nbMensInPop == 1)
+				System.err.println("ERROR no money for pop:" + totalMoneyThisTurn);
+			return wish;
+		}
+
+		if (nbMensInPop == 0) {
+			return wish;
+		}
+
+		long price = prv.getStock().get(serviceGood).getPriceBuyFromMarket(nbDays);
+		long nb =  (long) ((myPop.getPopType()+1)) * nbDays * nbMensInPop;
+		nb = Math.max(price, myPop.getMoney()/(price*10));
+		wish.put(serviceGood,nb);
+		
+		return wish;
 	}
 
 	@Override

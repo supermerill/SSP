@@ -162,6 +162,14 @@ public class Province implements SimpleSerializable{
 	public Collection<ProvinceIndustry> getIndustries() { return industries.values(); }
 	public ProvinceIndustry getIndustry(Industry indus) { return industries.get(indus); }
 	public Map<Good, ProvinceGoods> getStock() { return stock; }
+	public ProvinceGoods getStock(Good good) {
+		ProvinceGoods prvg = stock.get(good);
+		if(prvg == null){
+			prvg = new ProvinceGoods(good, this);
+			stock.put(good, prvg);
+		}
+		return prvg;
+	}
 	public List<Pop> getPops() { return this.pops; }
 	public void addPop(Pop newPop) { this.pops.add(newPop); this.pops.sort((p1,p2) -> - Integer.compare(p1.getPopType(), p2.getPopType())); }
 	public Civilisation getOwner() { return owner; }

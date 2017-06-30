@@ -29,7 +29,7 @@ public class SubsistanceIndustry extends Industry {
 	}
 	
 	@Override
-	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay, long wish) {
 		Province prv = indus.getProvince();
 		
 		long production = 0;
@@ -46,7 +46,7 @@ public class SubsistanceIndustry extends Industry {
 			//
 			long nbChampsUsed = Math.min(nbChamps, pop.getNbMensEmployed(indus));
 			long popProduction = (long)( prv.champsRendement * nbChampsUsed * 4 * durationInDay * (0.5+pop.getFoodEffectiveness()/2)); //Two times les efficient
-			GlobalDefines.plogln(", \"nbChampsUsed_"+pop+"\":"+nbChampsUsed+", \"getFoodEffectiveness"+(0.5+pop.getFoodEffectiveness()/2)+", \"prod_"+pop+"\":"+(prv.champsRendement * nbChampsUsed * 4 * durationInDay * (0.5+pop.getFoodEffectiveness()/2)));
+			GlobalDefines.plogln(", \"nbChampsUsed_"+pop+"\":"+nbChampsUsed+", \"getFoodEffectiveness\":"+(0.5+pop.getFoodEffectiveness()/2)+", \"prod_"+pop+"\":"+(prv.champsRendement * nbChampsUsed * 4 * durationInDay * (0.5+pop.getFoodEffectiveness()/2)));
 			nbChamps -= nbChampsUsed;
 			
 			GlobalDefines.plogln(", \"stock from "+pop.getStock().get(crop)+" to\":"+(popProduction + pop.getStock().get(crop)));
@@ -113,6 +113,11 @@ public class SubsistanceIndustry extends Industry {
 		GlobalDefines.plogln(",\"Hcheck "+currentPop+" chomeurs used\": \""+nbEmplThisPop+"/"+(currentPop.getNbMensChomage())+" => "+((currentPop.getNbMensChomage() - nbEmplThisPop) /2)+"\"");
 		
 		return super.needHire(toReturn, indus, currentPop, nbDays).setMin(nbToHire);
+	}
+
+	@Override
+	public long getMenWish(ProvinceIndustry indus, double currentConsumptionPD) {
+		return 0;
 	}
 
 }

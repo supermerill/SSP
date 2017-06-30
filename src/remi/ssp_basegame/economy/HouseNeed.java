@@ -26,6 +26,11 @@ public class HouseNeed extends PopNeed{
 	public HouseNeed(Pop pop){super(pop);}
 	
 	@Override
+	public Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
+		return goodsNeeded(prv, totalMoneyThisTurn/2, nbDays, houses, 0.5);
+	}
+	
+	@Override
 	public NeedWish moneyNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 
@@ -229,7 +234,7 @@ public class HouseNeed extends PopNeed{
 			long nbBuy = entry.getLongValue();
 			currentPopStock.put(house, currentPopStock.getLong(house)+nbBuy);
 //			goodStock.get(house).addNbConsumePerDay(nbBuy / (float)nbDays);
-			goodStock.get(house).addStock( -nbBuy);
+			goodStock.get(house).addStock( -nbBuy,0);
 			logln("HOUSE NEED buy "+nbBuy+" "+house.getName());
 		}
 

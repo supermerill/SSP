@@ -35,7 +35,7 @@ public class WoodGoodsArtisanalIndustry extends Industry {
 	}
 	
 	@Override
-	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay, long wish) {
 		Province prv = indus.getProvince();
 		
 		long nbMens = 0;
@@ -49,12 +49,34 @@ public class WoodGoodsArtisanalIndustry extends Industry {
 		//a kilo of goods per worker per day with a kilo of tools
 		// the quarter if no tools
 		float production = nbMens * 0.25f;
-		production += nbMens * 0.75f * Math.min(prv.getIndustry(ptr).getStock().getLong(tools), nbMens) * createThis.getIndustryToolEfficiency();
+		production += nbMens * 0.75f * Math.min(indus.getStock().getLong(wood), nbMens) * createThis.getIndustryToolEfficiency();
 		production *= durationInDay;
 		
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
 	
+		if(intproduction<0){
+			System.err.println("Error, negative production of woodsgoods");
+		}
+
+		//store prod
+		long previousStock = indus.getStock().getLong(tools);
+		indus.setBuyableStock((long) (previousStock*0.8));
+		indus.getStock().put(tools,previousStock+intproduction);
+		
+
+		if(indus.getBuyableStock()>indus.getStock().getLong(tools)){
+			System.err.println("Error, negative number of thing");
+		}
+		
 		return intproduction;
+	}
+
+	@Override
+	public long getMenWish(ProvinceIndustry indus, double currentConsumptionPD) {
+		Province prv = indus.getProvince();
+		double prodPerMen = 0;
+		prodPerMen = 0.25f + 0.75f * createThis.getIndustryToolEfficiency();
+		return (long) Math.min(indus.getStock().getLong(tools)*1.2, currentConsumptionPD/prodPerMen);
 	}
 }

@@ -24,6 +24,11 @@ public class GoodsNeed extends PopNeed{
 	public static List<Good> goods = new ArrayList<>();
 
 	public GoodsNeed(Pop pop){super(pop);}
+
+	@Override
+	public Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
+		return goodsNeeded(prv, totalMoneyThisTurn/2, nbDays, goods, 2);
+	}
 	
 	@Override
 	public NeedWish moneyNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
@@ -63,7 +68,6 @@ public class GoodsNeed extends PopNeed{
 				}
 			}
 			if(nbGoodsNeededNormal > 0){
-				//manque => certain peuvent mourir de froid et/ou maladie
 				wish.normalNeed = 0;
 				wish.luxuryNeed = wish.vitalNeed;
 				logln(", \"--- goods need? not enough ----\":\""+wish+"\"");

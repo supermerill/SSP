@@ -14,28 +14,29 @@ public class WoodHouseIndustry extends Industry {
 	static protected WoodHouseIndustry ptr;
 	public static void load(){
 		tools = Good.get("wood_goods");
+		wood = Good.get("wood");
 		ptr = new WoodHouseIndustry();
 		Industry.put("wood_house", ptr);
 	}
 	public static WoodHouseIndustry get(){ return ptr; }
 
 	BasicIndustryNeeds myBasicNeeds;
+	static protected  Good wood;
+	static protected Good tools;
 	
 	private WoodHouseIndustry(){
 		createThis = Good.get("wood_house");
 		myNeedsFactory = pi -> new BasicIndustryNeeds(pi)
-				.addRawGood(Good.get("wood"), 2)
-				.addToolGood(Good.get("wood_goods"), 1);;
+				.addRawGood(wood, 2)
+				.addToolGood(tools, 1);;
 	}
 	
 	private BasicIndustryNeeds getNeed(ProvinceIndustry indus){
 		return (BasicIndustryNeeds)indus.getNeed();
 	}
-
-	static protected Good tools;
 	
 	@Override
-	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay, long wish) {
 		Province prv = indus.getProvince();
 		
 		long nbMens = 0;
@@ -48,13 +49,24 @@ public class WoodHouseIndustry extends Industry {
 		//a kilo of goods per worker per day with a kilo of tools
 		// the quarter if no tools
 		float production = nbMens * 0.25f;
-		production += 0.75f * Math.max(prv.getIndustry(ptr).getStock().getLong(tools), nbMens) * createThis.getIndustryToolEfficiency();
+		production += 0.75f * Math.min(indus.getStock().getLong(tools), nbMens) * createThis.getIndustryToolEfficiency();
 		production *= durationInDay * 100;
 		
 
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
-	
+
+		//store prod
+//		System.err.println("create "+production+" houses");
+		indus.getStock().put(getGood(),indus.getStock().getLong(getGood())+intproduction);
 		return intproduction;
+	}
+
+	@Override
+	public long getMenWish(ProvinceIndustry indus, double currentConsumptionPD) {
+		Province prv = indus.getProvince();
+		double prodPerMen = 0;
+		prodPerMen = 0.25f + 0.75f * createThis.getIndustryToolEfficiency();
+		return (long) Math.min(indus.getStock().getLong(tools)*1.2, currentConsumptionPD/prodPerMen);
 	}
 }

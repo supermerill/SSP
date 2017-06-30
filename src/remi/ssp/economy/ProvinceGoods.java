@@ -61,9 +61,14 @@ public class ProvinceGoods implements SimpleSerializable {
 		this.stockConsolidated = (this.stockConsolidated*(NBDAYS_CONSOLIDATED-nbDays)/(float)(NBDAYS_CONSOLIDATED)) + (stock*(nbDays)/(float)(NBDAYS_CONSOLIDATED)); 
 	}
 //	public void addPrice(int price) { this.price += price; }
-	public void addStock(long stock) {
+	/**
+	 * add a positive or negative quantity of good to this stock
+	 * @param stock nb of element to add.
+	 * @param price usefull only if stock >0, used to compute the value of the stock
+	 */
+	public void addStock(long stock, long price) {
 		if(stock>0){
-			long price = getPriceSellToMarket(1);
+//			long price = getPriceSellToMarket(1);
 			this.stockPrice = (1+ this.stockPrice * this.stock + stock*price) / (1+this.stock + stock);
 			nbProduceThisPeriod += stock;
 		}else{
@@ -167,6 +172,8 @@ public class ProvinceGoods implements SimpleSerializable {
 				buyPrice = (buyPrice+stockPrice*9)/10;
 			}
 		}
+		//don't be too greedy
+		if(buyPrice > stockPrice*2) buyPrice = stockPrice*2;
 		if(price <0){
 			System.err.println("Error in compute buyfrommarket price: coeff:"+coeff+", price:"+price);
 		}

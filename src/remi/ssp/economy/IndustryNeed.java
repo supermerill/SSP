@@ -57,9 +57,12 @@ public abstract class IndustryNeed extends Needs{
 		long moneyExch = price*quantity;
 		prv.addMoney(moneyExch);
 //		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
-		prv.getStock().get(good).addStock(-quantity);
+		prv.getStock().get(good).addStock(-quantity,prv.getStock().get(good).getPriceBuyFromMarket(nbDays));
 		myIndus.addMoney(-moneyExch);
 		myIndus.getStock().put(good, quantity + myIndus.getStock().getLong(good));
+		if(myIndus.getStock().getLong(good)<0){
+			System.err.println("Error, negative number of thing");
+		}
 		return moneyExch;
 	}
 }

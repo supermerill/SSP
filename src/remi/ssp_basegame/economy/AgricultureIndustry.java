@@ -30,14 +30,14 @@ public class AgricultureIndustry extends Industry {
 	public float testefficiency = 1;
 	
 	@Override
-	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay, long nbWhish) {
 		Province prv = indus.getProvince();
 		//TODO transform some "friche" to fields
 		//TODO: use tools
 		//TODO: evolution de la surface agricole prv.surfaceSol*prv.pourcentChamps*prv.champsRendement
 		//TODO evolution de la surface cultivable par personne
 		long production = 0;
-		int nbChamps = (int) ( (prv.pourcentChamps * prv.surface) * 10); // 10 hectare per argi
+		long nbChamps = (long) ( (prv.pourcentChamps * prv.surface) * 10L); // 10 hectare per argi
 		logln(",\"agrinbChamps\":"+nbChamps+", \"pourcentChamps\":"+prv.pourcentChamps);
 		for(Pop pop : pops){
 			//
@@ -56,7 +56,19 @@ public class AgricultureIndustry extends Industry {
 		//do not do that, economyplugin will call it after caling this
 		//super.sellProductToMarket(prv, intproduction, durationInDay);
 
+		//store prod
+		indus.getStock().put(getGood(),indus.getStock().getLong(getGood())+intproduction);
 		return intproduction;
+	}
+	
+	@Override
+	public long getMenWish(ProvinceIndustry provinceIndustry, double currentConsumptionPD) {
+		Province prv = provinceIndustry.getProvince();
+		// 1 men produce provinceIndustry.getProvince().champsRendement * 8 per day
+		//to produce 1 per day, i need 1/(8*champsRendement) men
+		long nbMensWish = 1+ (long) (currentConsumptionPD / (prv.champsRendement * 8));
+		//reduce to max number of fields usable
+		return Math.min(nbMensWish, (long) ((prv.pourcentChamps * prv.surface) * 10L));
 	}
 
 }

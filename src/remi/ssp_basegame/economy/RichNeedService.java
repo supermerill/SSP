@@ -3,6 +3,10 @@ package remi.ssp_basegame.economy;
 import static remi.ssp.GlobalDefines.f;
 import static remi.ssp.GlobalDefines.logln;
 
+import java.util.Arrays;
+
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.PopNeed;
 import remi.ssp.economy.ProvinceGoods;
@@ -18,6 +22,28 @@ public class RichNeedService extends PopNeed {
 	public RichNeedService(Pop pop) {
 		super(pop);
 		serviceGood = Good.get("service");
+	}
+
+	@Override
+	public Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
+		final long nbMensInPop = myPop.getNbAdult() + myPop.getNbChildren() + myPop.getNbElder();
+
+		Object2LongOpenHashMap<Good> wish = new Object2LongOpenHashMap<>();
+		
+		if (totalMoneyThisTurn <= 0) {
+			if(nbMensInPop == 1)
+				System.err.println("ERROR no money for pop:" + totalMoneyThisTurn);
+			return wish;
+		}
+
+		if (nbMensInPop == 0) {
+			return wish;
+		}
+
+		long nb =  50 * nbDays * nbMensInPop;
+		wish.put(serviceGood, nb);
+		
+		return wish;
 	}
 
 	@Override

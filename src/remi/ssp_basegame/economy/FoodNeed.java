@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
@@ -43,6 +45,12 @@ public class FoodNeed extends PopNeed {
 
 	public FoodNeed(Pop pop) {
 		super(pop);
+	}
+	
+
+	@Override
+	public Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
+		return goodsNeeded(prv, totalMoneyThisTurn, nbDays, kJoules.keySet(), 2);
 	}
 
 	

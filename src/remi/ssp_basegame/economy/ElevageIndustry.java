@@ -5,6 +5,9 @@ import static remi.ssp.GlobalDefines.logln;
 import java.util.Collection;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap.Entry;
+import remi.ssp.GlobalDefines;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
@@ -39,6 +42,29 @@ public class ElevageIndustry extends Industry {
 			basicIndustryNeeds = new BasicIndustryNeeds(pi)
 					.addToolGood(Good.get("wood_goods"), 1);
 		}
+
+
+		@Override
+		public Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
+			Object2LongMap<Good> currentStock = myIndus.getStock();
+			long nb = 0;
+			for(Pop pop : prv.getPops()){
+				nb += pop.getNbMensEmployed(prv.getIndustry(ElevageIndustry.this));
+			}
+			Object2LongMap<Good> wanted = basicIndustryNeeds.goodsNeeded(prv, totalMoneyThisTurn, nbDays);
+			long nbSheep = (currentStock.getLong(Good.GoodFactory.get("meat"))/100);
+			
+			logln(", \"Need more sheeps?\":\" "+nbSheep+" ? "+nb*10+"\"");
+			if(nbSheep<nb*10){
+				//try to buy some meat
+				long nbNeedToBuy = nb*10 - nbSheep;
+				nbNeedToBuy *= 100;
+				wanted.put(Good.get("meat"), wanted.getLong(Good.get("meat")) + nbNeedToBuy);
+			}
+			
+			return wanted;
+		}
+		
 
 		@Override
 		public NeedWish moneyNeeded(Province prv, long totalMoneyThisTurn, int nbDays) {
@@ -94,7 +120,7 @@ public class ElevageIndustry extends Industry {
 				myIndus.addMoney(-quantityBuy * price);
 				currentStock.put(meat,nbSheep*100);
 //				prv.getStock().get(meat).addNbConsumePerDay(quantityBuy / (float)nbDays);
-				prv.getStock().get(meat).addStock( -quantityBuy);
+				prv.getStock().get(meat).addStock( -quantityBuy,price);
 				spent += quantityBuy * price;
 				logln(", \"buyvital_qt\":"+quantityBuy+",\"vital_price\":"+price+", \"vital_spent\":"+(quantityBuy * price)+"");
 				
@@ -128,7 +154,7 @@ public class ElevageIndustry extends Industry {
 	}
 	
 	@Override
-	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {
+	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay, long provinceNeed) {
 		Province prv = indus.getProvince();
 
 		
@@ -148,6 +174,7 @@ public class ElevageIndustry extends Industry {
 		
 		//multiplicate
 		// * 1.5 every year => +0.13% per day
+		//TODO: increase birth if many men per head.
 		long newSheeps = (int) (nbSheep * durationInDay * 0.00139);
 		if(newSheeps <= 0){
 			if( GlobalRandom.aleat.getInt(1000, (int)(prv.pourcentPrairie*1000000)) < (int) (nbSheep * durationInDay * 1.39) ){
@@ -162,19 +189,20 @@ public class ElevageIndustry extends Industry {
 		// - X sheep per prairie
 		
 		
-		int nbSheepToSell = 0;
-		int nbMens = 0;
+		long nbSheepToSell = 0;
+		long nbMens = 0;
 		for(Pop pop : pops){
 			nbMens += pop.getNbMensEmployed(indus);
 		}
-		if(nbSheep > 30 * nbMens){ //30 sheep per people: can sustain an other men
-			nbSheepToSell = 30 * nbMens;
-			nbSheep -= nbSheepToSell;
+		if(nbSheep > 15 * nbMens){ //30 sheep per people: can sustain an other men
+			double nbSheepPerMen = nbSheep / (double)nbMens;
+			//simple algo. sell half sheep if many many, almost nothing if near 15 per men.
+			nbSheepToSell = (long) (GlobalRandom.aleat.getInt(100, (int)nbSheep%10000) * (nbSheepPerMen-15)  /100d);
 		}
-		if(nbSheep > nbFields){ //30 sheep per people: can sustain an other men
+		if(nbSheep > nbFields){ //sell sheep if it can't be feed
 			nbSheepToSell += (nbSheep - nbFields) * nbMens / (10+nbMens);
-			nbSheep -= nbSheepToSell;
 		}
+		nbSheep -= nbSheepToSell;
 		logln(", \"i have to sell\":"+nbSheep);
 
 		if(nbSheep > nbFields){ //fall into a canyon
@@ -182,10 +210,19 @@ public class ElevageIndustry extends Industry {
 			nbSheep -= nbSheep - nbFields;
 		}
 		
+		//keep 30 sheep (savage one if necessary)
+		if(nbSheep<30 && nbSheepToSell>0){
+			nbSheepToSell += nbSheep - 30;
+			if(nbSheepToSell<0){
+				nbSheepToSell = 0;
+			}
+			nbSheep=30;
+		}
+		
 		//set new livestock
 		logln(", \"i have previously_kgSheeps\":"+indus.getStock().getLong(createThis));
-		indus.getStock().put(createThis, nbSheep*100);
-		logln(", \"i have now kgSheeps\":"+indus.getStock().getLong(createThis)+"}");
+		indus.getStock().put(createThis, (nbSheepToSell+nbSheep)*100);
+		logln(", \"i have now kgSheeps\":"+indus.getStock().getLong(createThis)+",\"sheep/men\":"+GlobalDefines.fm(nbSheep / (double)nbMens)+"}");
 		
 		
 		//TODO: sell more sheep if the price is high and famine is occurring.
@@ -195,5 +232,13 @@ public class ElevageIndustry extends Industry {
 
 		return intproduction;
 	}
+	
+	@Override
+	public long getMenWish(ProvinceIndustry provinceIndustry, double currentConsumptionPD) {
+		//if +0.13% per day and ~30 head per men, => 3.9% per day per men
+		//for 1 head per day, we need 25-26 mens
+		return (long) (1+25*currentConsumptionPD);
+	}
+	
 
 }
