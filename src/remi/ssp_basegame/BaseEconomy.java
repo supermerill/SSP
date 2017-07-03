@@ -73,10 +73,8 @@ public class BaseEconomy extends Economy {
 	}
 
 	/**
-	 * TODO: rework: instead of a province-loop, it should be a: - produce goods
-	 * in all province in the world (no order) - move goods via merchants for
-	 * all provinces (ordered by the richest/pop to the poorest) - consume goods
-	 * in each province (no order) - set prices in each province (no order)
+	 * TODO: rework: instead of a province-loop, it should be a: - produce goods in all province in the world (no order) - move goods via merchants for all
+	 * provinces (ordered by the richest/pop to the poorest) - consume goods in each province (no order) - set prices in each province (no order)
 	 */
 	public void doTurn(Carte map, int nbDays) {
 		// TODO: REMINDER: don't forget to clear the TradeRouteExchange
@@ -103,21 +101,44 @@ public class BaseEconomy extends Economy {
 					if (!goodsproduced.containsKey(e.getKey())) {
 						goodsproduced.put(e.getKey(), new GoodsProduced());
 					}
-					goodsproduced.get(e.getKey()).nbNeeds = e.getLongValue();
+					goodsproduced.get(e.getKey()).nbNeeds += e.getLongValue();
 				}
 			}
+
+			logln(",\"popneed\"{ ");
 			// get wish from pop
 			for (final Pop pops : prv.getPops()) {
 				for (PopNeed need : pops.getPopNeeds()) {
+					log(",\"popneed " + need + "\":\"init\"");
 					for (it.unimi.dsi.fastutil.objects.Object2LongMap.Entry<Good> e : need
 							.goodsNeeded(prv, pops.getMoney(), nbDays).object2LongEntrySet()) {
 						if (!goodsproduced.containsKey(e.getKey())) {
 							goodsproduced.put(e.getKey(), new GoodsProduced());
 						}
-						goodsproduced.get(e.getKey()).nbNeeds = e.getLongValue();
+						log(",\"popneed " + e.getKey() + "\":" + e.getLongValue());
+						goodsproduced.get(e.getKey()).nbNeeds += e.getLongValue();
 					}
 				}
 			}
+			logln("} ");
+
+			// reduce wish if a stock is available
+			for (Entry<Good, ProvinceGoods> prvGood : prv.getStock().entrySet()) {
+				if (prvGood.getValue().getStock() > 0) {
+					if (goodsproduced.containsKey(prvGood.getKey())) {
+						GoodsProduced oldStockProd = goodsproduced.get(prvGood.getKey());
+						oldStockProd.nbNeeds = (long) Math.min(oldStockProd.nbNeeds,
+								prvGood.getValue().getNbConsumePerDayConsolidated() * 1.1);
+					}
+				} else {
+					if (goodsproduced.containsKey(prvGood.getKey())) {
+						GoodsProduced oldStockProd = goodsproduced.get(prvGood.getKey());
+						oldStockProd.nbNeeds = (long) Math.max(oldStockProd.nbNeeds,
+								prvGood.getValue().getNbConsumePerDayConsolidated() * 1.5);
+					}
+				}
+			}
+
 		}
 
 		final Object2LongMap<Province> prv2Wealth = new Object2LongOpenHashMap<Province>();
@@ -172,7 +193,7 @@ public class BaseEconomy extends Economy {
 		allPrvs.sort((prv1, prv2) -> -Long.compare(prv2Wealth.getLong(prv1), prv2Wealth.getLong(prv2)));
 		for (Province prv : allPrvs) {
 			doNavalImportExport(prv, nbDays);
-			doLandImportExport(prv, nbDays);
+			//doLandImportExport(prv, nbDays);
 		}
 		for (Province prv : allPrvs) {
 			consume(prv, nbDays);
@@ -238,9 +259,7 @@ public class BaseEconomy extends Economy {
 				pop.resetSpend();
 				long nbFood = pop.getStock().getLong(Good.get("meat"));
 				nbFood += pop.getStock().getLong(Good.get("crop"));
-				plogln(", \"nbDayFood\":"
-						+ nbFood / Math.max(1, pop
-								.getNbAdult()) /* + ", \"nbFood\":" + nbFood */
+				plogln(", \"nbDayFood\":" + nbFood / Math.max(1, pop.getNbAdult()) /* + ", \"nbFood\":" + nbFood */
 						+ ", \"foodEff\":" + f(pop.getFoodEffectiveness()) + "}");
 				totalMoney += pop.getMoney();
 				nbHab += pop.getNbChildren() + pop.getNbAdult() + pop.getNbElder();
@@ -683,12 +702,13 @@ public class BaseEconomy extends Economy {
 
 			// produce & pay people
 
-			System.out.println(",\"wish_"+producedGood.getName()+"\":"+oldStock.get(prv).get(producedGood).nbNeeds);
-			
+			System.out
+					.println(",\"wish_" + producedGood.getName() + "\":" + oldStock.get(prv).get(producedGood).nbNeeds);
+
 			// produce
 			// here it should use our industry money
 			final long quantity = indus.getIndustry().produce(indus, prv.getPops(), nbDays,
-					oldStock.get(prv).get(producedGood).nbNeeds+1);
+					oldStock.get(prv).get(producedGood).nbNeeds + 1);
 			indus.updateStock(nbDays, oldStock.get(prv).get(producedGood).oldStock, quantity);
 
 			// long quantity = indus.getStock().getLong(producedGood);
@@ -709,14 +729,16 @@ public class BaseEconomy extends Economy {
 			}
 			long nbEmployes = indus.getEmployes();
 			if (nbEmployes <= 0) {
+				logln("}");
 				System.err.println("Error, industry " + indus.getName() + " has produced " + quantity + " things with "
 						+ nbEmployes + " inside!!!");
 			}
 
 			// sell to market
-//			final long totalGain = indus.getIndustry().sellProductToMarket(prv, quantity, nbDays);
-//			logln(", \"sell_gain\": " + fm(totalGain) + "");
+			// final long totalGain = indus.getIndustry().sellProductToMarket(prv, quantity, nbDays);
+			// logln(", \"sell_gain\": " + fm(totalGain) + "");
 			plogln(", \"" + indus + " produce_nb\":" + quantity + ", \"money_after_prod\":" + fm(indus.getMoney()));
+			logln("}");
 		}
 	}
 
@@ -724,12 +746,13 @@ public class BaseEconomy extends Economy {
 		// for each good
 		for (Entry<Good, GoodsProduced> good : oldStock.get(prv).entrySet()) {
 			ProvinceGoods marketStock = prv.getStock(good.getKey());
+			logln(", \"buy good" + good.getKey() + "\":{\"0\":0");
 			// see how many i have in stock
 			long stock = marketStock.getStock();
 			double optimalNbTurns = Math.max(2, good.getKey().getOptimalNbDayStock() / nbDays);
 			long needToBuy = (long) (good.getValue().nbNeeds * optimalNbTurns - stock);
 			if (needToBuy > 0) {
-				System.out.println(",\"needtobuy"+good.getKey()+"\":"+needToBuy);
+				logln(",\"needtobuy " + good.getKey() + "\":" + needToBuy);
 				// order industries by price
 				List<ProvinceIndustry> bestIndus = new ArrayList<>();
 				double totalPrvPrice = 0;
@@ -740,13 +763,18 @@ public class BaseEconomy extends Economy {
 					}
 				}
 				final long needToBuyInitial = needToBuy;
-				bestIndus.sort((i1, i2) -> -Double.compare(i1.getPrice(needToBuyInitial), i2.getPrice(needToBuyInitial)));
+				bestIndus.sort(
+						(i1, i2) -> -Double.compare(i1.getPrice(needToBuyInitial), i2.getPrice(needToBuyInitial)));
 				for (ProvinceIndustry prvIndus : bestIndus) {
+					logln(",\"bying in " + good.getKey() + "\":{\"stock\":" + prvIndus.getBuyableStock());
 					double prvPrice = prvIndus.getPrice(needToBuy);
+					logln(",\"prvPrice1\":" + prvPrice);
 					long nbBuy = (long) (1 + needToBuy * (1 / prvPrice) / totalPrvPrice);
-					prvPrice = prvIndus.getPrice(nbBuy);
+					logln(",\"nbBuy\":" + nbBuy);
+					// prvPrice = prvIndus.getPrice(nbBuy);
+					// logln(",\"prvPrice2\":"+ prvPrice);
 					nbBuy = Math.min(nbBuy, prvIndus.getBuyableStock());
-					System.out.println(",\"wantToBuy"+good.getKey()+"\":"+nbBuy);
+					// logln(",\"wantToBuy "+good.getKey()+" from "+prvIndus.getIndustry().getName()+" \":"+nbBuy);
 					needToBuy -= nbBuy;
 					// buy it
 					long totalPrice = (long) (nbBuy * prvPrice);
@@ -754,15 +782,17 @@ public class BaseEconomy extends Economy {
 					marketStock.addStock(nbBuy, (long) prvPrice);
 					prvIndus.buyGood(good.getKey(), nbBuy, totalPrice);
 
-					if(prvIndus.getStock().getLong(good.getKey())<0){
+					if (prvIndus.getStock().getLong(good.getKey()) < 0) {
 						System.err.println("Error, negative number of thing");
 					}
+					logln("}");
 				}
 			}
+			logln("}");
 		}
 	}
 
-	//TODO to redo:
+	// TODO to redo:
 	// keep half money as reserve
 	// try to keep a decent amount (at least half) for basic goods.
 	// try to not fluctuate the salary too much.
@@ -774,7 +804,104 @@ public class BaseEconomy extends Economy {
 				indus.setPreviousSalary(0);
 				continue;
 			}
+			logln(", \"PAYprvIndus_" + indus + "\":{\"indus\":\"" + indus.getIndustry().getName()+"\"");
+
+			final long currentMoney = indus.getMoney();
+			final long availableMoney = currentMoney/2;
 			
+			NeedWish wish = indus.getNeed().moneyNeeded(prv, indus.getMoney(), nbDays);
+			final long investNeeded = wish.getMoney();
+			
+
+			long moneySalary = Math.max(availableMoney - investNeeded,(long)(availableMoney*0.25));
+			moneySalary = Math.min((long) ((moneySalary + 2*(indus.getPreviousSalary()*indus.getEmployes()))/3),availableMoney);
+
+			long moneyInvestors = (long) ((currentMoney - investNeeded - moneySalary)*0.2);
+			if(moneyInvestors < 0 ){
+				moneyInvestors = 0;
+			}
+			
+			// Not enough invest money, grab the corrected version from the
+			// other pc?
+			logln(", \"money_indus\": " + fm(currentMoney ));
+			log(", \"money_investors\":" + fm(moneyInvestors));
+			logln(", \"money_salary\": " + fm(moneySalary ));
+			logln(", \"money_investNeed\": " + fm(investNeeded ));
+			logln(", \"money_kept\":" + fm((indus.getMoney() - moneyInvestors - moneySalary)));
+			// safeguard
+			if (moneyInvestors + moneySalary > currentMoney)
+				System.err.println("error in money distribution algorithm");
+
+			long marge = (long) (indus.getPrice(indus.getPreviousProduction()) - indus.getCurrentRawGoodPrice()*indus.getPreviousProduction());
+			// check for salary problem.
+			if (moneyInvestors > moneySalary * 5 && indus.getPreviousGain() > 0) {
+				// give all marge to salary
+				long newMoneySalary = Math.min(1 + moneyInvestors / 5, marge * indus.getPreviousProduction());
+				moneyInvestors -= newMoneySalary + moneySalary;
+				moneySalary = newMoneySalary;
+				logln(", \"more_for_salary\": " + fm(moneySalary ));
+			}
+
+			// distribute money
+			// TODO: do not reduce the salary that quick. not much than 1%
+			// per day
+			indus.setPreviousSalary((moneySalary) / (double) (nbEmployes));
+			logln(", \"individual_salary\": " + fm(moneySalary / (double) (nbEmployes)));
+			long nbOwner = prv.getPops().stream().filter(pop -> pop.getCoeffInvestors() > 0)
+					.mapToLong(pop -> pop.getNbAdult() * pop.getCoeffInvestors()).sum();
+			long nbOwnerVerif = 0;
+			for (Pop pop : prv.getPops()) {
+				if (pop.getCoeffInvestors() > 0) {
+					nbOwnerVerif += pop.getNbAdult() * pop.getCoeffInvestors();
+				}
+			}
+			if (nbOwner != nbOwnerVerif)
+				System.err.println("stream error : " + nbOwner + " != " + nbOwnerVerif);
+			// logln(", \"give\": {\"nbPops\":"+prv.getPops());
+			for (Pop pop : prv.getPops()) {
+				log(", \"give_" + pop + "\":{\"money_before\":" + f(pop.getMoney() / 1000f));
+				if (pop.getCoeffInvestors() > 0) {
+					// if owner
+					long money = (long) (moneyInvestors * pop.getNbAdult() * pop.getCoeffInvestors()) / nbOwner;
+					indus.addMoney(-money);
+					// log(Pop.popTypeName.get(pop.getPopType())+" pop has
+					// "+pop.getMoney());
+					pop.addMoney(money, Pop.MONEY_INVEST);
+					// logln(" and rich pop gain "+money+ ", and now has
+					// "+pop.getMoney());
+					log(", \"money_investors\": " + f(money / 1000f));
+				}
+				// salary
+				long employesHere = pop.getNbMensEmployed(indus);
+				long money = (long) (moneySalary * employesHere / (float) nbEmployes);
+				indus.addMoney(-money);
+				pop.addMoney(money, Pop.MONEY_SALARY);
+				log(", \"money_salary\": " + f(money / 1000f));
+				logln(", \"money_after\": " + f(pop.getMoney() / 1000f) + "}");
+			}
+			// logln("}")
+
+			if (indus.getMoney() < 0)
+				System.err.println("Error, in industral" + indus.getName() + "@" + prv.x + ":" + prv.y
+						+ " money salary : negative value " + indus.getMoney());
+
+			log(", \"indus_money_after\": " + f(indus.getMoney() / 1000f) + " ");
+			// we will use our money for our need in the consume phase (or
+			// for selling)
+
+			logln("}");
+		}
+	}
+
+	public void industriesPayEmployesOld(Province prv, int nbDays) {
+		// produce
+		for (final ProvinceIndustry indus : prv.getIndustries()) {
+			long nbEmployes = indus.getEmployes();
+			if (indus.getMoney() < 1 || nbEmployes == 0) {
+				indus.setPreviousSalary(0);
+				continue;
+			}
+
 			NeedWish wish = indus.getNeed().moneyNeeded(prv, indus.getMoney(), nbDays);
 			final long investNeeded = wish.getMoney();
 
@@ -786,7 +913,7 @@ public class BaseEconomy extends Economy {
 			// compute how many we need to keep going (increase prod)
 
 			// TODO redo
-			long moneyToProduce = indus.getRawGoodsCost() * indus.getPreviousProduction();
+			long moneyToProduce = (long) (indus.getCurrentRawGoodPrice() * indus.getPreviousProduction());
 
 			float ratio = (indus.getMoney() / (float) moneyToProduce);
 			// logln("ratio="+ratio);
@@ -799,11 +926,12 @@ public class BaseEconomy extends Economy {
 			// i removed the ratio for now because is has caused a big
 			// starvation in poor people (salary /2 in 1 tick)
 			// long moneySalary = (long) (marge * quantity /* ratio*/) / 2;
-			long moneySalary = (long) Math.max(indus.getMoney() - moneyToProduce, Math.min(indus.getMoney()*0.05, moneyToProduce*0.05));
+			long moneySalary = (long) Math.max(indus.getMoney() - moneyToProduce,
+					Math.min(indus.getMoney() * 0.05, moneyToProduce * 0.05));
 			moneySalary -= Math.min(moneySalary / 2, investNeeded);
 			long moneyBonus = (long) (moneySalary * (1 - ratioSalaryInvest));
 			moneySalary = moneySalary - moneyBonus;
-			if(moneySalary<0)
+			if (moneySalary < 0)
 				System.err.println("merdouuille");
 			// logln(", indus.getMoney()="+indus.getMoney()+",
 			// moneyToKeep="+moneyToKeep+", goodPrice="+goodPrice+",
@@ -850,7 +978,7 @@ public class BaseEconomy extends Economy {
 			if (moneyInvestors + moneySalary > indus.getMoney())
 				System.err.println("error in money distribution algorithm");
 
-			long marge = (long) (indus.getPrice(indus.getPreviousProduction()) - indus.getRawGoodsCost());
+			long marge = (long) (indus.getPrice(indus.getPreviousProduction()) - indus.getCurrentRawGoodPrice());
 			// check for salary problem.
 			if (moneyInvestors > moneySalary * 5 && indus.getPreviousGain() > 0) {
 				// give all marge to salary
@@ -906,7 +1034,7 @@ public class BaseEconomy extends Economy {
 			// we will use our money for our need in the consume phase (or
 			// for selling)
 
-			logln("}");
+			// logln("}");
 		}
 	}
 
@@ -1277,8 +1405,8 @@ public class BaseEconomy extends Economy {
 					int left = GlobalRandom.aleat
 							.getLeftover(((double) (computePrice * increase)) - ((long) (computePrice)));
 					computePrice += left;
-					plogln(",\"increasePrice(toomuchmoney)\":{\"g\":\"" + entry.getKey() + ", \"oldPrice\":"
-							+ entry.getValue().oldPrice + "\", \" increase\":"
+					plogln(",\"increasePrice(toomuchmoney)\":{\"g\":\"" + entry.getKey() + "\", \"oldPrice\":"
+							+ entry.getValue().oldPrice + ", \" increase\":"
 							+ (computePrice - entry.getValue().oldPrice) + ", \"newPrice\":" + computePrice + "}");
 					entry.getValue().oldPrice = (computePrice);
 				}
@@ -1391,12 +1519,13 @@ public class BaseEconomy extends Economy {
 				logln(", \"calculus\":\"[ max from " + f(saveNP + 1) + " and " + newPrice + "(" + f(tempPrice / saveNP)
 						+ " -> " + f((tempPrice / saveNP) - 1) + " * "
 						+ f(good.getVolatility() * nbDays / PRICE_CHANGE_PERIOD) + " = " + f(increaseMult - 1) + " -> "
-						+ f(increaseMult) + ")] \"");
+						+ f(increaseMult) + ")] \",\"newPrice\":" + newPrice);
 				// try to go back to the market price quickly if needed.
 				if (prvGood.getStock() == 0 && newPrice < prvGood.getPriceBuyFromMarket(nbDays)) {
 					newPrice += prvGood.getPriceBuyFromMarket(nbDays);
 					newPrice /= 2;
 				}
+				logln(",\"newPriceFinal\":" + newPrice);
 
 				// newPrice = Math.max(saveNP+1, (long)(saveNP + ((tempPrice -
 				// saveNP) * ((good.getVolatility() * nbDays) /
@@ -1441,6 +1570,7 @@ public class BaseEconomy extends Economy {
 						+ "(" + "(" + f(tempPrice / saveNP) + " => " + f((saveNP / tempPrice)) + " -> "
 						+ f((saveNP / tempPrice) - 1) + " * " + f(good.getVolatility() * nbDays / PRICE_CHANGE_PERIOD)
 						+ " = " + f(increaseMult - 1) + " -> " + f(increaseMult) + "=>" + f(decreaseMult) + ")]\" ");
+				logln(",\"newPriceFinal2\":" + newPrice);
 
 			}
 
@@ -1476,6 +1606,7 @@ public class BaseEconomy extends Economy {
 
 			// do not go higher than 2 000 000 /kg
 			prv.getStock().get(entry.getKey()).setPrice(Math.min(newPrice, Integer.MAX_VALUE));
+			prv.getStock().get(entry.getKey()).setPrice(Math.min(newPrice, prvGood.getStockPrice() * 50));
 			// "clean" for next loop (we want to keep 2 time more than we need
 			// in stock, and this method add a bit of inertia) => replaced by
 			// "consolidated"
@@ -1595,8 +1726,8 @@ public class BaseEconomy extends Economy {
 					result *= indus.getLongValue() * nbDays / 30f;
 					if (result > 0 && result < 1)
 						result = 1;
-					if (indus.getKey().getPreviousSalary() < 10) {
-						if (indus.getLongValue() < 100) {
+					if (indus.getKey().getPreviousSalary() < 1) {
+						if (indus.getLongValue() < 10) {
 
 							logln(", \"fire all " + indus.getKey() + "! salary =\":"
 									+ indus.getKey().getPreviousSalary());

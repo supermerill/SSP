@@ -12,6 +12,8 @@ import remi.ssp.algorithmes.Spawner;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Job;
 import remi.ssp.economy.PopNeed;
+import remi.ssp.economy.PopNeed.PopNeedFactory;
+import remi.ssp.economy.PopNeed.PopNeedFactoryStorage;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.ProvinceIndustry.ProvinceIndustryFactory;
@@ -21,6 +23,7 @@ import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 import remi.ssp_basegame.economy.AgricultureIndustry;
 import remi.ssp_basegame.economy.ElevageIndustry;
+import remi.ssp_basegame.economy.HouseNeed;
 import remi.ssp_basegame.economy.HuntingIndustry;
 import remi.ssp_basegame.economy.HuntingSportIndustry;
 import remi.ssp_basegame.economy.PersonalServiceIndustry;
@@ -112,7 +115,7 @@ public class BaseSpawner extends Spawner {
 					//add needs (TODO: get them from techs researched at startup)
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
 					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*250); //~some day of food
-//					pop.getPopNeeds().add(HouseNeed.create("house", pop));
+					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 					pop.getPopNeeds().add(PopNeed.create("rich_service", pop));
 					//middle
 					pop = new Pop(prv);
@@ -126,7 +129,7 @@ public class BaseSpawner extends Spawner {
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
 					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*250); //~some day of food
 					pop.getPopNeeds().add(PopNeed.create("middle_service", pop));
-//					pop.getPopNeeds().add(HouseNeed.create("house", pop));
+					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 					//poor
 					pop = new Pop(prv);
 					pop.addChildren(300);
@@ -139,7 +142,7 @@ public class BaseSpawner extends Spawner {
 					pop.getPopNeeds().add(PopNeed.create("food", pop));
 					pop.getStock().put(Good.get("crop"), pop.getNbAdult()*250); //~some day of food
 					pop.getPopNeeds().add(PopNeed.create("middle_service", pop));
-//					pop.getPopNeeds().add(HouseNeed.create("house", pop));
+					pop.getPopNeeds().add(HouseNeed.create("house", pop));
 				}
 			}
 		

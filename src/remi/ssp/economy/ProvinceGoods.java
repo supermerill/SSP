@@ -173,7 +173,7 @@ public class ProvinceGoods implements SimpleSerializable {
 			}
 		}
 		//don't be too greedy
-		if(buyPrice > stockPrice*2) buyPrice = stockPrice*2;
+		if(buyPrice > stockPrice*3) buyPrice = stockPrice*3;
 		if(price <0){
 			System.err.println("Error in compute buyfrommarket price: coeff:"+coeff+", price:"+price);
 		}

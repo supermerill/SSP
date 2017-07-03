@@ -22,8 +22,8 @@ public class GlobalRandom {
 	private Random rand;
 	
 	public int getInt(int modulo, int salt){
-		if(modulo==0) return 0;
-		return (rand.nextInt() & 0x7FFFFFFF) % modulo;
+		if(modulo<=0) return 0;
+		return ((rand.nextInt()+salt) & 0x7FFFFFFF) % modulo;
 	}
 	
 	public void shuffle(List<?> list) {

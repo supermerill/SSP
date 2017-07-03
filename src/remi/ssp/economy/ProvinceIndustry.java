@@ -9,6 +9,7 @@ import javax.json.JsonObjectBuilder;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import remi.ssp.GlobalDefines;
 import remi.ssp.network.SimpleSerializable;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
@@ -44,7 +45,8 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 	// used to run
 	Object2LongMap<Good> stock = new Object2LongOpenHashMap<Good>(); //raw goods + tools
 	long money=0;//bfr
-	long rawGoodsCost=0; // rawgoods + depreciation of owned stock
+	//long rawGoodsCost=0; // rawgoods + depreciation of owned stock
+	double currentRawGoodPrice = 1; //like currentstockPrice, but for raw goods.
 	long previousProduction=0;
 	double previousSalary=1;
 	
@@ -69,8 +71,8 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 		}
 	}
 //	public void setMoney(long money) { this.money = money; }
-	public long getRawGoodsCost() { return rawGoodsCost; }
-	public void setRawGoodsCost(long rawGoodsCost) { this.rawGoodsCost = rawGoodsCost; }
+	public double getCurrentRawGoodPrice() { return currentRawGoodPrice; }
+	public void setCurrentRawGoodPrice(double currentRawGoodPrice) { this.currentRawGoodPrice = currentRawGoodPrice; }
 	public Object2LongMap<Good> getStock() { return stock; }
 	public long getPreviousProduction() { return previousProduction; }
 	public void setPreviousProduction(long previousProduction) { this.previousProduction = previousProduction; 
@@ -80,9 +82,9 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 	}
 	public double getPreviousSalary() { return previousSalary; }
 	public void setPreviousSalary(double previousSalary) { this.previousSalary = previousSalary; 
-	if(previousSalary<0 || previousSalary>10000000){
-		System.err.println("Error, negative previousSalary");
-	}
+		if(previousSalary<0 || previousSalary>10000000){
+			System.err.println("Error, negative previousSalary");
+		}
 	}
 	
 	//-----------------------------------------------
@@ -183,11 +185,28 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 	 * @return price per element
 	 */
 	public double getPrice(long wish) {
+		GlobalDefines.logln(",\"get price for "+industry.getName()+"\":{\"0\":0");
 		
 		// --- compute fixed cost: salary
 		
 		//check salary
 		double salaryNeeded = getPreviousSalary();
+		GlobalDefines.logln(",\"previous salary\":"+GlobalDefines.fm(salaryNeeded));
+		
+		if(salaryNeeded <=0){
+			salaryNeeded=0;
+			if(province.getPops().size()>0){
+				for(Pop pop : province.getPops()){
+					salaryNeeded += pop.getGainSalary() / pop.getNbAdult();
+				}
+				salaryNeeded /= province.getPops().size();
+				GlobalDefines.logln(",\"no previous salary, usemean\":"+GlobalDefines.fm(salaryNeeded));
+			}
+			if(salaryNeeded<=0){
+				salaryNeeded = 10000;
+				GlobalDefines.logln(",\"no previous salary, use default\":"+GlobalDefines.fm(salaryNeeded));
+			}
+		}
 		
 		//do we have more or less salarymens?
 //		long empoyesDiff = getPreviousEmployes() - getEmployes();
@@ -200,28 +219,40 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 		long currentMens = this.getEmployes();
 		// if we don't produce enough, ask for more money
 		// if we overproduce, ask for less money.
-		double ratio = (wish/ (double)previousProduction);
-		salaryNeeded *= ratio;
+		double ratio = ((1+wish)/ (1+(double)previousProduction));
+		final double mult = (2-((2-0.5)/(1+Math.pow(ratio,1.2))));
+		salaryNeeded *= mult;
+//		salaryNeeded *= (2-((2-0.5/1+Math.pow(ratio,1.2))));
+		GlobalDefines.logln(",\"previousProduction\":"+previousProduction);
+		GlobalDefines.logln(",\"wish\":"+wish);
+		GlobalDefines.logln(",\"ratio\":"+ratio);
+		GlobalDefines.logln(",\"mult\":"+mult);
+		GlobalDefines.log(",\"salary needed\":"+GlobalDefines.fm(salaryNeeded));
 		
-		long fixedPrice = (long) (currentMens * salaryNeeded / wish);
+		long fixedPrice = (long) (currentMens * salaryNeeded);
 		
 		//if consumption is bigger than production -> increase price
 		//if consumption is lower than production -> lower price
 		
 		// --- compute variable cost: goods
 		
-		long variablePrice = this.rawGoodsCost;
+		long variablePrice = (long)(this.getCurrentRawGoodPrice() * previousProduction);
+		GlobalDefines.log(",\"init fixedPrice\":"+fixedPrice);
+		GlobalDefines.logln(",\"init variablePrice\":"+variablePrice);
 
 		if(fixedPrice<variablePrice*0.25){
 			//set a minimum for the salary
 			fixedPrice = variablePrice / 4;
 		}
-//		if(variablePrice<fixedPrice*0.2){
-//			//set a minimum for the tools & raw goods
-//			variablePrice = fixedPrice / 5;
-//		}
+		if(variablePrice<fixedPrice*0.1){
+			//set a minimum for the tools & raw goods
+			variablePrice = fixedPrice / 10;
+		}
+		GlobalDefines.log(",\"final fixedPrice\":"+fixedPrice);
+		GlobalDefines.logln(",\"final variablePrice\":"+variablePrice);
 		
-		return fixedPrice + variablePrice;
+		GlobalDefines.logln("}");
+		return (fixedPrice + variablePrice)/(double)previousProduction;
 	}
 	
 	public void buyGood(Good good, long nbBuy, long totalPrice) {
@@ -246,7 +277,7 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 	
 	public void load(JsonObject jsonObj){
 		money = jsonObj.getJsonNumber("money").longValue();
-		rawGoodsCost = jsonObj.getJsonNumber("cost").longValue();
+		currentRawGoodPrice = jsonObj.getJsonNumber("cost").doubleValue();
 		previousProduction = jsonObj.getJsonNumber("prod").longValue();
 		previousSalary = jsonObj.getJsonNumber("salary").longValue();
 		JsonArray array = jsonObj.getJsonArray("stock");
@@ -258,7 +289,7 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 	}
 	public void save(JsonObjectBuilder jsonOut){
 		jsonOut.add("money", money);
-		jsonOut.add("cost", rawGoodsCost);
+		jsonOut.add("cost", currentRawGoodPrice);
 		jsonOut.add("prod", previousProduction);
 		jsonOut.add("salary", previousSalary);
 		JsonArrayBuilder array = Json.createArrayBuilder();

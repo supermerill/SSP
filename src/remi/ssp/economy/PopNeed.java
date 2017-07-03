@@ -45,6 +45,7 @@ public abstract class PopNeed extends Needs {
 
 	protected Object2LongMap<Good> goodsNeeded(Province prv, long totalMoneyThisTurn, int nbDays, Collection<Good> possibleGoods, double nbPerDayPerMen) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
+		logln(",\"goodsNeeded\":"+possibleGoods.size());
 
 		final long nbMensInPop = myPop.getNbAdult() + myPop.getNbChildren() + myPop.getNbElder();
 
@@ -53,10 +54,12 @@ public abstract class PopNeed extends Needs {
 		if (totalMoneyThisTurn <= 0) {
 			if(nbMensInPop == 1)
 				System.err.println("ERROR no money for pop:" + totalMoneyThisTurn);
+			logln(",\"goodsNeeded\":\"nomoney\"");
 			return wish;
 		}
 
 		if (nbMensInPop == 0) {
+			logln(",\"goodsNeeded\":\"0 mens\"");
 			return wish;
 		}
 //
@@ -120,6 +123,7 @@ public abstract class PopNeed extends Needs {
 //		logln(", \"food wish/need\":\"" + wish + "\"}");
 		
 		for(Good good : possibleGoods){
+			logln(",\"goodsNeeded\":\"add "+good+"\"");
 			wish.put(good, (long) (nbPerDayPerMen * nbDays * nbMensInPop));
 		}
 		return wish;

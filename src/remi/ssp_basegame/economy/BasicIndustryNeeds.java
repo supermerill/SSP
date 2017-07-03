@@ -134,7 +134,6 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			//update rawgoodCost
 			rawGoodCost += price * needed.getFloatValue();
 		}
-		myIndus.setRawGoodsCost(rawGoodCost);
 		for(Entry<Good> needed : toolsNeeded.object2FloatEntrySet()){
 			long currentStockNumber = currentStock.getLong(needed.getKey());
 			ProvinceGoods market = goodStock.get(needed.getKey());
@@ -200,10 +199,11 @@ public class BasicIndustryNeeds extends IndustryNeed {
 //			currentStock.put(needed.getKey(),currentStockNumber + quantityBuy);
 //			market.addStock( -quantityBuy);
 		}
-		
+
 
 		if (myIndus.getMoney() < 0)
 			System.err.println("Error, in industral money buy: "+myIndus+" now has "+myIndus.getMoney()+"€");
+
 		
 		return maxMoney - moneyToSpend;
 	}
@@ -212,6 +212,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 	public long useGoodsAndTools(ProvinceIndustry stock, long quantity, int nbDays){
 		
 		long realProd = quantity;
+		long price = 0;
 		//restrict production to the max available from raw materials
 		for(Entry<Good> needed : rawNeeded.object2FloatEntrySet()){
 			if(stock.getStock().getLong(needed.getKey())<0){
@@ -231,6 +232,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			if(stock.getStock().getLong(needed.getKey())<0){
 				System.err.println("Error, negative number of mat");
 			}
+			price += stock.getProvince().getStock(needed.getKey()).getPriceBuyFromMarket(0) * needed.getFloatValue() * realProd;
 		}
 
 		// break some tools (0.5% of tools break per use per day)
@@ -238,14 +240,17 @@ public class BasicIndustryNeeds extends IndustryNeed {
 			if(stock.getStock().getLong(needed.getKey())<0){
 				System.err.println("Error, negative number of tools");
 			}
-			stock.getStock().put(needed.getKey(), (long)(
-					Math.min(stock.getStock().getLong(needed.getKey()), realProd) * 0.005f * nbDays * needed.getFloatValue())  );
+			long previousStock = stock.getStock().getLong(needed.getKey());
+			long newStock = (long) (Math.min(previousStock, realProd) * 0.005f * nbDays * needed.getFloatValue());
+			stock.getStock().put(needed.getKey(), (long)(newStock));
 			if(stock.getStock().getLong(needed.getKey())<0){
 				System.err.println("Error, negative number of tools");
 			}
+			price += stock.getProvince().getStock(needed.getKey()).getPriceBuyFromMarket(0)* (previousStock - newStock);
 		}
 		
 
+		myIndus.setCurrentRawGoodPrice(price/(double)realProd);
 		
 		return realProd;
 	}
