@@ -5,13 +5,16 @@ import static remi.ssp.GlobalDefines.logln;
 import java.util.Collection;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import remi.ssp.GlobalDefines;
 import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.IndustryNeed;
+import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
+import remi.ssp.utils.LongInterval;
 
 //create food from animals (and grow the cheptel)
 //needs:  TODO: buy sheep from market if possible
@@ -162,16 +165,17 @@ public class ElevageIndustry extends Industry {
 		// - X sheep per prairie
 		
 		
-		int nbSheepToSell = 0;
-		int nbMens = 0;
+		long nbSheepToSell = 0;
+		long nbMens = 0;
 		for(Pop pop : pops){
 			nbMens += pop.getNbMensEmployed(indus);
 		}
-		if(nbSheep > 30 * nbMens){ //30 sheep per people: can sustain an other men
-			nbSheepToSell = 30 * nbMens;
-			nbSheep -= nbSheepToSell;
+		if(nbSheep > 15 * nbMens){ //30 sheep per people: can sustain an other men
+			double nbSheepPerMen = nbSheep / (double)nbMens;
+			//simple algo. sell half sheep if many many, almost nothing if near 15 per men.
+			nbSheepToSell = (long) (GlobalRandom.aleat.getInt(100, (int)nbSheep%10000) * (nbSheepPerMen-15)  /100d);
 		}
-		if(nbSheep > nbFields){ //30 sheep per people: can sustain an other men
+		if(nbSheep > nbFields){ //sell sheep if it can't be feed
 			nbSheepToSell += (nbSheep - nbFields) * nbMens / (10+nbMens);
 			nbSheep -= nbSheepToSell;
 		}
@@ -181,11 +185,21 @@ public class ElevageIndustry extends Industry {
 			logln(", \"sheeps lost\":"+(nbSheep - nbFields));
 			nbSheep -= nbSheep - nbFields;
 		}
+
+		//keep 30 sheep (savage one if necessary)
+		if(nbSheep<30 && nbSheepToSell>0){
+			nbSheepToSell += nbSheep - 30;
+			if(nbSheepToSell<0){
+				nbSheepToSell = 0;
+			}
+			nbSheep=30;
+		}
+		
 		
 		//set new livestock
 		logln(", \"i have previously_kgSheeps\":"+indus.getStock().getLong(createThis));
 		indus.getStock().put(createThis, nbSheep*100);
-		logln(", \"i have now kgSheeps\":"+indus.getStock().getLong(createThis)+"}");
+		logln(", \"i have now kgSheeps\":"+indus.getStock().getLong(createThis)+",\"sheep/men\":"+GlobalDefines.fm(nbSheep / (double)nbMens)+"}");
 		
 		
 		//TODO: sell more sheep if the price is high and famine is occurring.
@@ -195,5 +209,53 @@ public class ElevageIndustry extends Industry {
 
 		return intproduction;
 	}
+	
+
+	public long getMenWish(ProvinceIndustry provinceIndustry, double currentConsumptionPD) {
+		//if +0.13% per day and ~30 head per men, => 3.9% per day per men
+		//for 1 head per day, we need 25-26 mens
+		return (long) (1+25*currentConsumptionPD);
+	}
+	
+	/**
+	 * hire if i have at least 15 head per person, to a max of 60 head/mens
+	 */
+	public LongInterval needHire(LongInterval toReturn, ProvinceIndustry indus, Pop pop, int nbDays)
+	{
+		long nbSheep = (indus.getStock().getLong(createThis)/100); //100kg per sheep
+		long nbEmp = indus.getEmployes();
+		if(toReturn==null)toReturn=new LongInterval(Math.max(0, nbSheep/60 - nbEmp), Math.max(0, nbSheep/15 - nbEmp)); return toReturn.set(Math.max(0, nbSheep/60 - nbEmp), Math.max(0, nbSheep/15 - nbEmp)); 
+	 }
+	
+
+//	/**
+//	* from the super
+//	 * @param provinceIndustry 
+//	 * @return number of minimum workers this industry should fire
+//	 */
+//	public LongInterval needFire(LongInterval toReturn, ProvinceIndustry indus, Pop pop, int nbDays)
+//	{
+//		if(toReturn==null)toReturn=new LongInterval(0, 0);
+//		toReturn.set(DEF_INTER); 
+//		Province prv = indus.getProvince();
+//		long nbEmployed = pop.getNbMensEmployed(indus);
+//		ProvinceGoods prvGood = prv.getStock().get(createThis);
+//		//TODO: logs to understand why agri overproductino isn't fired
+//		GlobalDefines.log(", \"WillfireOverproduction_"+createThis+"_"+nbEmployed+"\":\""+prvGood.getStockConsolidated()
+//		+" > "+(prvGood.getNbConsumePerDayConsolidated() * createThis.getOptimalNbDayStock()));
+//		GlobalDefines.logln(" && "+(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays)+" < "+prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays+"\"");
+//		//if too much stock and overproduction
+//		if(prvGood.getStockConsolidated() > prvGood.getNbConsumePerDayConsolidated() * createThis.getOptimalNbDayStock()
+//				&& prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays < prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays){
+//			//then fire enough to remove overproduction *2 (max 10%)
+//			double ratioFire = 1 - (double)(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays) / (double)(prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays);
+//			long nbFire = (long) (nbEmployed * ratioFire);
+//			nbFire = 1 + nbFire*2;
+//			nbFire = Math.min(nbFire, Math.max(1, nbEmployed/10));
+//			GlobalDefines.logln(", \"fireOverproduction_"+createThis+"_"+nbEmployed+"\":"+nbFire);
+//			return toReturn.set(nbFire, Long.MAX_VALUE);
+//		}
+//		return toReturn;
+//	}
 
 }

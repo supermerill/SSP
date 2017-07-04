@@ -10,14 +10,31 @@ import remi.ssp.politic.Province;
  *
  */
 public class TradeRoute {
-	Province source;
-	Province destination;
+	protected Province source;
+	protected Province destination;
 	
-	boolean isWater = false; //for sea and canals liaisons
+	protected boolean isWater = false; //for sea and canals liaisons
+	
+	
 	
 	//TODO: extension: previous share of market to keep track of market share, and modify it by opinion and profit over time.
 	
 	
+	public TradeRoute(Province source, Province destination) {
+		super();
+		this.source = source;
+		this.destination = destination;
+	}
+	
+	public TradeRoute(Province source, Province destination, boolean isWater) {
+		super();
+		this.source = source;
+		this.destination = destination;
+		this.isWater = isWater;
+	}
+
+
+
 	public Province getOtherEnd(Province me){
 		if(source == me) return destination;
 		return source;

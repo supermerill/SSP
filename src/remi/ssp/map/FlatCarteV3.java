@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import remi.ssp.algorithmes.GlobalRandom;
+import remi.ssp.economy.TradeRoute;
 import remi.ssp.politic.Carte;
 import remi.ssp.politic.Plot;
 import remi.ssp.politic.Province;
@@ -453,7 +454,10 @@ public class FlatCarteV3 implements MapFactory {
 		int taillePatcheu = 0;
 		dessine(centreu, taillePatcheu, 10000);
 		Province deux = provinces.get(1).get(0);
+		dessine(deux, taillePatcheu, 5000);
 //		dessine(deux, taillePatcheu, 10000);
+		centreu.getTradeRoute().add(new TradeRoute(centreu, deux));
+		deux.getTradeRoute().add(new TradeRoute(deux, centreu));
 		if(true)return;
 		//////////////////////////////////////////////////////////////////////////////////////////
 

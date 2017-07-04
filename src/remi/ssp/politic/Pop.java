@@ -50,8 +50,8 @@ public class Pop implements SimpleSerializable {
 		//TODO: slaves: like investment for the richs: they give their money to rich & medium, and use the rich & medium money to satisfy their needs.
 	}
 
-	public Pop(){}
-	public Pop(/*Culture culture,*/ Province prv){ this.prv = prv; }
+	//public Pop(){}
+	public Pop(/*Culture culture,*/ Province prv){ this.prv = prv;}
 	
 
 	private long nbAdult=0;
@@ -62,11 +62,6 @@ public class Pop implements SimpleSerializable {
 	long nbMensChomage=0;
 //	int nbMensCommerce=0;//cf job // more = more imports & exports. A part is used as a baseline for shop = efficacity of stock retention (TODO)
 	Object2LongMap<Job> nbMensEmployed = new Object2LongOpenHashMap<>();
-
-	// commerce
-	ProvinceCommerce commerceLand = new ProvinceCommerce("commLand"); //fake industry to contains commerce data
-	ProvinceCommerce commerceSea = new ProvinceCommerce("commSea"); //fake industry to contains commerce data
-//	int revenueCommerce = 0; //industry one is stored in factories, military in civilisation.
 
 	long cash = 0; // during a tunr, people receive cash. Then, they use it to buy goods.
 	Object2LongMap<Good> stock = new Object2LongOpenHashMap<>();
@@ -150,8 +145,6 @@ public class Pop implements SimpleSerializable {
 	public Object2LongMap<Good> getStock() { return stock; }
 	public float getRepartitionRevenuMult() { return repartitionMult; }
 	public float getRepartitionRevenu(float i){ return 1-(1/(1+(i*repartitionMult))); }
-	public ProvinceCommerce getLandCommerce() { return commerceLand; }
-	public ProvinceCommerce getSeaCommerce() { return commerceSea; }
 	
 
 	public long getNbAdult() { return nbAdult; }
@@ -256,12 +249,11 @@ public class Pop implements SimpleSerializable {
 			Industry jobIndustry = Industry.get(jobName);
 			if(jobIndustry != null){
 				nbMensEmployed.put(prv.industries.get(jobIndustry), object.getJsonNumber("nb").longValue());
-			}else if(jobName.equals("commLand")){
-				commerceLand = new ProvinceCommerce("commLand"); //TODO: use moddable factories in all load() method in the project
-				commerceLand.load(jsonObj.getJsonObject("trl"), prv);
+			}
+			else if(jobName.equals("commLand")){
+				nbMensEmployed.put(prv.getLandCommerce(), object.getJsonNumber("nb").longValue());
 			}else if(jobName.equals("commSea")){
-				commerceSea = new ProvinceCommerce("commSea");
-				commerceSea.load(jsonObj.getJsonObject("trs"), prv);
+				nbMensEmployed.put(prv.getSeaCommerce(), object.getJsonNumber("nb").longValue());
 			}
 		}
 
@@ -312,12 +304,6 @@ public class Pop implements SimpleSerializable {
 		}
 		jsonOut.add("nbE", array);
 		
-		JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-		commerceLand.save(jsonObj);
-		jsonOut.add("trl", jsonObj);
-		jsonObj = Json.createObjectBuilder();
-		commerceSea.save(jsonObj);
-		jsonOut.add("trs", jsonObj);
 		jsonOut.add("cash", cash);
 		jsonOut.add("gain", gain);
 

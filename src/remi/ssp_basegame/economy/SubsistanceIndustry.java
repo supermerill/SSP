@@ -41,15 +41,15 @@ public class SubsistanceIndustry extends Industry {
 		}
 		
 		
-		GlobalDefines.plogln(",\"subsist nbChamps\":"+nbChamps+", \"pourcentChamps\":"+prv.pourcentChamps);
+		GlobalDefines.logln(",\"subsist nbChamps\":"+nbChamps+", \"pourcentChamps\":"+prv.pourcentChamps);
 		for(Pop pop : pops){
 			//
 			long nbChampsUsed = Math.min(nbChamps, pop.getNbMensEmployed(indus));
 			long popProduction = (long)( prv.champsRendement * nbChampsUsed * 4 * durationInDay * (0.5+pop.getFoodEffectiveness()/2)); //Two times les efficient
-			GlobalDefines.plogln(", \"nbChampsUsed_"+pop+"\":"+nbChampsUsed+", \"getFoodEffectiveness"+(0.5+pop.getFoodEffectiveness()/2)+", \"prod_"+pop+"\":"+(prv.champsRendement * nbChampsUsed * 4 * durationInDay * (0.5+pop.getFoodEffectiveness()/2)));
+			GlobalDefines.logln(", \"nbChampsUsed_"+pop+"\":"+nbChampsUsed+", \"getFoodEffectiveness\":"+(0.5+pop.getFoodEffectiveness()/2)+", \"prod_"+pop+"\":"+(prv.champsRendement * nbChampsUsed * 4 * durationInDay * (0.5+pop.getFoodEffectiveness()/2)));
 			nbChamps -= nbChampsUsed;
 			
-			GlobalDefines.plogln(", \"stock from "+pop.getStock().get(crop)+" to\":"+(popProduction + pop.getStock().get(crop)));
+			GlobalDefines.logln(", \"stock from "+pop.getStock().get(crop)+" to\":"+(popProduction + pop.getStock().get(crop)));
 			pop.getStock().put(crop, popProduction + pop.getStock().get(crop));
 			
 			production+= popProduction;
@@ -82,11 +82,11 @@ public class SubsistanceIndustry extends Industry {
 
 		long nbEmplThisPop = currentPop.getNbMensEmployed(indus);
 		long nbToFire = (Math.max(0, nbEmpl - nbChamps/2) * nbEmplThisPop) / nbEmpl;
-		GlobalDefines.plogln(",\"Fcheck "+currentPop+" fields used\": \""+nbEmpl+"/"+(nbChamps/2)+" => "+((nbEmpl - nbChamps/2) )+" for pop "+nbEmplThisPop+"/"+nbEmpl+" ==> "+nbToFire+"\"");
+		GlobalDefines.logln(",\"Fcheck "+currentPop+" fields used\": \""+nbEmpl+"/"+(nbChamps/2)+" => "+((nbEmpl - nbChamps/2) )+" for pop "+nbEmplThisPop+"/"+nbEmpl+" ==> "+nbToFire+"\"");
 		
 		//and do not get more than nbChomage/2
 		nbToFire = Math.max(nbToFire, (nbEmplThisPop - currentPop.getNbMensChomage()) /2);
-		GlobalDefines.plogln(",\"Fcheck "+currentPop+" chomeurs used\": \""+nbEmplThisPop+"/"+(currentPop.getNbMensChomage())+" => "+((nbEmplThisPop - currentPop.getNbMensChomage()) /2)+" ==> "+ ((nbEmplThisPop - currentPop.getNbMensChomage()) /2)+"\"");
+		GlobalDefines.logln(",\"Fcheck "+currentPop+" chomeurs used\": \""+nbEmplThisPop+"/"+(currentPop.getNbMensChomage())+" => "+((nbEmplThisPop - currentPop.getNbMensChomage()) /2)+" ==> "+ ((nbEmplThisPop - currentPop.getNbMensChomage()) /2)+"\"");
 		
 		
 		return super.needFire(toReturn, indus, currentPop, nbDays).set(nbToFire, nbToFire);
@@ -109,8 +109,8 @@ public class SubsistanceIndustry extends Industry {
 		long nbEmplThisPop = currentPop.getNbMensEmployed(indus);
 		long nbToHire = Math.min(Math.max(0, (nbChamps/2 - nbEmpl)* nbEmplThisPop) / nbEmpl, Math.max(0, (currentPop.getNbMensChomage() - nbEmplThisPop) /2));
 		
-		GlobalDefines.plogln(",\"Hcheck "+currentPop+" fields used\": \""+nbEmpl+"/"+(nbChamps/2)+" => "+ ((nbChamps/2 - nbEmpl))+" for pop "+nbEmplThisPop+"/"+nbEmpl+" ==> "+((((nbChamps/2 - nbEmpl))* nbEmplThisPop) / nbEmpl)+"\"");
-		GlobalDefines.plogln(",\"Hcheck "+currentPop+" chomeurs used\": \""+nbEmplThisPop+"/"+(currentPop.getNbMensChomage())+" => "+((currentPop.getNbMensChomage() - nbEmplThisPop) /2)+"\"");
+		GlobalDefines.logln(",\"Hcheck "+currentPop+" fields used\": \""+nbEmpl+"/"+(nbChamps/2)+" => "+ ((nbChamps/2 - nbEmpl))+" for pop "+nbEmplThisPop+"/"+nbEmpl+" ==> "+((((nbChamps/2 - nbEmpl))* nbEmplThisPop) / nbEmpl)+"\"");
+		GlobalDefines.logln(",\"Hcheck "+currentPop+" chomeurs used\": \""+nbEmplThisPop+"/"+(currentPop.getNbMensChomage())+" => "+((currentPop.getNbMensChomage() - nbEmplThisPop) /2)+"\"");
 		
 		return super.needHire(toReturn, indus, currentPop, nbDays).setMin(nbToHire);
 	}

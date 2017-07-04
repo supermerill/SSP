@@ -32,7 +32,7 @@ public class BasicEconomyPlugin extends Plugin {
 //		create("woodenBasicGoods",0.7f, 1); //extension
 //		create("woodenNormalGoods",0.7f, 3);
 //		create("woodenLuxuryGoods",0.7f, 10);
-		create("wood_goods",0.7f, 10).setVolatility(0.5f).setIndustryToolEfficiency(1);
+		create("wood_goods",0.7f, 10).setVolatility(0.5f).setIndustryToolEfficiency(1).setCommerceCapacityPerMen(100);
 
 //		create("coal",0.99f, 0);
 //		create("badSteel",0.9f, 0); //later

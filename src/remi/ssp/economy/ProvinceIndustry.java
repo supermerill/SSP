@@ -77,6 +77,14 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 	public double getPreviousSalary() { return previousSalary; }
 	public void setPreviousSalary(double previousSalary) { this.previousSalary = previousSalary; }
 	
+	public long getEmployes() {
+		long nbEmp = 0;
+		for(Pop pop : province.getPops()){
+			nbEmp += pop.getNbMensEmployed(this);
+		}
+		return nbEmp;
+	}
+	
 
 	@Override
 	public LongInterval needFire(LongInterval toReturn, Province prv, Pop pop, int nbDays) {

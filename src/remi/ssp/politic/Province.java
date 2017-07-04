@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import remi.ssp.army.DivisionUnit;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
+import remi.ssp.economy.ProvinceCommerce;
 import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.TradeRoute;
@@ -119,6 +120,8 @@ public class Province implements SimpleSerializable{
 	
 	
 	//economic
+	ProvinceCommerce commerceLand = new ProvinceCommerce("commLand", this); //fake industry to contains commerce data
+	ProvinceCommerce commerceSea = new ProvinceCommerce("commSea", this); //fake industry to contains commerce data
 	Map<Industry, ProvinceIndustry> industries = new HashMap<>();
 	Map<Good, ProvinceGoods> stock = new HashMap<>(); //market : industry & pop & merchant buy goods from this. industry & merchant sell goods into this
 	long money; //BFR from the marketplace
@@ -158,6 +161,8 @@ public class Province implements SimpleSerializable{
 	}
 	
 
+	public ProvinceCommerce getLandCommerce() { return commerceLand; }
+	public ProvinceCommerce getSeaCommerce() { return commerceSea; }
 	public void addIndustry(ProvinceIndustry industry) { industries.put(industry.getIndustry(), industry); }
 	public Collection<ProvinceIndustry> getIndustries() { return industries.values(); }
 	public ProvinceIndustry getIndustry(Industry indus) { return industries.get(indus); }
@@ -287,6 +292,12 @@ public class Province implements SimpleSerializable{
 			indus.setProvince(this);
 			industries.put(indus.getIndustry(), indus);
 		}
+		
+
+			commerceLand = new ProvinceCommerce("commLand",this);
+			commerceLand.load(jsonProvince.getJsonObject("trl"), this);
+			commerceSea = new ProvinceCommerce("commSea",this);
+			commerceSea.load(jsonProvince.getJsonObject("trs"), this);
 
 		array = jsonProvince.getJsonArray("stock");
 		stock.clear();
@@ -302,7 +313,7 @@ public class Province implements SimpleSerializable{
 		array = jsonProvince.getJsonArray("pops");
 		pops.clear();
 		for(int i=0;i<array.size();i++){
-			Pop pop = new Pop();
+			Pop pop = new Pop(this);
 			pop.load(array.getJsonObject(i), this);
 			pop.prv = this;
 			pops.add(pop);
@@ -360,7 +371,13 @@ public class Province implements SimpleSerializable{
 			array.add(objectBuilder);
 		}
 		jsonOut.add("pops", array);
-		
+
+		JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		commerceLand.save(jsonObj);
+		jsonOut.add("trl", jsonObj);
+		jsonObj = Json.createObjectBuilder();
+		commerceSea.save(jsonObj);
+		jsonOut.add("trs", jsonObj);
 
 		//divisions are saved separatly
 

@@ -159,7 +159,7 @@ public class BaseSpawner extends Spawner {
 				for(Pop pop: prv.getPops()){
 					jobs.clear();
 					jobs.addAll(prv.getIndustries());
-//					jobs.add(pop.getLandCommerce());
+					jobs.add(prv.getLandCommerce());
 //					jobs.add(pop.getSeaCommerce());
 					for(Entry<Job> job : pop.getNbMensEmployed().object2LongEntrySet()){
 						jobs.remove(job.getKey());
