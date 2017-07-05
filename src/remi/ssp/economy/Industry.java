@@ -40,7 +40,7 @@ public abstract class Industry {
 	 * @Deprecated not used yet (i think)
 	 */
 	public LongInterval needHire(LongInterval toReturn, ProvinceIndustry provinceIndustry, Pop pop, int nbDays)
-	{ if(toReturn==null)toReturn=new LongInterval(0, 0); return toReturn.set(DEF_INTER); }
+	{ if(toReturn==null)toReturn=new LongInterval(0, 0).set(DEF_INTER); return toReturn.set(DEF_INTER); }
 	
 
 	/**
@@ -51,7 +51,7 @@ public abstract class Industry {
 	 */
 	public LongInterval needFire(LongInterval toReturn, ProvinceIndustry indus, Pop pop, int nbDays)
 	{
-		if(toReturn==null)toReturn=new LongInterval(0, 0);
+		if(toReturn==null)toReturn=new LongInterval(0, 0).set(DEF_INTER);
 		toReturn.set(DEF_INTER); 
 		Province prv = indus.getProvince();
 		long nbEmployed = pop.getNbMensEmployed(indus);
@@ -65,11 +65,20 @@ public abstract class Industry {
 				&& prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays < prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays){
 			//then fire enough to remove overproduction *2 (max 10%)
 			double ratioFire = 1 - (double)(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays) / (double)(prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays);
+			if(this.getName().equals("AgricultureIndustry")){
+				GlobalDefines.plogln(",\"ratioFireBef\":"+ratioFire);
+			}
+			ratioFire *= (prvGood.getStock() / (10*prvGood.getNbConsumePerDayConsolidated()*createThis.getOptimalNbDayStock()));
+			if(this.getName().equals("AgricultureIndustry")){
+				GlobalDefines.plogln(",\" "+(prvGood.getStock() / (10*prvGood.getNbConsumePerDayConsolidated()*createThis.getOptimalNbDayStock()))+" AgricultureIndustry "+createThis.getOptimalNbDayStock()
+			+" * "+prvGood.getNbConsumePerDayConsolidated()+"\":"+prvGood.getStock()
+			+",\"ratioFire\":"+ratioFire);
+			}
 			long nbFire = (long) (nbEmployed * ratioFire);
 			nbFire = 1 + nbFire*2;
 			nbFire = Math.min(nbFire, Math.max(1, nbEmployed/10));
 			GlobalDefines.logln(", \"fireOverproduction_"+createThis+"_"+nbEmployed+"\":"+nbFire);
-			return toReturn.set(nbFire, Long.MAX_VALUE);
+			return toReturn.set(nbFire*0, Long.MAX_VALUE);
 		}
 		return toReturn;
 	}

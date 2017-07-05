@@ -80,7 +80,7 @@ public class BaseSpawner extends Spawner {
 					}
 					//place some food and houses
 					prv.getStock().get(Good.get("meat")).setStock(500);
-					prv.getStock().get(Good.get("crop")).setStock(13500);
+					prv.getStock().get(Good.get("crop")).setStock(135000);
 					prv.getStock().get(Good.get("wood_house")).setStock(10);
 					prv.getStock().get(Good.get("wood")).setStock(10000);
 				}

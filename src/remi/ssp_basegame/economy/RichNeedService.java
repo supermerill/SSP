@@ -46,8 +46,11 @@ public class RichNeedService extends PopNeed {
 		
 		//but if possible, grab at least 4
 		stock -= Math.min(stock, nbMensInPop * 10 * nbDays);
-		wish.luxuryNeed += Math.min(stock, nbMensInPop * 40 * nbDays) * price;
+		wish.luxuryNeed += Math.min((long)(totalMoneyThisTurn*0.8), Math.min(stock, nbMensInPop * 100 * nbDays) * price);
 		
+		if(wish.normalNeed<0 || wish.luxuryNeed<0){
+			System.err.println("Error, negative wish");
+		}
 		
 		return wish;
 	}

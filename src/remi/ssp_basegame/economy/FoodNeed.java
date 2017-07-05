@@ -26,6 +26,8 @@ public class FoodNeed extends PopNeed {
 
 	final int nbDayStockNeeded = 300;
 
+	private boolean hasStateAid = true;
+
 	/*
 	 * 1 gramme de glucide donne 4 kCalories 1 gramme de lipide donne 9
 	 * kCalories 1 gramme de protide donne 4 kCalories
@@ -173,6 +175,10 @@ public class FoodNeed extends PopNeed {
 
 		logln(", \"food wish\":\"" + wish + "\"}");
 
+		if(wish.getMoney()<0){
+			System.err.println("error, negative food wish");
+		}
+		
 		return wish;
 	}
 
@@ -374,9 +380,9 @@ public class FoodNeed extends PopNeed {
 			}
 			if(0.7f * nbKiloStock < nbMensInPop * 1.5 * 200){
 				float ratio = 0.7f * nbKiloStock / ( nbMensInPop * 1.5f * 200);
-				GlobalDefines.plog(", \"nbKiloStock\":"+nbKiloStock );
-				GlobalDefines.plog(", \" ( nbMensInPop * 1.5f * 200)\":"+ ( nbMensInPop * 1.5f * 200));
-				GlobalDefines.plog(", \"ratio\":"+ratio );
+				GlobalDefines.log(", \"nbKiloStock\":"+nbKiloStock );
+				GlobalDefines.log(", \" ( nbMensInPop * 1.5f * 200)\":"+ ( nbMensInPop * 1.5f * 200));
+				GlobalDefines.log(", \"ratio\":"+ratio );
 				//reduce ration from 1.5kg to 1kg
 				kgNeeded = (long) (nbMensInPop * nbDays * (0.8f + ratio)); 
 				nbSurplus = (nbKiloVital + nbKiloNormal + nbKiloLuxe) - kgNeeded;
@@ -417,6 +423,18 @@ public class FoodNeed extends PopNeed {
 				}
 			}
 			
+			//try to get food from state aid
+			if(hasStateAid && nbSurplus < 0){
+				//get crop from market stock and give it
+//				goodStock.get
+				Good food = Good.get("crop");
+
+				long nbFood = Math.min(-nbSurplus, goodStock.get(food).getStock() - nbGoods.getLong(food));
+				GlobalDefines.plogln(", \"i get state aid for " + food.getName() + "\":{\"want\": " + (-nbSurplus) + ", \"will get\":" + nbFood + " }");
+
+				prv.getStock().get(food).addStock(-nbFood);
+				nbSurplus += nbFood;
+			}
 			
 
 			if (nbSurplus < 0) {

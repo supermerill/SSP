@@ -112,7 +112,8 @@ public class SubsistanceIndustry extends Industry {
 		GlobalDefines.logln(",\"Hcheck "+currentPop+" fields used\": \""+nbEmpl+"/"+(nbChamps/2)+" => "+ ((nbChamps/2 - nbEmpl))+" for pop "+nbEmplThisPop+"/"+nbEmpl+" ==> "+((((nbChamps/2 - nbEmpl))* nbEmplThisPop) / nbEmpl)+"\"");
 		GlobalDefines.logln(",\"Hcheck "+currentPop+" chomeurs used\": \""+nbEmplThisPop+"/"+(currentPop.getNbMensChomage())+" => "+((currentPop.getNbMensChomage() - nbEmplThisPop) /2)+"\"");
 		
-		return super.needHire(toReturn, indus, currentPop, nbDays).setMin(nbToHire);
+//		return super.needHire(toReturn, indus, currentPop, nbDays).setMin(nbToHire);
+		return new LongInterval(0, 0);
 	}
 
 }

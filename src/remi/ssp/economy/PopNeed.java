@@ -67,16 +67,9 @@ public abstract class PopNeed extends Needs {
 		logln(", \"SC_"+myPop+"_"+good+"\":{\"stock\":"+market.getStock()+", \"want\":"+(maxNb - currentStock.getLong(good))+"}");
 		long quantityBuy = Math.min(market.getStock(), maxNb - currentStock.getLong(good));
 		final long price = market.getPriceBuyFromMarket(nbDays);
-		final long wtf = quantityBuy * price;
-		final boolean wtf2 = (quantityBuy * price > moneyToSpend);
-		final long wtf22 = quantityBuy;
-		final long wtf23 = moneyToSpend;
-		boolean wtf3 = false;
 		if(quantityBuy * price > moneyToSpend){
 			quantityBuy = (moneyToSpend / price);
-			wtf3 = true;
 		}
-		final long wtf4 = quantityBuy;
 		if(quantityBuy > 0){
 			//buy
 			long moneySpend = quantityBuy * price;

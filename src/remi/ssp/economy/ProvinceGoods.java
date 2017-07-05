@@ -41,6 +41,10 @@ public class ProvinceGoods implements SimpleSerializable {
 		System.err.println("error, you set a too low amount for stock of "+good);
 	}
 	}
+	public void initNewPrice(long newPrice) {
+		stockPrice = price;
+		previousPrice = price;
+	}
 	public void setNbConsumeThisPeriod(float nbConsume) { this.nbConsumeThisPeriod = nbConsume; }
 	public float getNbConsumePerDayConsolidated() { return nbConsumePerDayConsolidated; }
 	public void setNbProduceThisPeriod(float nbProduce) { this.nbProduceThisPeriod = nbProduce; }
