@@ -79,7 +79,12 @@ public abstract class Industry {
 			nbFire = Math.min(nbEmployed - 30, nbFire);
 			nbFire = Math.max(0, nbFire);
 			GlobalDefines.logln(", \"fireOverproduction_"+createThis+"_"+nbEmployed+"\":"+nbFire);
-			return toReturn.set(nbFire, Long.MAX_VALUE);
+			long nbMax = Long.MAX_VALUE;
+			if(prvGood.getStock()<prvGood.getNbConsumeThisPeriod()/10){
+				nbMax = 0;
+			}
+			nbFire = Math.min(nbMax, nbFire);
+			return toReturn.set(nbFire, nbMax);
 		}
 		return toReturn;
 	}

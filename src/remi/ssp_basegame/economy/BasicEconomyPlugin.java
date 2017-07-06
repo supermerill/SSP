@@ -19,14 +19,14 @@ public class BasicEconomyPlugin extends Plugin {
 		
 
 		FoodNeed.kJoules.put(create("crop",0.1f, 1).setOptimalNbDayStock(100).setVolatility(2f).get(), 2000);
-		FoodNeed.kJoules.put(create("fish",0.5f, 4).setOptimalNbDayStock(2).setVolatility(2f).get(), 2000);
+		FoodNeed.kJoules.put(create("fish",0.5f, 4).setOptimalNbDayStock(5).setVolatility(2f).get(), 2000);
 //		FoodNeed.kJoules.put(create("rare_fish",0.9f, 10).setOptimalNbDayStock(1).get(), 2000);
-		FoodNeed.kJoules.put(create("meat",0.5f, 3).setOptimalNbDayStock(2).setVolatility(2f).get(), 2000);
-		FoodNeed.kJoules.put(create("rare_meat",0.9f, 6).setOptimalNbDayStock(1).setVolatility(1f).get(), 2000);
+		FoodNeed.kJoules.put(create("meat",0.5f, 3).setOptimalNbDayStock(5).setVolatility(2f).get(), 2000);
+		FoodNeed.kJoules.put(create("rare_meat",0.9f, 6).setOptimalNbDayStock(5).setVolatility(1f).get(), 2000);
 		//create("rawWood",0.9f, 1);
 		//create("plank",0.95f, 10);
 		create("wood",0.95f, 10).setOptimalNbDayStock(100); //for now, split it in rawwood & plank later (extension)
-		HouseNeed.houses.add(create("wood_house", 0.95f, 1).setCanBeMoved(false).setVolatility(0.2f).get());
+		HouseNeed.houses.add(create("wood_house", 0.95f, 1).setOptimalNbDayStock(50).setCanBeMoved(false).setVolatility(0.2f).get());
 //		HouseNeed.houses.add(create("stone_house", 0.98f, 10).setCanBeMoved(false).setVolatility(0.1f).get());
 //		HouseNeed.houses.add(create("manoir_house", 0.99f, 100).setCanBeMoved(false).setVolatility(0.05f).get());
 //		create("woodenBasicGoods",0.7f, 1); //extension

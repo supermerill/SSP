@@ -2,6 +2,7 @@ package remi.ssp_basegame.economy;
 
 import java.util.Collection;
 
+import remi.ssp.GlobalDefines;
 import remi.ssp.economy.Good;
 import remi.ssp.economy.Industry;
 import remi.ssp.economy.ProvinceIndustry;
@@ -52,8 +53,11 @@ public class WoodHouseIndustry extends Industry {
 		production *= durationInDay * 100;
 		
 
+		GlobalDefines.plog(",\"wood_house_have in stock \":"+indus.getStock().getLong(Good.get("wood")));
+		GlobalDefines.plog(",\"wood_house_wanttobuild \":"+production);
 		// produce
 		long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)production, durationInDay);
+		GlobalDefines.plog(",\"wood_house_built \":"+intproduction);
 	
 		return intproduction;
 	}

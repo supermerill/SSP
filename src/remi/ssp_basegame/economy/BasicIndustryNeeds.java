@@ -80,7 +80,7 @@ public class BasicIndustryNeeds extends IndustryNeed {
 	@Override
 	public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
 		Object2LongMap<Good> currentStock = myIndus.getStock();
-		long maxLastProd = Math.max(1, myIndus.getPreviousProduction());
+		long maxLastProd = Math.max(1, myIndus.getPreviousProduction())+2;
 		long rawGoodCost = 0;
 		//TODO: better one.
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();

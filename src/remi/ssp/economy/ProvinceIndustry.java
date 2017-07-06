@@ -69,6 +69,9 @@ public class ProvinceIndustry implements Job, SimpleSerializable{
 		}
 	}
 //	public void setMoney(long money) { this.money = money; }
+	/**
+	 * @return last cost for raw goods (not tools) in the last timeperiod
+	 */
 	public long getRawGoodsCost() { return rawGoodsCost; }
 	public void setRawGoodsCost(long rawGoodsCost) { this.rawGoodsCost = rawGoodsCost; }
 	public Object2LongMap<Good> getStock() { return stock; }
