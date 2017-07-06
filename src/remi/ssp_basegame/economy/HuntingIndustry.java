@@ -85,7 +85,10 @@ public class HuntingIndustry extends Industry {
 		
 	//set new livestock
 	indus.getStock().put(Good.GoodFactory.get("meat"), nbRabbit);
-	
+
+	if(nbRabbitToSell<0){
+		System.err.println("Error, negative hunting");
+	}
 
 	// produce
 	long intproduction = getNeed(indus).useGoodsAndTools(indus, (int)nbRabbitToSell, durationInDay);
@@ -96,6 +99,10 @@ public class HuntingIndustry extends Industry {
 //	prv.getStock().get(Good.GoodFactory.get("rare_meat")).addStock(nbRabbitToSell/10);
 //	prv.getIndustry(this).addMoney(price*nbRabbitToSell/10);
 
+	if(intproduction<0){
+		System.err.println("Error, negative hunting production");
+	}
+	
 	return intproduction;
 }
 

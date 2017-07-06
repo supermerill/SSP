@@ -61,7 +61,7 @@ public class BasicEconomyPlugin extends Plugin {
 		WoodGoodsArtisanalIndustry.load();
 		WoodHouseIndustry.load();
 		PersonalServiceIndustry.load();
-		SubsistanceIndustry.load();
+//		SubsistanceIndustry.load();
 
 		PopNeed.PopNeedFactoryStorage.put("food", pop -> new FoodNeed(pop));
 		PopNeed.PopNeedFactoryStorage.put("house", pop -> new HouseNeed(pop));

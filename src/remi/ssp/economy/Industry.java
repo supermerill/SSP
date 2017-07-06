@@ -36,8 +36,7 @@ public abstract class Industry {
 	 * Redefine this method to limit the number of people that can be hire here.
 	 * This implementation does nothing interesting.
 	 * @param pop 
-	 * @return number of maximum new workers this industry can accept this period
-	 * @Deprecated not used yet (i think)
+	 * @return number of min-maximum new workers this industry can accept this period
 	 */
 	public LongInterval needHire(LongInterval toReturn, ProvinceIndustry provinceIndustry, Pop pop, int nbDays)
 	{ if(toReturn==null)toReturn=new LongInterval(0, 0).set(DEF_INTER); return toReturn.set(DEF_INTER); }
@@ -47,7 +46,7 @@ public abstract class Industry {
 	 * Redefine this method to set a minimum number of people that should be fired here.
 	 * This base implementation will fire a minimum number of people if it detect an overproduction.
 	 * @param provinceIndustry 
-	 * @return number of minimum workers this industry should fire
+	 * @return number of minimum-max workers this industry should fire
 	 */
 	public LongInterval needFire(LongInterval toReturn, ProvinceIndustry indus, Pop pop, int nbDays)
 	{
@@ -62,23 +61,25 @@ public abstract class Industry {
 		GlobalDefines.logln(" && "+(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays)+" < "+prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays+"\"");
 		//if too much stock and overproduction
 		if(prvGood.getStockConsolidated() > prvGood.getNbConsumePerDayConsolidated() * createThis.getOptimalNbDayStock()
-				&& prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays < prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays){
+				&& 2*prvGood.getNbConsumeThisPeriod()+2*prvGood.getNbConsumePerDayConsolidated()*nbDays < prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays){
 			//then fire enough to remove overproduction *2 (max 10%)
 			double ratioFire = 1 - (double)(prvGood.getNbConsumeThisPeriod()+prvGood.getNbConsumePerDayConsolidated()*nbDays) / (double)(prvGood.getNbProduceThisPeriod()+prvGood.getNbProduceThisPeriod()*nbDays);
-			if(this.getName().equals("AgricultureIndustry")){
-				GlobalDefines.plogln(",\"ratioFireBef\":"+ratioFire);
-			}
-			ratioFire *= (prvGood.getStock() / (10*prvGood.getNbConsumePerDayConsolidated()*createThis.getOptimalNbDayStock()));
-			if(this.getName().equals("AgricultureIndustry")){
-				GlobalDefines.plogln(",\" "+(prvGood.getStock() / (10*prvGood.getNbConsumePerDayConsolidated()*createThis.getOptimalNbDayStock()))+" AgricultureIndustry "+createThis.getOptimalNbDayStock()
-			+" * "+prvGood.getNbConsumePerDayConsolidated()+"\":"+prvGood.getStock()
-			+",\"ratioFire\":"+ratioFire);
-			}
+//			if(this.getName().equals("AgricultureIndustry")){
+//				GlobalDefines.plogln(",\"ratioFireBef\":"+ratioFire);
+//			}
+			ratioFire *= (prvGood.getStock() / (2*prvGood.getNbConsumePerDayConsolidated()*createThis.getOptimalNbDayStock()));
+//			if(this.getName().equals("AgricultureIndustry")){
+//				GlobalDefines.plogln(",\" "+(prvGood.getStock() / (10*prvGood.getNbConsumePerDayConsolidated()*createThis.getOptimalNbDayStock()))+" AgricultureIndustry "+createThis.getOptimalNbDayStock()
+//			+" * "+prvGood.getNbConsumePerDayConsolidated()+"\":"+prvGood.getStock()
+//			+",\"ratioFire\":"+ratioFire);
+//			}
 			long nbFire = (long) (nbEmployed * ratioFire);
-			nbFire = 1 + nbFire*2;
-			nbFire = Math.min(nbFire, Math.max(1, nbEmployed/10));
+//			nbFire = 1 + nbFire*2;
+			nbFire = Math.min(nbFire, Math.max(1, nbEmployed/20));
+			nbFire = Math.min(nbEmployed - 30, nbFire);
+			nbFire = Math.max(0, nbFire);
 			GlobalDefines.logln(", \"fireOverproduction_"+createThis+"_"+nbEmployed+"\":"+nbFire);
-			return toReturn.set(nbFire*0, Long.MAX_VALUE);
+			return toReturn.set(nbFire, Long.MAX_VALUE);
 		}
 		return toReturn;
 	}

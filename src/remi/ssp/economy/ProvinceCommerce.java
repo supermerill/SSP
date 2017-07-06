@@ -168,7 +168,7 @@ public class ProvinceCommerce implements Job, SimpleSerializable {
 
 	@Override
 	public LongInterval needHire(LongInterval toReturn, Province prv, Pop pop, int nbDays) {
-		return toReturn==null?new LongInterval(0, 20):toReturn.set(0, 10+pop.getNbMensEmployed(this)/4);
+		return toReturn==null?new LongInterval(2, 20):toReturn.set(2, 10+pop.getNbMensEmployed(this)/4);
 	}
 
 	// TODO better than "just buy some wood goods"
@@ -202,7 +202,7 @@ public class ProvinceCommerce implements Job, SimpleSerializable {
 				wish.normalNeed = totalMoneyThisTurn;
 				wish.luxuryNeed = 0;
 			}
-			if(wish.luxuryNeed>totalMoneyThisTurn){
+			if(wish.luxuryNeed+wish.normalNeed>totalMoneyThisTurn){
 				wish.luxuryNeed = totalMoneyThisTurn - wish.normalNeed;
 			}
 			return wish;
@@ -211,6 +211,8 @@ public class ProvinceCommerce implements Job, SimpleSerializable {
 		@Override
 		public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
 			Object2LongMap<Good> currentStock = getStock();
+			if (getMoney() < 0)
+				System.err.println("Error, in commerce land buy: now has "+getMoney()+"!!");
 			long maxLastProd = 0;
 			for (Pop pop : prv.getPops()) {
 				maxLastProd += pop.getNbMensEmployed(prv.getLandCommerce());

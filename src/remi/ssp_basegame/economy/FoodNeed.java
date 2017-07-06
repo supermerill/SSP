@@ -20,13 +20,14 @@ import remi.ssp.economy.ProvinceGoods;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 
-//TODO: use the current stock.
 // actually, we eat all right away, without stockpiling anything.
 public class FoodNeed extends PopNeed {
 
 	final int nbDayStockNeeded = 300;
 
-	private boolean hasStateAid = true;
+	//give crop if someone is starving
+	//increase the price of crop, but remove the yoyo effect of famine/grow
+	private float hasStateAid = 0.5f;
 
 	/*
 	 * 1 gramme de glucide donne 4 kCalories 1 gramme de lipide donne 9
@@ -77,7 +78,6 @@ public class FoodNeed extends PopNeed {
 		// final long maxKgWished = (maxKgNeeded * 4)/3;
 
 		// kjoules in stock, in case of?
-		// TODO
 
 		List<Good> lowPriceFood = new ArrayList<>();
 		List<Good> normalFood = new ArrayList<>();
@@ -186,7 +186,7 @@ public class FoodNeed extends PopNeed {
 	public long spendMoney(Province prv, NeedWish maxMoneyToSpend, int nbDays) {
 		Map<Good, ProvinceGoods> goodStock = prv.getStock();
 		logln(", \"spend_food\":{\"dispo\": \"" + maxMoneyToSpend + "\"");
-
+		
 		// is reduced later if no food are buyed.
 		myPop.setFoodEffectiveness(1);
 
@@ -387,9 +387,6 @@ public class FoodNeed extends PopNeed {
 				kgNeeded = (long) (nbMensInPop * nbDays * (0.8f + ratio)); 
 				nbSurplus = (nbKiloVital + nbKiloNormal + nbKiloLuxe) - kgNeeded;
 				log(", \"rationnement\": true" );
-				final double kiloPerDayPerMen = (nbShouldBeEat) / (double) (nbMensInPop * nbDays);
-				myPop.setFoodEffectiveness(Math.min(1, (float) (kiloPerDayPerMen - 0.5)));
-				logln(", \"changeFoodEffectiveness\": " + myPop.getFoodEffectiveness());
 			}
 		}
 //		logResume(nbGoods,"afterrat");
@@ -424,17 +421,22 @@ public class FoodNeed extends PopNeed {
 			}
 			
 			//try to get food from state aid
-			if(hasStateAid && nbSurplus < 0){
+			if(hasStateAid>0 && nbSurplus < 0){
 				//get crop from market stock and give it
 //				goodStock.get
 				Good food = Good.get("crop");
 
-				long nbFood = Math.min(-nbSurplus, goodStock.get(food).getStock() - nbGoods.getLong(food));
+				long nbFood = (long) (Math.min(-nbSurplus, goodStock.get(food).getStock() - nbGoods.getLong(food)) * hasStateAid);
 				GlobalDefines.plogln(", \"i get state aid for " + food.getName() + "\":{\"want\": " + (-nbSurplus) + ", \"will get\":" + nbFood + " }");
 
 				prv.getStock().get(food).addStock(-nbFood);
 				nbSurplus += nbFood;
+				nbShouldBeEat += nbFood;
 			}
+
+			final double kiloPerDayPerMen = (nbShouldBeEat) / (double) (nbMensInPop * nbDays);
+			myPop.setFoodEffectiveness(Math.min(1, (float) (kiloPerDayPerMen - 0.5)));
+			logln(", \"changeFoodEffectiveness\": " + myPop.getFoodEffectiveness());
 			
 
 			if (nbSurplus < 0) {
@@ -451,12 +453,9 @@ public class FoodNeed extends PopNeed {
 				// maybe it should work with food industry to coordinate their
 				// things.
 
-				// TODO: kill children & old people first because they are weaks
-				// famine! (old code, placeholder that can work, somehow (but
-				// it's not efficient)
+				// famine!
 				// 1.5kg par personne par jour is optimal, less than 0.5 and
 				// people began to die.
-				final double kiloPerDayPerMen = (nbShouldBeEat) / (double) (nbMensInPop * nbDays);
 				if(kiloPerDayPerMen <0){
 					System.err.println("error in computation for kiloPerDayPerMen");
 				}
@@ -467,7 +466,7 @@ public class FoodNeed extends PopNeed {
 				if (kiloPerDayPerMen < 0.5) {
 					long nbPopNoFood = (long) ((0.5-kiloPerDayPerMen) * nbMensInPop); 
 					GlobalDefines.plogln(", \"famine!\":\" (" + nbPopNoFood + " may die because " + (nbKiloVital + nbKiloNormal + nbKiloLuxe) + "<=" + kgNeeded +") we are " 
-					+ nbMensInPop + " , we need " + (-nbSurplus) + " kg more of food (kiloPerDayPerMen="+GlobalDefines.f(kiloPerDayPerMen)+"\"");
+					+ nbMensInPop + " , we need " + (-nbSurplus) + " kg more of food (kiloPerDayPerMen="+GlobalDefines.f(kiloPerDayPerMen)+"\",\"nbShouldBeEat\":"+nbShouldBeEat);
 
 					// utilisation loi de poisson avec 30 days half-life.
 //					long nbPopToDie = (long) (nbPopNoFood * Math.exp(-0.69 * nbDays / 30d));
@@ -522,9 +521,6 @@ public class FoodNeed extends PopNeed {
 					logln(", \"changeFoodEffectiveness\": " + myPop.getFoodEffectiveness());
 				}
 
-			}else{
-				final double kiloPerDayPerMen = (nbShouldBeEat) / (double) (nbMensInPop * nbDays);
-				myPop.setFoodEffectiveness(Math.min(1, (float) (kiloPerDayPerMen - 0.5)));
 			}
 		} else {
 			// TODO: add a bit of random

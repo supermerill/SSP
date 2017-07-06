@@ -9,6 +9,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import remi.ssp.GlobalDefines;
 import remi.ssp.politic.Pop;
 import remi.ssp.politic.Province;
 
@@ -88,7 +89,9 @@ public abstract class PopNeed extends Needs {
 		prv.addMoney(price*quantity);
 //		prv.getStock().get(good).addNbConsumePerDay(quantity / (float)nbDays);
 		prv.getStock().get(good).addStock(-quantity);
+		log(",\""+myPop+"_buy_qtt\":"+(price*quantity)+",\""+myPop+"_buy_Mbefore\":"+myPop.getMoney());
 		myPop.addMoney(-price*quantity);
+		logln(",\""+myPop+"_buy_Mafter\":"+myPop.getMoney());
 		return price*quantity;
 	}
 	

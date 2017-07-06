@@ -50,7 +50,7 @@ public class WoodcutterIndustry extends Industry {
 	prv.pourcentFriche -= percentMore;
 	
 	//how much lumber per man?
-	float productivity = 10 * durationInDay; //base: 10kg per day (will be much better with tools)
+	float productivity = 0.51f * durationInDay; //base: 1/10kg per day (will be much better with tools)
 
 	long nbMens = 0;
 	for(Pop pop : pops){
