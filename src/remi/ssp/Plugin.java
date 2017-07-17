@@ -27,6 +27,8 @@ public abstract class Plugin implements Serializable{
 	public void loadGoods(){} //1
 	public void loadEquipment(){} //2
 	public void loadIndustry(){} //3
+	public void loadIdeas(){} //4
+	public void loadTechnologies(){} //5
 	
 
 

@@ -25,6 +25,7 @@ import remi.ssp.economy.ProvinceIndustry;
 import remi.ssp.economy.TradeRoute;
 import remi.ssp.network.SimpleSerializable;
 import remi.ssp.technology.Idea;
+import remi.ssp.technology.Idea.ProvinceIdea;
 
 public class Province implements SimpleSerializable{
 	private static final long serialVersionUID = ((long)"Province".hashCode()) + 1L;
@@ -70,7 +71,7 @@ public class Province implements SimpleSerializable{
 	
 	public float pourcentChamps=0; //0=> aucune, 1= >tout
 	public float mecanisationChamps=0; //0=> aucune, X=> score moyen de X
-	public float champsRendement=1;
+	public float champsRendement=4;
 	public float rationReserve=0; // nb de ration stocké dans cette province.
 
 	public float pourcentPrairie=0; //0=> aucune, 1= >tout
@@ -137,8 +138,8 @@ public class Province implements SimpleSerializable{
 	public float rayonnementCulturel = 0; //0=nul, X=nombre de personnes connaissant cette province.
 	
 	//TODO: serialization
-	List<Idea> ideas = new ArrayList<>();
-	
+	List<ProvinceIdea> ideas = new ArrayList<>();
+	public List<ProvinceIdea> getIdeas(){ return ideas; }
 	
 	public int getNbAdult(){
 		int nbHabitants = 0;

@@ -655,6 +655,17 @@ public class BaseEconomy extends Economy {
 			long goodPrice = prvGood.getPriceSellToMarket(nbDays);
 			 // can't sell for less than 1 cent
 			long marge = goodPrice - (indus.getRawGoodsCost() + 10);
+			
+			//check if price can't be reset at a real high price.
+			if (marge <= 0 && prvGood.getPrice() != 0 && prvGood.getStock() == 0 && prvGood.getNbProducePerDayConsolidated() < 1) {
+				long newPrice = (long) ((prvGood.getPrice() * indus.getRawGoodsCost() * 1.1) / (double)goodPrice);
+				logln(",\"production_problem\":\" not enough marge (" + marge + ", "
+						+ indus.getRawGoodsCost() + " ), price increased from "+fm(prvGood.getPrice())+" to "+fm(newPrice)+"\"");
+				prvGood.setPrice(Math.min(newPrice, prvGood.getPrice()*2)); 
+				goodPrice = prvGood.getPriceSellToMarket(nbDays);
+				marge = goodPrice - (indus.getRawGoodsCost() + 10);
+			}
+			//check if price is high enough to warrant a production run
 			if (marge <= 0 && prvGood.getPrice() != 0) {
 				if (prvGood.getStock() == 0) {
 					// it seems the market choose a too low price
@@ -664,6 +675,7 @@ public class BaseEconomy extends Economy {
 				}
 				prvGood.setNbConsumeThisPeriod(1 + prvGood.getNbConsumeThisPeriod());
 
+//				logln(",\"production_problem\":\"prvGood.getStock()=(" + prvGood.getStock() + ", prvGood.getNbProducePerDayConsolidated()=" + prvGood.getNbProducePerDayConsolidated()+"\"");
 				logln(",\"production_problem\":\"(" + prvGood.getPriceSellToMarket(nbDays) + ") is null or not enough marge (" + marge + ", "
 						+ indus.getRawGoodsCost() + " )\"");
 				// chomage technique
@@ -1372,21 +1384,29 @@ public class BaseEconomy extends Economy {
 				newPrice = Math.max(updatedOldPrice + 1, (long) ((increaseMult) * updatedOldPrice));
 				logln(", \"calculus\":\"increaseMult="+increaseMult+", updatedOldPrice="+updatedOldPrice+" [ max from " + f(updatedOldPrice + 1) + " and " + newPrice + "(" + f(computedPrice / updatedOldPrice) + " -> " + f((computedPrice / updatedOldPrice) - 1)
 						+ " * " + f(good.getVolatility() * nbDays / PRICE_CHANGE_PERIOD) + " = " + f(increaseMult - 1) + " -> " + f(increaseMult) + ")] \"");
+				
 				// try to go back to the market price quickly if needed.
 				if (prvGood.getStock() == 0 && newPrice < prvGood.getPriceBuyFromMarket(nbDays)) {
+					logln(", \"quick increase due to no stocks\":"+prvGood.getPriceBuyFromMarket(nbDays));
 					newPrice += prvGood.getPriceBuyFromMarket(nbDays);
 					newPrice /= 2;
 				}
 				
 				//edge case if underflow.
 				if(newPrice-updatedOldPrice<3 && ratio>1.1){
+					logln(", \"prevent underflow\":"+updatedOldPrice);
 					newPrice = updatedOldPrice+3;
 				}
 				
 				//don't increase if consumption is lower than production
 				if(prvGood.getNbConsumeThisPeriod()<prvGood.getNbProduceThisPeriod()){
+					logln(", \"price stagnate due to low consumptino\":"+updatedOldPrice*1.05);
 					newPrice = (long) Math.min(newPrice, updatedOldPrice*1.05);
 				}
+
+				GlobalDefines.logFlush();
+				if (newPrice <= 0)
+					System.err.println("Error, new price is null:" + newPrice + " for " + entry.getKey().getName() + " @" + prv.x + ":" + prv.y + " " + ratio);
 
 				// newPrice = Math.max(saveNP+1, (long)(saveNP + ((tempPrice -
 				// saveNP) * ((good.getVolatility() * nbDays) /

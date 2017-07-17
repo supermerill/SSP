@@ -1,22 +1,55 @@
 package remi.ssp.technology;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import remi.ssp.army.EquipmentTemplate;
 import remi.ssp.politic.Civilisation;
 
 public class Technology extends NameDescription{
+	
+	public static class TechnologyFactory{
+		Technology template;
+		public static TechnologyFactory create(String name){ 
+			TechnologyFactory ret = new TechnologyFactory();
+			ret.template = new Technology(name);
+			return ret;
+		}
+		public TechnologyFactory setVisible(boolean visible){ template.isVisible = visible; return this; }
+		public TechnologyFactory setReserchable(boolean isResearchable){ template.isResearchable = isResearchable; return this; }
+		public TechnologyFactory setScienceCost(int researchCost){ template.researchCost = researchCost; return this; }
+		public TechnologyFactory addIdea(Idea idea){ template.ideas.add(idea); return this; }
+		public TechnologyFactory addPrerequisite(Technology tech){ template.prerequisite.add(tech); return this; }
+		public Technology create(){ Technology ret = template; template = null; register(ret); return ret; }
+	}
 
-	protected final boolean isVisible = false;
-	protected final boolean isResearchable = false;
-	protected final int researchCost = 1000000;
+	private static Map<String, Technology> techStore = new HashMap<>();
+	public static boolean register(Technology tech){
+		if(!techStore.containsKey(tech.name)){
+			techStore.put(tech.name, tech);
+			return true;
+		}else return false;
+	}
+	public static Technology get(String techName){
+		return techStore.get(techName);
+	}
+
+	protected boolean isVisible = false;
+	protected boolean isResearchable = false;
+	protected int researchCost = 1000000;
 
 	protected float traderouteMult = 1;
 	protected float scientistMult = 1;
 
+	protected List<Technology> prerequisite;
 	protected List<Idea> ideas;
 	protected List<EquipmentTemplate> equipments;
-	//TODO other unlocks? like government options, 
+	//TODO other unlocks? like government options,
+
+	public Technology(String name) {
+		super.name = name;
+	}
 
 	/**
 	 * Can we use you scientist to research this?

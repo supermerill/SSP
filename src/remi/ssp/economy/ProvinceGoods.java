@@ -3,6 +3,7 @@ package remi.ssp.economy;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import remi.ssp.GlobalDefines;
 import remi.ssp.network.SimpleSerializable;
 import remi.ssp.politic.Province;
 
@@ -86,7 +87,14 @@ public class ProvinceGoods implements SimpleSerializable {
 	public long getPriceSellToMarket(int durationInDay){
 		double coeff = Math.max(0.1,prv.getMoneyConsolidated()) / ((1.0+prv.getMoneyChangePerDayConsolidated()*nbDayMarketBFR));
 		coeff = ( 1f / (1+ coeff*coeff) );
-		
+
+//		GlobalDefines.plog(", \"coeff\":"+coeff);
+		if(stock < getNbConsumeThisPeriod()){
+			coeff = coeff * 0.5;
+		}if(stock < 1){
+			coeff = coeff * 0.5;
+		}
+//		GlobalDefines.plogln(", \"coeffafterstockconsider\":"+coeff);
 //		logln("price to sell me :"+( price * (1-coeff) )+" / "+price);
 		//if stock is high and i don't have money, lower this even more
 //		if(prv.getMoney()<0 && stock > 100*getMoneyChangePerDayConsolidated){
@@ -139,9 +147,9 @@ public class ProvinceGoods implements SimpleSerializable {
 	public long getPriceBuyFromMarket(int durationInDay){
 		double coeff = Math.max(0.1,prv.getMoneyConsolidated()) / ((1.0+prv.getMoneyChangePerDayConsolidated()*nbDayMarketBFR));
 		coeff = ( 1f / (1+ coeff*coeff) );
-//		logln("price to buy me :"+( price * (1+coeff) )+" / "+price+"    ("+prv.getMoney()+"/"
+//		GlobalDefines.plogln(", \"price to buy me\" :\""+( price * (1+coeff) )+" / "+price+"    ("+prv.getMoney()+"/"
 //		+(durationInDay*(1.0+prv.getMoneyChangePerDayConsolidated()))+" = "+(prv.getMoney() / (durationInDay*(1.0+prv.getMoneyChangePerDayConsolidated())))
-//				+" => "+coeff);
+//				+" => "+coeff+"\"");
 		
 //		long buyPrice = (long)( price * (1+5*coeff) );
 		//don't inflate, as it create a vicious cycle (more pricey -> need more meny -> more pricey)
@@ -173,6 +181,9 @@ public class ProvinceGoods implements SimpleSerializable {
 		}
 		if(price <0){
 			System.err.println("Error in compute buyfrommarket price: coeff:"+coeff+", price:"+price);
+		}
+		if(buyPrice>Integer.MAX_VALUE){
+			return -1;
 		}
 		return buyPrice;
 	}

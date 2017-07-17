@@ -28,9 +28,10 @@ public class AgricultureIndustry extends Industry {
 		return (BasicIndustryNeeds)indus.getNeed();
 	}
 	
-	public float testefficiency = 1;
+	public float testefficiency = 01.0f;
 	
-	public final int baseEfficiency = 4;
+	public final float baseEfficiency = 0.25f;
+	//champsRendement vary from 4 to many
 	
 	@Override
 	public long produce(ProvinceIndustry indus, Collection<Pop> pops, int durationInDay) {

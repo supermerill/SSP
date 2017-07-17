@@ -99,7 +99,9 @@ public class PluginLoader{
 		//3 industry, needs
 		forEachPlugin(orderedNames, plugin->plugin.loadIndustry());
 		//3 ideas
+		forEachPlugin(orderedNames, plugin->plugin.loadIdeas());
 		//4 research
+		forEachPlugin(orderedNames, plugin->plugin.loadTechnologies());
 		
 		//after
 		forEachPlugin(orderedNames, plugin->plugin.init());
