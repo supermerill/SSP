@@ -30,6 +30,11 @@ public abstract class Idea {
 	
 	
 	public static class ProvinceIdea{
+		public ProvinceIdea() {}
+		public ProvinceIdea(Province prv, Idea idea) {
+			this.prv = prv;
+			this.idea = idea;
+		}
 		public Idea idea;
 		public Province prv;
 		//how many % of pop know this idea?
@@ -91,7 +96,7 @@ public abstract class Idea {
 	}
 	
 	/**
-	 * 
+	 * note: only propagate if the civ has researched the tech.
 	 * @param prvOri
 	 * @param prvDest province where this Idea isn't registered yet.
 	 * @param nbDays

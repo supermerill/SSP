@@ -1,11 +1,15 @@
 package remi.ssp.technology;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import remi.ssp.algorithmes.GlobalRandom;
 import remi.ssp.army.EquipmentTemplate;
 import remi.ssp.politic.Civilisation;
+import remi.ssp.politic.Province;
+import remi.ssp.technology.Idea.ProvinceIdea;
 
 public class Technology extends NameDescription{
 	
@@ -33,6 +37,9 @@ public class Technology extends NameDescription{
 	}
 	public static Technology get(String techName){
 		return techStore.get(techName);
+	}
+	public static List<Technology> getAll() {
+		return new ArrayList<>(techStore.values());
 	}
 
 	protected boolean isVisible = false;
@@ -84,9 +91,16 @@ public class Technology extends NameDescription{
 	/**
 	 * If something is needed to be done when researched
 	 */
-	public void researched(Civilisation civ) {
-		// TODO Auto-generated method stub
-		
+	public void doResearched(Civilisation civ) {
+		//set the idea center at a random province.
+		for(Idea idea : ideas){
+			int nbprv = civ.getProvinces().size();
+			if(nbprv<=0)break;
+			int idxPrv = GlobalRandom.aleat.getInt(nbprv, nbprv+civ.getMensInReserve());
+			Province prv = civ.getProvinces().get(idxPrv);
+			ProvinceIdea pi = new ProvinceIdea(prv, idea);
+			prv.getIdeas().add(pi);
+		}
 	}
 	
 //	/**
