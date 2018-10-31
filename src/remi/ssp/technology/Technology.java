@@ -49,9 +49,9 @@ public class Technology extends NameDescription{
 	protected float traderouteMult = 1;
 	protected float scientistMult = 1;
 
-	protected List<Technology> prerequisite;
-	protected List<Idea> ideas;
-	protected List<EquipmentTemplate> equipments;
+	protected List<Technology> prerequisite = new ArrayList<>();
+	protected List<Idea> ideas = new ArrayList<>();
+	protected List<EquipmentTemplate> equipments = new ArrayList<>();
 	//TODO other unlocks? like government options,
 
 	public Technology(String name) {
